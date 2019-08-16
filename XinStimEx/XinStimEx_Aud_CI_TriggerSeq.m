@@ -1,4 +1,4 @@
-%% Xintrinsic Stimulation:
+%% Xintrinsic Stimulation: External:
 % Auditory: Cochlear Implant Trigger Sequence
 
 close all;
@@ -16,10 +16,21 @@ stm.TrialStimTime =         15.0;
 % stm.TrialPipTime =              0.25;
 % stm.TrialPipDutyCycle =         0.5;
 
-stm.TrialStimElectdNum =        6;
-stm.TrialPipNum =               10;
+% stm.TrialStimElectdNum =        6;
+% stm.TrialPipNum =               10;
+% stm.TrialPipTime =              0.25;
+% stm.TrialPipDutyCycle =         0.5;
+
+
+stm.TrialPreStimTime =      5;
+stm.TrialStimTime =         10.0;
+stm.TrialStimElectdNum =        1;
+stm.TrialPipNum =               40;
 stm.TrialPipTime =              0.25;
 stm.TrialPipDutyCycle =         0.5;
+% stm.TrialPipNum =               5;
+% stm.TrialPipTime =              0.25;
+% stm.TrialPipDutyCycle =         0.5;
 
 stm.SmplNumTrialPreStim =	round(stm.SR*stm.TrialPreStimTime); 
 stm.SmplNumPipOn =          round(stm.SR*stm.TrialPipTime*stm.TrialPipDutyCycle);

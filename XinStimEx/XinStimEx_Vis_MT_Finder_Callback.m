@@ -1,4 +1,4 @@
-function XinStim_Vis_MT_Finder_Callback(~,~)
+function XinStimEx_Vis_MT_Finder_Callback(~,~)
 global stm sys
 if toc(sys.Ses.CycleInitialTime) > 0.1    % at least 0.1s 
     sys.Ses.CycleNumCurrent =   sys.Ses.CycleNumCurrent + 1;

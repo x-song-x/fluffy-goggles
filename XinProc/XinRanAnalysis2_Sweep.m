@@ -573,13 +573,15 @@ end
     R.PtOne_Saturation =	R.PtOne_CycleAmp;          
     R.PtOne_Value =         R.PtOne_CycleAmp;                     
                             
-S.TrlDurPreStim =   2;
-S.TrlDurStim =      16;
+% S.TrlDurPreStim =   2.5;
+% S.TrlDurStim =      15;
     R.PtOne_Hue =      (R.PtOne_Hue-S.TrlDurPreStim/S.TrlDurTotal) /...
                                 (S.TrlDurStim/S.TrlDurTotal);
                             % match the Stimulus ONSET / OFFSET to 0-1
-    R.PtOne_Saturation(R.PtOne_Hue>(1+0.6/S.TrlDurStim)) = 0;
-    R.PtOne_Saturation(R.PtOne_Hue<(0-0.6/S.TrlDurStim)) = 0;
+%     R.PtOne_Saturation(R.PtOne_Hue>(1+0.6/S.TrlDurStim)) = 0;
+%     R.PtOne_Saturation(R.PtOne_Hue<(0-0.6/S.TrlDurStim)) = 0;
+    R.PtOne_Saturation(R.PtOne_Hue>1) = 0;
+    R.PtOne_Saturation(R.PtOne_Hue<0) = 0;
     R.PtOne_Hue =      min(max(R.PtOne_Hue, 0), 1);
                             % limit the hue range as 0-HueLim  
                             % and according pixels' sat to be 0;
@@ -647,7 +649,7 @@ R.PhPwThree_TuneMap =  reshape(R.PtThree_TuneMap, R.N_Ph, R.N_Pw,3);
                 'PseudoH',      T.hFig2AxesSpec(3));
 	setappdata(T.hFig2SpecColorbar(1), ...
                 'ImageCData',	R.PhPwThree_TuneMap);
-    XinRanAnalysis2_Sweep_SatBar(T.hFig2SpecColorbar(1), 0.005);
+    XinRanAnalysis2_Sweep_ValBar(T.hFig2SpecColorbar(1), 0.005);
                         
     % Hue Colorbar
     T.hFig2AxesSpec(4) = axes(...
