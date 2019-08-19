@@ -344,9 +344,9 @@ for j = 1:1
                 ['Mean STD: ',	sprintf('%5.2f%%', mean(R.PtIndex_STD)*100)] },...
                     'Parent',       gca,...
                     'VerticalAlignment',    'middle');
-        ylabel({'Norm. signal (%)','raw polarity'},...
+        ylabel({'Norm. signal (%)','raw polarity',''},...
                     'Parent',       gca,...
-                    'VerticalAlignment',    'Bottom');
+                    'VerticalAlignment',    'Middle');
         title('Trial temporal trace');
 %             text(R.N_Fpt/P.ProcFrameRate*1.0, T.max(k)* 0.85,...
 %                         ['Max  STD: ', sprintf('%5.2f%%', max(R.PtIndex_STD)*100)],...
@@ -592,11 +592,6 @@ R.PhPwThree_TuneMap =       reshape(R.PtThree_TuneMap, R.N_Ph, R.N_Pw,3);
                                     R.N_Pw*T.SpecMag    R.N_Ph*T.SpecMag],...
                 'NextPlot',     'add');   
     T.hFig2AxesTuneImage = image(T.hFig2AxesTune, R.PhPwThree_TuneMap);
-	setappdata(T.hFig2AxesTuneImage,    'RawHue',       R.PtOne_Hue);
-	setappdata(T.hFig2AxesTuneImage,    'RawSat',       R.PtOne_Saturation);
-	setappdata(T.hFig2AxesTuneImage,    'RawVal',       R.PtOne_Value);
-	setappdata(T.hFig2AxesTuneImage,    'LimValRange',  0.00025*2.^(0:0.5:4));
-	setappdata(T.hFig2AxesTuneImage,    'LimValOrder',  4);
     set(T.hFig2AxesTune, ...
                 'YDir',         'reverse',...
                 'XLim',         [1 R.N_Pw],...
@@ -610,7 +605,7 @@ R.PhPwThree_TuneMap =       reshape(R.PtThree_TuneMap, R.N_Ph, R.N_Pw,3);
                 'Units',        'pixels',...  
                 'Position',     get(T.hFig2AxesTune, 'position'),...
                 'Visible',     'off'); 
-    colormap(   T.hFig2AxesTuneFakeHue, 'hsv');      caxis( [0 1]);
+    colormap(   T.hFig2AxesTuneFakeHue, 'hsv');                     caxis( [0 1]);
     T.hFig2SpecScaleBarHue = colorbar(...
                 'Units',        'pixels',...
                 'Position',     [   T.AxesSide(1)*(2  )+R.N_Pw*(2  )*T.SpecMag+10, ...
@@ -628,7 +623,8 @@ R.PhPwThree_TuneMap =       reshape(R.PtThree_TuneMap, R.N_Ph, R.N_Pw,3);
                 'Units',        'pixels',...  
                 'Position',     get(T.hFig2AxesTune, 'position'),...
                 'Visible',      'off'); 
-    colormap(   T.hFig2AxesTuneFakeSat, [zeros(64,1) (0:1/63:1)' zeros(64,1)]); caxis( [0 1]);
+    colormap(   T.hFig2AxesTuneFakeSat,...
+            hsv2rgb([1/3*ones(64,1) (0:1/63:1)' 0.5*ones(64,1)]) );	caxis( [0 1]);
     T.hFig2SpecScaleBarSat = colorbar(...
                 'Units',        'pixels',...
                 'Position',     [   T.AxesSide(1)*(2  )+R.N_Pw*(2  )*T.SpecMag+40, ...
@@ -656,45 +652,33 @@ R.PhPwThree_TuneMap =       reshape(R.PtThree_TuneMap, R.N_Ph, R.N_Pw,3);
                 'Tag',          'ScaleBarVal',...
                 'ButtonDownFcn','XinRanAnalysis2_Sweep_ScaleBar');   
 	setappdata(T.hFig2SpecScaleBarVal, ...
-                'ImageH',       T.hFig2AxesTuneImage);     
+                'ImageH',       T.hFig2AxesTuneImage);            
+	setappdata(T.hFig2AxesTuneImage,    'RawHue',           R.PtOne_Hue);
+	setappdata(T.hFig2AxesTuneImage,    'RawSat',           R.PtOne_Saturation);
+	setappdata(T.hFig2AxesTuneImage,    'RawVal',           R.PtOne_Value);
+    setappdata(T.hFig2AxesTuneImage,    'HueMapOptions', {  'HSLuvCircular',...
+                                                            'HSLuvLinear',...
+                                                            'HSLuvZigZag'});
+    setappdata(T.hFig2AxesTuneImage,    'HueMapOrder',      1);
+    setappdata(T.hFig2AxesTuneImage,    'HueMap',           'HSLuvLinear');
+    setappdata(T.hFig2AxesTuneImage,    'HueTempolate',     []);
+    setappdata(T.hFig2AxesTuneImage,    'HueColorMap',      []);
+    setappdata(T.hFig2AxesTuneImage,    'HueAxesH',         T.hFig2AxesTuneFakeHue);    
+	setappdata(T.hFig2AxesTuneImage,    'SatParaRange', [   0   0   0   1   1   1;
+                                                            1   1   0   0   1   1;
+                                                            0   0.6 0   0   0.6 0]);
+	setappdata(T.hFig2AxesTuneImage,    'SatParaOrder',     1);
+	setappdata(T.hFig2AxesTuneImage,    'SatValSync',       0);
+	setappdata(T.hFig2AxesTuneImage,    'SatGroundOut',     1);
+	setappdata(T.hFig2AxesTuneImage,	'SatGroundTime',	0);
+	setappdata(T.hFig2AxesTuneImage,    'SatStimTime',      S.TrlDurStim);
+	setappdata(T.hFig2AxesTuneImage,    'ValLimRange',  0.00025*2.^(0:0.5:4));
+	setappdata(T.hFig2AxesTuneImage,    'ValLimOrder',  4); 
             
-   
-% 	setappdata(T.hFig2SpecColorbar(1), ...
-%                 'ImageH',       T.hFig2AxesSpecImage);
-% 	setappdata(T.hFig2SpecColorbar(1), ...
-%                 'PseudoH',      T.hFig2AxesSpec(3));           
-            
-    XinRanAnalysis2_Sweep_ValBar(T.hFig2SpecColorbar(1), 0.005); 
+    XinRanAnalysis2_Sweep_ScaleBar(T.hFig2SpecScaleBarVal); 
     
     %% Save
 %     save([Xin.T.filename(1:end-4) '_P2.mat'], 'R', '-v7.3');
 return;
 
-%% Analysis (1)
-% Normalized to each frame's ROI out total intensity
-sROIouta =	ROIouta'*aa; 
-FrameTot =	ones(9000,1)*sROIouta;
-ai =        aa./FrameTot;      
-                
-%% Analysis on power meter signal
-figure
-Xin.P.PM.FrameSeq =         mean(S.SesPowerMeter,2);
-Xin.P.PM.FrameSeqMean =     mean(Xin.P.PM.FrameSeq);
-Xin.P.PM.FrameSeqStd =      std(Xin.P.PM.FrameSeq);
-subplot(1,2,1);
-plot(Xin.P.PM.FrameSeq);
-xlabel('Frame sequence (Frame)');
-ylabel('Power reading (Volt)');
-
-Xin.P.PM.FrameSeqFFT =      abs(fft(Xin.P.PM.FrameSeq-Xin.P.PM.FrameSeqMean))*2/length(Xin.P.PM.FrameSeq);
-Xin.P.PM.FreqSeq =          0:(80/length(Xin.P.PM.FrameSeq)):(80-80/length(Xin.P.PM.FrameSeq));
-subplot(1,2,2);
-plot(Xin.P.PM.FreqSeq,  Xin.P.PM.FrameSeqFFT);
-set(gca, 'XScale', 'log');
-set(gca, 'XLim',    [0 Xin.P.PM.FreqSeq(end)/2]);
-xlabel('Frequency (Hz)');
-ylabel('Power reading (Volt)');
-    
-        Xin.P.V.PM =            reshape(Xin.P.PM.FrameSeq, Xin.P.V.BinTemporal, [] );
-        Xin.P.V.PM =            mean(Xin.P.V.PM);
         
