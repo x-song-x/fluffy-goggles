@@ -672,10 +672,10 @@ R.PhPwThree_TuneMap =       reshape(R.PtThree_TuneMap, R.N_Ph, R.N_Pw,3);
 	setappdata(T.hFig2AxesTuneImage,    'SatGroundOut',     1);
 	setappdata(T.hFig2AxesTuneImage,	'SatGroundTime',	0);
 	setappdata(T.hFig2AxesTuneImage,    'SatStimTime',      S.TrlDurStim);
-	setappdata(T.hFig2AxesTuneImage,    'ValLimRange',  0.00025*2.^(0:0.5:4));
-	setappdata(T.hFig2AxesTuneImage,    'ValLimOrder',  4); 
+	setappdata(T.hFig2AxesTuneImage,    'ValLimRange',      0.00025*2.^(0:0.5:4));
+	setappdata(T.hFig2AxesTuneImage,    'ValLimOrder',      4); 
             
-    XinRanAnalysis2_Sweep_ScaleBar(T.hFig2SpecScaleBarVal); 
+    XinRanAnalysis2_Sweep_ScaleBar(T.hFig2SpecScaleBarHue); 
     
     %% Save
 %     save([Xin.T.filename(1:end-4) '_P2.mat'], 'R', '-v7.3');
