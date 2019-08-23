@@ -11,19 +11,21 @@ close all;
 clearvars;
 global stm sys
 
-stm 
-
 %% Stimuli perimeters
-% stm.MonitorName =       'Dell P2416D';
 % stm.MonitorDistance =   75;         % in cm
 % stm.MonitorHeight =     29.5;       % in cm
 % stm.MonitorWidth =      52.7;       % in cm
+% stm.MonitorName =       'Dell P2416D';
+% stm.DotDiameter =       0.4;        % in degree
+% stm.DotMotionSpeedMax =	16;         % in degree / second
+% stm.DotDensityAngle =   180;         % as how many dots are in the field
+% stm.TrialDuration =     20;         % in second
+% 
 
-stm.MonitorName =       'Samsung LG 32GK850F-B';
-stm.MonitorDistance =   75;             % in cm
-stm.MonitorHeight =     0.2724*1440;	% in cm
-stm.MonitorWidth =      0.2724*2560;	% in cm
-
+stm.MonitorDistance =   75;         % in cm
+stm.MonitorHeight =     29.5;       % in cm
+stm.MonitorWidth =      52.7;       % in cm
+stm.MonitorName =       'Dell P2416D';
 stm.DotDiameter =       0.4;        % in degree
 stm.DotMotionSpeedMax =	16;         % in degree / second
 stm.DotDensityAngle =   180;         % as how many dots are in the field
@@ -40,6 +42,22 @@ sys.NIDAQ.D.CycleSmplHigh =     2;
 sys.NIDAQ.D.CycleSmplLow =      sys.NIDAQ.D.InTimebaseRate * sys.Ses.CycleTime - ...
                                 sys.NIDAQ.D.CycleSmplHigh;
 import dabs.ni.daqmx.*
+
+% sys.NIDAQ.dev = Device('Dev1');
+% sys.NIDAQ.dev.reset();
+% sys.NIDAQ.TaskCO = Task('Recording Session Cycle Switcher');
+% sys.NIDAQ.TaskCO.createCOPulseChanTicks(...
+%     'Dev1', 0, 'Cycle Counter', 'RTSI7', ...
+%     sys.NIDAQ.D.CycleCOStateSmpl, sys.NIDAQ.D.CycleCOStateSmpl,...
+%     0, 'DAQmx_Val_Low');
+% sys.NIDAQ.TaskCO.cfgImplicitTiming(...
+%     'DAQmx_Val_FiniteSamps',	round(sys.Ses.CycleNumTotal/2)+1);
+% sys.NIDAQ.TaskCO.cfgDigEdgeStartTrig(...
+% 	'RTSI6',            'DAQmx_Val_Falling');
+% % 	'RTSI6',            'DAQmx_Val_Rising');
+% sys.NIDAQ.TaskCO.registerSignalEvent(...
+% 	@Visual_MT_Finder_Demo_Callback, 'DAQmx_Val_CounterOutputEvent');
+% sys.NIDAQ.TaskCO.start();
 
 sys.NIDAQ.TaskCO = Task('Recording Session Cycle Switcher');
 sys.NIDAQ.TaskCO.createCOPulseChanTicks(...
