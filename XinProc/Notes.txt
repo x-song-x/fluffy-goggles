@@ -1,0 +1,3 @@
+
+Bugs:
+	Click on Hue bar, FrmeBar gets totally blue? on 190813T114937_Green_Koehler_Pola_PBS_P1_Sweep
