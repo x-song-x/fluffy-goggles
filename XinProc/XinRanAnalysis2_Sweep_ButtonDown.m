@@ -30,6 +30,8 @@ if SpecUpdt
     SpecSesDurTotal =   getappdata(SpecH,   'SpecSesDurTotal');
     Spec_N_Qfc =        getappdata(SpecH,   'Spec_N_Qfc');
     Spec_RatioCut_Qfc = getappdata(SpecH,	'Spec_RatioCut_Qfc');
+    HistH =        getappdata(SpecH,        'HistH');
+    HistogramH =	getappdata(SpecH,       'HistogramH');
     % update SpecNum
     SpecNum = SpecNum + SpecUpDown;
     if SpecNum<1;                   SpecNum = 1;                        end
@@ -46,6 +48,8 @@ if SpecUpdt
         RawVal =    SpecAmp(:,SpecNum);
     setappdata(TuningH,     'RawHue',   RawHue);
     setappdata(TuningH,     'RawVal',   RawVal);       
+    % update histogram
+    HistogramH.Data =	SpecAgl(:,SpecNum);    
     drawnow;
 end
 

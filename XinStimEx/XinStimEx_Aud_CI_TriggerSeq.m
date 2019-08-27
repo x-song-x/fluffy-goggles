@@ -20,15 +20,15 @@ stm.TrialStimTime =         15.0;
 % stm.TrialPipTime =              0.25;
 % stm.TrialPipDutyCycle =         0.5;
 
-% stm.TrialPreStimTime =      5;
-% stm.TrialStimTime =         10.0;
-% stm.TrialStimElectdNum =        1;
-% stm.TrialPipNum =               40;
-% stm.TrialPipTime =              0.25;
-% stm.TrialPipDutyCycle =         0.5;
-% % % stm.TrialPipNum =               5;
-% % % stm.TrialPipTime =              0.25;
-% % % stm.TrialPipDutyCycle =         0.5;
+stm.TrialPreStimTime =      5;
+stm.TrialStimTime =         10.0;
+stm.TrialStimElectdNum =        1;
+stm.TrialPipNum =               40;
+stm.TrialPipTime =              0.25;
+stm.TrialPipDutyCycle =         0.5;
+% % stm.TrialPipNum =               5;
+% % stm.TrialPipTime =              0.25;
+% % stm.TrialPipDutyCycle =         0.5;
 
 % stm.TrialPreStimTime =      2;
 % stm.TrialStimTime =         16;
@@ -37,12 +37,12 @@ stm.TrialStimTime =         15.0;
 % stm.TrialPipTime =              0.25;
 % stm.TrialPipDutyCycle =         0.5;
 
-stm.TrialPreStimTime =      4;
-stm.TrialStimTime =         16;
-stm.TrialStimElectdNum =        2;
-stm.TrialPipNum =               10;
-stm.TrialPipTime =              0.4;
-stm.TrialPipDutyCycle =         0.5;
+% stm.TrialPreStimTime =      4;
+% stm.TrialStimTime =         16;
+% stm.TrialStimElectdNum =        2;
+% stm.TrialPipNum =               10;
+% stm.TrialPipTime =              0.4;
+% stm.TrialPipDutyCycle =         0.5;
 
 stm.SmplNumTrialPreStim =	round(stm.SR*stm.TrialPreStimTime); 
 stm.SmplNumPipOn =          round(stm.SR*stm.TrialPipTime*stm.TrialPipDutyCycle);
@@ -64,7 +64,7 @@ end
         
 %% Finalize the DO Sequence
 disp(length(stm.seq));
-plot(stm.seq);
+% plot(stm.seq);
 stm.seq = uint32(stm.seq);
 
 %% Setup NI-DAQ
