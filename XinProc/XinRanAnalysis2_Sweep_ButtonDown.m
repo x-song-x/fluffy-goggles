@@ -7,7 +7,7 @@ else
 end
 
 ButtonTag =     get(H,              'tag');
-TuningH =       getappdata(H,       'TuningH');
+    
 %% Update "Spec", "Tune", or "Temp", "Frme", "Pixl"
 switch ButtonTag(1:4)
     case 'Spec';    SpecUpdt=1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0;
@@ -17,7 +17,7 @@ switch ButtonTag(1:4)
     case 'Play';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1;
     otherwise
 end
-
+TuningH =       getappdata(H,       'TuningH');
 %% Get Data (Spectrum)
 if SpecUpdt
     SpecUpDown =    getappdata(H,       'UpDown');
@@ -91,7 +91,7 @@ if TuneUpdt
             setappdata(TuningH,	'HueMap',           HueMap);
             setappdata(TuningH,	'HueTempolate',     HueTempolate);
             setappdata(TuningH,	'HueColorMap',      HueColorMap);
-            colormap(HueAxesH, HueColorMap);        caxis( [0 1]);   
+            colormap(HueAxesH, HueColorMap);        caxis(HueAxesH, [0 1]);   
             ylabel(H,	'\uparrow Onset                                                    Offset \uparrow',...
                         'FontSize',             8,...
                         'VerticalAlignment',    'Cap');    
