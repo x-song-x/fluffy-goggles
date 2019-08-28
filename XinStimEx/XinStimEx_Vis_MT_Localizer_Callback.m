@@ -27,7 +27,8 @@ if sys.SesCycleNumCurrent == sys.SesCycleNumTotal + 1
         disp('hardware not found, stopping the software timer');
         sys.TimerH.stop;
         sys.TimerH.delete;
+        try sys.MsgBox.delete();    catch
+        end
     end    
 end
     
-

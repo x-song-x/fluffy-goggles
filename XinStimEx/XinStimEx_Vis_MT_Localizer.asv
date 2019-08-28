@@ -82,22 +82,23 @@ switch stm.SesOption(1)
                                     (stm.DotVecRadius/stm.MonitorPixelAngleY);
         stm.DotMotionStepMax =      stm.DotMotionSpeedMax*stm.TrialIFI;
         stm.TrialFrameSeq =         1:round(stm.SesCycleTime/stm.TrialIFI);
-        switch stm.SesOption
-            case 'DLCL'
-                stm.DotMotionPeakTime =     4;    
-                slope =                     1/(stm.SesCycleTime/2 - stm.DotMotionPeakTime);
-                shift1 =                    slope*stm.SesCycleTime/2;
-                shift2 =                    slope*(stm.SesCycleTime/2 - stm.DotMotionPeakTime/2);
-            case 'DRCW'
-        %         stm.DotAngleMinInitial =    335;
-
-            case 'DRCC'
-        end
-        Screen('DrawDots', stm.windowPtr, [stm.DotVecPositionX; stm.DotVecPositionY],...
-            stm.DotDiameterInPixel, white,	stm.MonitorCenter, 2);
-        vbl = Screen('Flip', stm.windowPtr);
     otherwise
 end
+switch stm.SesOption
+    case 'DLCL'
+        stm.DotMotionPeakTime =     4;    
+        slope =                     1/(stm.SesCycleTime/2 - stm.DotMotionPeakTime);
+        shift1 =                    slope*stm.SesCycleTime/2;
+        shift2 =                    slope*(stm.SesCycleTime/2 - stm.DotMotionPeakTime/2);
+    case 'DRCW'
+%         stm.DotAngleMinInitial =    335;
+        
+    case 'DRCC'
+end
+
+Screen('DrawDots', stm.windowPtr, [stm.DotVecPositionX; stm.DotVecPositionY],...
+    stm.DotDiameterInPixel, white,	stm.MonitorCenter, 2);
+vbl = Screen('Flip', stm.windowPtr);
 
 %% Setup Timer: NI-DAQ or PC timing
 switch stm.TimerOption
@@ -119,7 +120,6 @@ switch stm.TimerOption
         sys.NIDAQ.TaskCO.registerSignalEvent(...
             @XinStim_Vis_MT_Finder_Callback, 'DAQmx_Val_CounterOutputEvent');
         sys.NIDAQ.TaskCO.start();
-        stm.Running =               1;
     case 'simulated'
         sys.TimerH =                timer;
         sys.TimerH.TimerFcn =       @XinStimEx_Vis_MT_Localizer_Callback;
@@ -127,7 +127,6 @@ switch stm.TimerOption
         sys.TimerH.TasksToExecute = sys.SesCycleNumTotal+1;
         sys.TimerH.ExecutionMode =  'fixedRate';
         sys.MsgBox =                msgbox('Click to terminate the session after current cycle');
-        stm.Running =               1;
         pause;
         sys.TimerH.start;   
     otherwise
