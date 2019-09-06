@@ -1,7 +1,6 @@
  %% Xintrinsic File Listing
-% not available for Matlab R2015a
-% available for Matlab R2018a
-% due to the denifition change on the "dir" function.
+%   The defination of "dir" function has been changed in Matlab R2018a 
+%   comparing to R2015a
 
 %% Locate The Parent Folder
 function XinList
