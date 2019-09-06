@@ -10,15 +10,16 @@ ButtonTag =     get(H,              'tag');
     
 %% Update "Spec", "Tune", or "Temp", "Frme", "Pixl"
 switch ButtonTag(1:4)
-    case 'Spec';    SpecUpdt=1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0;
-    case 'Tune';    SpecUpdt=0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0;
-    case 'Frme';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0;
-    case 'Temp';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0;
-    case 'Play';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1;
+    case 'Spec';    SpecUpdt=1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0;
+    case 'Tune';    SpecUpdt=0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0;
+    case 'Frme';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0; PixlUpdt=0;
+    case 'Temp';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0; PixlUpdt=0;
+    case 'Play';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1; PixlUpdt=0;
+    case 'Pixl';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=1;
     otherwise
 end
 TuningH =       getappdata(H,       'TuningH');
-%% Get Data (Spectrum)
+%% Spectrum
 if SpecUpdt
     SpecUpDown =    getappdata(H,       'UpDown');
     SpecH =         getappdata(H,       'SpecH');
@@ -53,7 +54,7 @@ if SpecUpdt
     drawnow;
 end
 
-%% Get Data (Tuning)
+%% Tuning
 if TuneUpdt
     RawHue =        getappdata(TuningH,	'RawHue');
     RawSat =        getappdata(TuningH,	'RawSat');
@@ -157,7 +158,7 @@ if TuneUpdt
     PhPwThree_TuneMap =     reshape(PtThree_TuneMap, 75, 120, 3);
     set(TuningH,    'CData',        PhPwThree_TuneMap);
 end
-            
+%% Temporal Trace (mean)      
 if TempAmpUpdt  
     % callback is from "hFig2AxesFrmeScalebar"
     Tmax =          getappdata(H,   'Tmax');
@@ -186,7 +187,7 @@ if TempAmpUpdt
     set(AxesPixlH,	'YTickLabels',  TmaxLabels);
     setappdata(H,	'Tmax',         Tmax);
 end
-
+%% Frame
 if FrmeUpdt
     FrmeUpDown =    getappdata(H,           'UpDown');
     FrmeImageH =	getappdata(H,           'FrmeImageH');
@@ -212,7 +213,7 @@ if FrmeUpdt
     set(TempDotH,           'XData',    FrmeNum);
     set(TempTextH,          'string',   sprintf('Time: %4.1f s', FrmeTime));  
 end
-
+%% Playing
 if Play
     % Video Playback
     PlayingNow = getappdata(H,	'PlayingNow');
@@ -247,25 +248,23 @@ if Play
         hAP = getappdata(H,     'AudioPlayerH');
         hAP.pause;        
     end
-    
-    
-% for j = [1:T.length]
-%     for k = 1:D.N_Tt
-%         m = T.TrialOrder(k);
-%         if S.TrlNumTotal == 1
-%             T.Frame = reshape(T.TrlNumFrmMVV_NormACM(j,:)/T.max(1), ...
-%                                 D.N_Ph, D.N_Pw);
-%         else
-%             T.Frame = squeeze(reshape(T.TrlNumFrmMVV_NormACM(j,k,:)/T.max(k), ...
-%                                 D.N_Ph, D.N_Pw));
-%         end
-%         set(T.hFig2Vid(m),...
-%                 'cData',        T.Frame);
-%         set(T.hFig2VidTitle(m),...
-%                 'String',       [sprintf('Trial time: %5.1f s', j/5)] );
-%     end
-%     pause(0.2);
-% end
+end
+%% Pixel
+if PixlUpdt
+    PixelPosi = get(gca, 'CurrentPoint');
+    PixelPosi = round(PixelPosi(1,1:2));    
+    disp(PixelPosi);
+    AxesPixlH =         getappdata(H,           'AxesPixlH');
+    FptCtPhPw_NormTrl = getappdata(AxesPixlH,   'FptCtPhPw_NormTrl');
+    LineAllH =          getappdata(AxesPixlH,   'LineAllH');
+    LineMeanH =         getappdata(AxesPixlH,   'LineMeanH');
+    for i = 1:length(LineAllH)
+        LineAllH(i).YData =    squeeze(FptCtPhPw_NormTrl(:,i,PixelPosi(2),PixelPosi(1)));
+    end
+    LineMeanH.YData =	mean(squeeze(FptCtPhPw_NormTrl(:,:,PixelPosi(2),PixelPosi(1))),2);
+    AxesPixlH.Title.String = sprintf('Pixel(%dH,%dW): temporal traces across reps',...
+        PixelPosi([2,1]));
+    drawnow;
 end
 
 function OutHueTemplate = HSLuvUniformHue(OutputType)
