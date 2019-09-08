@@ -31,7 +31,7 @@ if SpecUpdt
     SpecSesDurTotal =   getappdata(SpecH,   'SpecSesDurTotal');
     Spec_N_Qfc =        getappdata(SpecH,   'Spec_N_Qfc');
     Spec_RatioCut_Qfc = getappdata(SpecH,	'Spec_RatioCut_Qfc');
-    HistH =        getappdata(SpecH,        'HistH');
+    HistH =         getappdata(SpecH,       'HistH');
     HistogramH =	getappdata(SpecH,       'HistogramH');
     % update SpecNum
     SpecNum = SpecNum + SpecUpDown;
@@ -125,11 +125,7 @@ if TuneUpdt
             end
             ValLim =        ValLimRange(ValLimOrder);
             setappdata(TuningH,	'ValLimOrder',  ValLimOrder);
-            setappdata(TuningH,  'ValLim',       ValLim);
-    %         ylabel(H,	['0                                       (in 2xRMS)   ',...
-    %                     sprintf('%5.3f %%',ValLim*100)],...
-    %                     'FontSize',             8,...
-    %                     'VerticalAlignment',    'Cap');
+            setappdata(TuningH,	'ValLim',       ValLim);
             ylabel(H,	sprintf('0                       (old plots: %5.3f %%)        %5.3f %%',...
                         ValLim*sqrt(2)*100, ValLim*100), ...
                         'FontSize',             8,...
@@ -251,9 +247,8 @@ if Play
 end
 %% Pixel
 if PixlUpdt
-    PixelPosi = get(gca, 'CurrentPoint');
-    PixelPosi = round(PixelPosi(1,1:2));    
-    disp(PixelPosi);
+    PixelPosi =         get(gca,                'CurrentPoint');
+    PixelPosi =         round(PixelPosi(1,1:2));    
     AxesPixlH =         getappdata(H,           'AxesPixlH');
     FptCtPhPw_NormTrl = getappdata(AxesPixlH,   'FptCtPhPw_NormTrl');
     LineAllH =          getappdata(AxesPixlH,   'LineAllH');
