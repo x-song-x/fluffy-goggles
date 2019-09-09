@@ -11,10 +11,15 @@ if toc(stm.SesCycleTimeInitial) > 0.1
     sys.SesCycleNumCurrent =   sys.SesCycleNumCurrent + 1;
     stm.SesCycleTimeInitial =  tic;
     tt = datestr(now, 'HH:MM:SS.FFF');
-    disp([sprintf('cycle: #%d ', sys.SesCycleNumCurrent), tt]);
+    disp([sprintf('cycle: #%d ', sys.SesCycleNumCurrent), tt]); 
+    if strcmp(stm.SesOption, 'Cali')
+        cali_run(sys.SesCycleNumCurrent);
+    end
     drawnow;
-    if ~ishandle(sys.MsgBox)
-        sys.SesCycleNumCurrent = sys.SesCycleNumTotal +1;
+    if isfield(sys, 'MsgBox')
+        if ~ishandle(sys.MsgBox)
+            sys.SesCycleNumCurrent = sys.SesCycleNumTotal +1;
+        end
     end
 end
 %% Stop the session

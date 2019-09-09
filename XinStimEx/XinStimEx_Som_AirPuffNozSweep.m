@@ -1,7 +1,7 @@
 %% Xintrinsic Stimulation:
 % Somatosensory: Air Puff Nozzle Sweep
 
-close all;
+% close all;
 clearvars;
 global stm sys
 
@@ -9,15 +9,22 @@ global stm sys
 stm.SR =                    100e3;
 stm.TrialTime =             20;
 
+%% 2 nozzles: P0.5: stimulating, P0.2: masking
+stm.TrialPreStimTime =      0;
+stm.TrialStimTime =         20;
+stm.TrialStimChanNum =      8;
+stm.TrialPuffSeqTime =      2.5;
+stm.TrialStimChanBitSeq =   [2 2 2 5 2 2 2 2];
+
 %% 7 nozzles
-% stm.TrialPreStimTime =      2.5;
-% stm.TrialStimTime =         15.0;
-stm.TrialPreStimTime =      2.3;
-stm.TrialStimTime =         15.4;
-stm.TrialStimChanNum =      7;
-stm.TrialPuffSeqTime =      2.2;
-% stm.TrialStimChanBitSeq =   [0 1 2 3 4 5 6];
-stm.TrialStimChanBitSeq =   [5 4 6 0 2 1 3];
+% % stm.TrialPreStimTime =      2.5;
+% % stm.TrialStimTime =         15.0;
+% stm.TrialPreStimTime =      2.3;
+% stm.TrialStimTime =         15.4;
+% stm.TrialStimChanNum =      7;
+% stm.TrialPuffSeqTime =      2.2;
+% % stm.TrialStimChanBitSeq =   [0 1 2 3 4 5 6];
+% stm.TrialStimChanBitSeq =   [5 4 6 0 2 1 3];
 
 %% 5 nozzles
 % stm.TrialPreStimTime =      2.5;
@@ -69,8 +76,8 @@ sys.NIDAQ.TaskDO.createDOChan(...
     'Dev3',     'port0/line0:7');
 sys.NIDAQ.TaskDO.cfgSampClkTiming(...
 	stm.SR,     'DAQmx_Val_ContSamps',	stm.TrialTime*stm.SR);
-% sys.NIDAQ.TaskDO.cfgDigEdgeStartTrig(... 
-% 	'RTSI6',	'DAQmx_Val_Rising');
+sys.NIDAQ.TaskDO.cfgDigEdgeStartTrig(... 
+	'RTSI6',	'DAQmx_Val_Rising');
 sys.NIDAQ.TaskDO.writeDigitalData(      stm.seq);
 sys.NIDAQ.TaskDO.start();
 

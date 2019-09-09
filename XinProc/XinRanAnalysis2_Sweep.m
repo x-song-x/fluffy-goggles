@@ -686,5 +686,5 @@ XinRanAnalysis2_Sweep_ButtonDown(T.hFig2SpecScalebarVal);
 XinRanAnalysis2_Sweep_ButtonDown(T.hFig2AxesFrmeScalebar);  
 
 %% Save
-savefig(T.hFig(2), ['D:\=XINTRINSIC=\',F.FileName{1}(1:end-4) '_Sweep.fig'], 'compact');
+% savefig(T.hFig(2), ['D:\=XINTRINSIC=\',F.FileName{1}(1:end-4) '_Sweep.fig'], 'compact');
 % savefig(T.hFig(2), [F.PathName,F.FileName{1}(1:end-4) '_Sweep.fig'], 'compact');
