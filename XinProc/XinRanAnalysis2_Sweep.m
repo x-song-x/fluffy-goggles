@@ -21,15 +21,16 @@ if nargin ==0
         F.FileName = {F.FileName};
     end
 else
-    fileparts(varargin{1});
+    [F.PathName, F.FileName, F.FileExt] = fileparts(varargin{1});
+    F.PathName =    [F.PathName, '\'];
+    F.FileName =    [F.FileName, F.FileExt];
 end
-
 disp(['Xintrinsic Processing Stage 2 on Tones starts on the session:', F.FileName{1}]);
 
 %% load file
 Xin.T.filename = [F.PathName, F.FileName{1}];      
-load([Xin.T.filename(1:end-7) '.mat']);         % load S
-load([Xin.T.filename(1:end-4) '.mat']);         % load P
+load([Xin.T.filename(1:end-7) '.mat']);         % load S (Saved from recording)
+load([Xin.T.filename(1:end-4) '.mat']);         % load P (Preprocessed)  
 disp([  'Processing: "', F.FileName{1}, ...
         '" with the sound: "', S.SesSoundFile, '"']);
 % S.TrlNumberTotal =          S.TrlNumberTotal*3;
