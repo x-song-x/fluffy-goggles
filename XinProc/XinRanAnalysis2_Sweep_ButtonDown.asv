@@ -10,15 +10,25 @@ ButtonTag =     get(H,              'tag');
     
 %% Update "Spec", "Tune", or "Temp", "Frme", "Pixl"
 switch ButtonTag(1:4)
-    case 'Spec';    SpecUpdt=1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0;
-    case 'Tune';    SpecUpdt=0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0;
-    case 'Frme';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0; PixlUpdt=0;
-    case 'Temp';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0; PixlUpdt=0;
-    case 'Play';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1; PixlUpdt=0;
-    case 'Pixl';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=1;
+    case 'Spec';    SpecUpdt=1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
+    case 'Tune';    SpecUpdt=0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
+    case 'Frme';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
+    case 'Temp';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0; PixlUpdt=0; AmpSUpdt=0;
+    case 'Play';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1; PixlUpdt=0; AmpSUpdt=0;
+    case 'Pixl';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=1; AmpSUpdt=0;
+    case 'AmpS';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=1;
     otherwise
+                    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
 end
 TuningH =       getappdata(H,       'TuningH');
+%% Amplitude of the Spectrum
+if AmpSUpdt
+    SpecH =         getappdata(H,       'SpecH');
+    YLimRange =     getappdata(H,       'YLimRange');
+    CurYLim =       get(SpecH,      'YLim'
+    set(SpecH,      'YLim',         [0 1
+end
+
 %% Spectrum
 if SpecUpdt
     SpecUpDown =    getappdata(H,       'UpDown');
@@ -31,7 +41,7 @@ if SpecUpdt
     SpecSesDurTotal =   getappdata(SpecH,   'SpecSesDurTotal');
     Spec_N_Qfc =        getappdata(SpecH,   'Spec_N_Qfc');
     Spec_RatioCut_Qfc = getappdata(SpecH,	'Spec_RatioCut_Qfc');
-    HistH =        getappdata(SpecH,        'HistH');
+    HistH =         getappdata(SpecH,       'HistH');
     HistogramH =	getappdata(SpecH,       'HistogramH');
     % update SpecNum
     SpecNum = SpecNum + SpecUpDown;
@@ -111,8 +121,8 @@ if TuneUpdt
             switch sprintf('%d',[SatGroundOut SatValSync]) 
                 case '00'; str = '                                                          everything \uparrow';
                 case '01'; str = '\rightarrow sync w/ value \leftarrow';
-                case '10'; str = ['\uparrow out of stim\pm', sprintf('%3.1fs range', SatGroundTime) '        wihtin the range \uparrow']; 
-                case '11'; str = ['\uparrow out of stim\pm', sprintf('%3.1fs range', SatGroundTime) '   \rightarrow sync w/ value \leftarrow   ']; 
+                case '10'; str = ['\uparrow out of stim\pm', sprintf('%4.1fs range', abs(SatGroundTime)) '       wihtin the range \uparrow']; 
+                case '11'; str = ['\uparrow out of stim\pm', sprintf('%4.1fs range', abs(SatGroundTime)) '  \rightarrow sync w/ value \leftarrow   ']; 
                 otherwise
             end
             ylabel(H,	str,...
@@ -125,11 +135,7 @@ if TuneUpdt
             end
             ValLim =        ValLimRange(ValLimOrder);
             setappdata(TuningH,	'ValLimOrder',  ValLimOrder);
-            setappdata(TuningH,  'ValLim',       ValLim);
-    %         ylabel(H,	['0                                       (in 2xRMS)   ',...
-    %                     sprintf('%5.3f %%',ValLim*100)],...
-    %                     'FontSize',             8,...
-    %                     'VerticalAlignment',    'Cap');
+            setappdata(TuningH,	'ValLim',       ValLim);
             ylabel(H,	sprintf('0                       (old plots: %5.3f %%)        %5.3f %%',...
                         ValLim*sqrt(2)*100, ValLim*100), ...
                         'FontSize',             8,...
@@ -251,15 +257,19 @@ if Play
 end
 %% Pixel
 if PixlUpdt
-    PixelPosi = get(gca, 'CurrentPoint');
-    PixelPosi = round(PixelPosi(1,1:2));    
-    disp(PixelPosi);
+    PixelPosi =         get(gca,                'CurrentPoint');
+    PixelPosi =         round(PixelPosi(1,1:2));    
     AxesPixlH =         getappdata(H,           'AxesPixlH');
     FptCtPhPw_NormTrl = getappdata(AxesPixlH,   'FptCtPhPw_NormTrl');
     LineAllH =          getappdata(AxesPixlH,   'LineAllH');
     LineMeanH =         getappdata(AxesPixlH,   'LineMeanH');
-    L
-    
+    for i = 1:length(LineAllH)
+        LineAllH(i).YData =    squeeze(FptCtPhPw_NormTrl(:,i,PixelPosi(2),PixelPosi(1)));
+    end
+    LineMeanH.YData =	mean(squeeze(FptCtPhPw_NormTrl(:,:,PixelPosi(2),PixelPosi(1))),2);
+    AxesPixlH.Title.String = sprintf('Pixel(%dH,%dW): temporal traces across reps',...
+        PixelPosi([2,1]));
+    drawnow;
 end
 
 function OutHueTemplate = HSLuvUniformHue(OutputType)

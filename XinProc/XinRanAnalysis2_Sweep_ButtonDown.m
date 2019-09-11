@@ -10,15 +10,32 @@ ButtonTag =     get(H,              'tag');
     
 %% Update "Spec", "Tune", or "Temp", "Frme", "Pixl"
 switch ButtonTag(1:4)
-    case 'Spec';    SpecUpdt=1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0;
-    case 'Tune';    SpecUpdt=0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0;
-    case 'Frme';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0; PixlUpdt=0;
-    case 'Temp';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0; PixlUpdt=0;
-    case 'Play';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1; PixlUpdt=0;
-    case 'Pixl';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=1;
+    case 'Spec';    SpecUpdt=1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
+    case 'Tune';    SpecUpdt=0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
+    case 'Frme';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
+    case 'Temp';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0; PixlUpdt=0; AmpSUpdt=0;
+    case 'Play';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1; PixlUpdt=0; AmpSUpdt=0;
+    case 'Pixl';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=1; AmpSUpdt=0;
+    case 'AmpS';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=1;
     otherwise
+                    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
 end
 TuningH =       getappdata(H,       'TuningH');
+%% Amplitude of the Spectrum
+if AmpSUpdt
+    SpecH =         getappdata(H,       'SpecH');
+    YLimRange =     getappdata(H,       'YLimRange');
+    CurYLim =       get(SpecH,          'YLim');
+    CurYLim =       CurYLim(2);
+    CurYLimIdx =    find(YLimRange == CurYLim, 1);
+    if CurYLimIdx == length(YLimRange)
+        CurYLimIdx = 1;
+    else
+        CurYLimIdx = CurYLimIdx +1;
+    end        
+    set(SpecH,      'YLim',             [0 YLimRange(CurYLimIdx)]);
+end
+
 %% Spectrum
 if SpecUpdt
     SpecUpDown =    getappdata(H,       'UpDown');
@@ -111,8 +128,8 @@ if TuneUpdt
             switch sprintf('%d',[SatGroundOut SatValSync]) 
                 case '00'; str = '                                                          everything \uparrow';
                 case '01'; str = '\rightarrow sync w/ value \leftarrow';
-                case '10'; str = ['\uparrow out of stim\pm', sprintf('%3.1fs range', SatGroundTime) '        wihtin the range \uparrow']; 
-                case '11'; str = ['\uparrow out of stim\pm', sprintf('%3.1fs range', SatGroundTime) '   \rightarrow sync w/ value \leftarrow   ']; 
+                case '10'; str = ['\uparrow out of stim\pm', sprintf('%4.1fs range', abs(SatGroundTime)) '       wihtin the range \uparrow']; 
+                case '11'; str = ['\uparrow out of stim\pm', sprintf('%4.1fs range', abs(SatGroundTime)) '  \rightarrow sync w/ value \leftarrow   ']; 
                 otherwise
             end
             ylabel(H,	str,...
