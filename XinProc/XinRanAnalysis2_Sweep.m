@@ -1,9 +1,9 @@
 function XinRanAnalysis2_Sweep(varargin)
 % Xintrinsic continuous sweep based session analysis
 %   S.TrlNumTotal is supposed to be 1
-%   Stimulation is 
+%   Stimulation is supposed to vary a feature continuously in a cycle
 
-global A
+global A D T
 %% Get preprocessed ('*_P?.mat') file
 if nargin ==0
     % Calling from direct running of the function
@@ -25,111 +25,103 @@ else
     F.PathName =        [F.PathName, '\'];
     A.FileName =        {[A.FileName, A.FileExt]};
 end
-
-%% load file
+%% Load data files
 Xin.T.filename = [F.PathName, A.FileName{1}];      
 load([Xin.T.filename(1:end-7) '.mat'], 'S');	% load S (Saved from recording)
 load([Xin.T.filename(1:end-4) '.mat'], 'P');	% load P (Preprocessed)  
-disp([  'Analyzing session: "', A.FileName{1}, ...
-        '" with the sound: "', S.SesSoundFile, '"']);
-    
-%% Setup Parmateters  
-global D T
-
-% Figure
-T.VarMag =                  2;
-T.SpecMag =                 3;
-
+if S.TrlNumTotal == 1
+    disp([  'Analyzing session: "', A.FileName{1}, ...
+            '" with the sound: "', S.SesSoundFile, '"']);
+else
+    disp([  'Session: "', A.FileName{1}, ...
+            '" with the sound: "', S.SesSoundFile, '" is not a Sweep based session.']);
+    return
+end
+%% Figure: ROI
 T.AxesSS =                  [60 90];    % Axes, Space for the Side
 T.AxesSB =                  10;         % Axes, Space in Between
 T.AxesSCB =                 60;         % Axes, Space for ColorBar
 
-T.N_IntColorLim =           [0 1];
-T.N_StdColorLim =           [0.0001,  0.1];
-T.N_StdColorLimLog =        log10(T.N_StdColorLim);
-T.N_StdColorTickLog =       T.N_StdColorLimLog(1):1:T.N_StdColorLimLog(2);
-T.N_StdColorTickLabels =	cellfun(@num2str, num2cell(10.^T.N_StdColorTickLog),...
-                            'UniformOutput',    false);               
-T.RefFrameStart =           squeeze(P.ProcDataMat(1,1,:,:,1));             
-T.RefFrameEnd =             squeeze(P.ProcDataMat(end,end,:,:,end));
-D.RefFrame =                T.RefFrameStart + T.RefFrameEnd;
-D.RefFrame =                D.RefFrame / max(max(D.RefFrame));     
-    T.hFig(1) = figure(...
+    T.hFig1 = figure(...
                     'Name',         ['Determine the ROI in the session "', A.FileName{1}(1:end-7), '"'],...
                     'Units',        'pixels',...  
                     'Position',     [   10                      10....
                                         T.AxesSS(1)*2+P.ProcPixelWidth*5 ...
                                         T.AxesSS(2)*2+P.ProcPixelHeight*5 ]);
-    T.hFig1Axes(1) = axes(...
-                    'Parent',       T.hFig(1),...
+    T.hFig1Axes1 = axes(...
+                    'Parent',       T.hFig1,...
                     'Units',        'pixels',...  
                     'Position',     [   T.AxesSS(1)           T.AxesSS(2)...
                                         P.ProcPixelWidth*5      P.ProcPixelHeight*5 ]);
-    imshow(D.RefFrame,...
-                    'InitialMagnification',         500);    
+	T.hFig1Axes1Image1 = imagesc(	squeeze(P.ProcDataMat(1,1,:,:,1)) + ...             
+                                    squeeze(P.ProcDataMat(end,end,:,:,end)),...
+                    'Parent',       T.hFig1Axes1);    
+	colormap(T.hFig1Axes1,          'gray');
     title(                       	'Drag to position the ROI, double click on the circle to finish');
-    T.hFig1Axes1ROI = imellipse(gca, [23 0 76 76]);
-    wait(T.hFig1Axes1ROI);
+    try 
+        if strcmp(S.MkyPrep, 'Skull')
+            T.hFig1Axes1ROI = imellipse(gca, [  0	0	120	75]);
+        else
+            T.hFig1Axes1ROI = imellipse(gca, [  23	0	76	76]);
+        end
+    catch
+            T.hFig1Axes1ROI = imellipse(gca, [  23	0	76	76]);            
+    end 
+    if A.RunningSource == 'D'
+        wait(T.hFig1Axes1ROI);
+    end
     title(                          'Done, start calculating...');
-    pause(0.1);
-
-% Data & Numbers 
-% Pixel
+    drawnow;
+%% Setup Parmateters: Data & Numbers 
 D.N_Ph =            P.ProcPixelHeight;      % Number_PixelHeight
 D.N_Pw =            P.ProcPixelWidth;       % Number_PixelWidth
-D.N_Pt =            D.N_Ph * D.N_Pw;        % Number_PixelTotal, proc
+D.N_Pt =            D.N_Ph * D.N_Pw;        % Number_PixelTotal(in each frame in the P?.mat)
 
-% Frame, Trial, Cycle
-D.N_Ft =            P.ProcFrameNumTotal;                            % FrameTotal
-D.N_Fpc =           D.N_Ft / S.SesCycleNumTotal;                    % FramePerCycle
-D.N_Fpt =           D.N_Fpc / S.TrlNumTotal;                        % FramePerTrial
-
-D.N_Ftpreoff =      round(  S.TrlDurPreStim *               P.ProcFrameRate); % Number_FrameTrialPrestimOff
-D.N_Ftstimon =      D.N_Ftpreoff + 1;
-D.N_Ftstimoff =     round(( S.TrlDurPreStim+S.TrlDurStim) * P.ProcFrameRate); % Number_FrameTrialStimOff
-D.N_Ftposton =      D.N_Ftstimoff + 1;
-
-D.N_Tt =                S.TrlNumTotal;
-D.N_Ct =                S.SesCycleNumTotal;
+D.N_Ft =            P.ProcFrameNumTotal;            % Number_FrameTotal
+D.N_Fpc =           D.N_Ft / S.SesCycleNumTotal;	% Number_FramePerCycle
+D.N_Fpt =           D.N_Fpc / S.TrlNumTotal;        % Number_FramePerTrial
+D.N_Ftpreoff =      round(  S.TrlDurPreStim *               P.ProcFrameRate); 
+                                                    % Number_FrameTrialPrestimOff
+D.N_Ftstimon =      D.N_Ftpreoff + 1;               % Number_FrameTrialStimOn
+D.N_Ftstimoff =     round(( S.TrlDurPreStim+S.TrlDurStim) * P.ProcFrameRate);
+                                                    % Number_FrameTrialStimOff
+D.N_Ftposton =      D.N_Ftstimoff + 1;              % Number_FrameTrialPostimON
+try
+    if S.SysCamFrameRate ~=80
+        D.N_Fps =	S.SysCamFrameRate/P.ProcFrameBinNum;	% Number_FramePerSecond
+    else
+        D.N_Fps =	80/P.ProcFrameBinNum;
+    end
+catch
+        D.N_Fps =	80/P.ProcFrameBinNum;
+end
+    % Not necessary
+    D.N_Tt =            S.TrlNumTotal;          % Number_TrialTotal (per cycle)
+D.N_Ct =            S.SesCycleNumTotal;     % Number_CycleTotal (in the session)
                         
 % Region of Interest
 D.PhPw_ROIin =          createMask(T.hFig1Axes1ROI);            % ROI in
 D.PhPw_ROIout =         ~D.PhPw_ROIin;                          % ROI out
 D.Pt_ROIin =            reshape(D.PhPw_ROIin,     D.N_Pt, []);  % ROI in 
-D.PtIndex_ROIin =       find(D.Pt_ROIin);
 D.Pt_ROIout =           reshape(D.PhPw_ROIout,    D.N_Pt, []);  % ROI out
+D.PtIndex_ROIin =       find(D.Pt_ROIin);
 
 % Temporal Analysis
 
 % Spectral AnalysisFpt
-D.N_Qt =                D.N_Ft;
-D.N_Qfc =               int16((1/S.SesSoundDurTotal)/ (80/P.ProcFrameBinNum/D.N_Ft) +1);     % cc
-D.N_Qft =               (1/S.TrlDurTotal)/      (80/P.ProcFrameBinNum/D.N_Ft) +1;   
-D.Qt_Freqs =            0:  (80/P.ProcFrameBinNum/D.N_Ft):     ...
-                            ((D.N_Ft-1)*	80/P.ProcFrameBinNum/D.N_Ft); 
+D.N_Qt =                D.N_Ft;         % Number_FrequencyTotal
+D.N_Qfc =               D.N_Ct +1;      % Number_FrequencyOfTheCycle  
+D.Qt_Freqs =            0:  1/(D.N_Ft/D.N_Fps): (D.N_Ft-1)/(D.N_Ft/D.N_Fps); 
 T.PtQt_ROIin =          D.Pt_ROIin *     ones(1,   length(D.Qt_Freqs));    
 T.PtQt_ROIout =         D.Pt_ROIout *    ones(1,   length(D.Qt_Freqs));
 
-% Data
-T.PtFt_Raw =            reshape(permute(P.ProcDataMat,[2,3,4,5,1]),    D.N_Pt,	D.N_Ft); % aa
-D.Name =                'Raw';
-D.PtFt_A0 =             T.PtFt_Raw;
-
-%% Power Meter
-% interpolate 0s
-% T.OneFrt_PMRawZero =    (P.RawMeanPower == 0);
-% if sum(P.RawMeanPower == 0) ~=0
-%     % if 
-% else
-%     T.OneFt_PowerRaw =  P.ProcMeanPower;
-% end
-% T.OneFt_PowerRaw =  P.ProcMeanPower;
-% T.OneQt_PowerFFTRaw =   fft(T.OneFt_PowerRaw);
-% T.OneQt_PowerFFTAmp =   abs(T.OneQt_PowerFFTRaw)*2/length(D.Qt_Freqs);
+% Data                                  % ProcDataMat:(Ct, Tt, Ph, Pw, Fpt)         
+T.PhPwFptCt_DataRaw =   squeeze(permute(P.ProcDataMat, [3 4 5 2 1]));
+T.PtFt_Raw =            reshape(T.PhPwFptCt_DataRaw,	D.N_Pt,	D.N_Ft);          
+T.CtTtFptPhPw_DataRaw =         permute(P.ProcDataMat, [1 2 5 3 4]);
+T.PhPw_ImageRawMean =   squeeze(mean(mean(T.PhPwFptCt_DataRaw, 3), 4));
 
 %% Variance Analysis 
-T.CtTtFptPhPw_DataRaw =     permute(P.ProcDataMat, [1 2 5 3 4]);
-
 D.Fig2Var{1}.Title =        'Average intensity (% to saturation)';
 D.Fig2Var{1}.PhPw_Data =	squeeze(mean(mean(mean(T.CtTtFptPhPw_DataRaw, 1), 2), 3)) / ...
                             (2^12 *4^2 *P.ProcPixelBinNum^2 *P.ProcFrameBinNum);
@@ -137,23 +129,18 @@ D.Fig2Var{1}.ColorMap =     'hot';
 
 D.Fig2Var{2}.Title =        'STD, entire session (ratio)';
 D.Fig2Var{2}.PhPw_Data =	squeeze(std(reshape(T.CtTtFptPhPw_DataRaw, D.N_Ft, D.N_Ph, D.N_Pw), 0, 1))./...
-                                squeeze(mean(mean(mean(T.CtTtFptPhPw_DataRaw, 1), 2), 3)) ;
+                                T.PhPw_ImageRawMean ;
 D.Fig2Var{2}.ColorMap =     'parula';
 
 D.Fig2Var{3}.Title =        'STD, across repetition cycles (ratio)';
 D.Fig2Var{3}.PhPw_Data =	squeeze(std(mean(mean(T.CtTtFptPhPw_DataRaw, 2), 3), 0, 1))./...
-                                squeeze(mean(mean(mean(T.CtTtFptPhPw_DataRaw, 1), 2), 3)) ;
-D.Fig2Var{3}.ColorMap =     'parula';    
+                                T.PhPw_ImageRawMean ;
+D.Fig2Var{3}.ColorMap =     'parula';      
 
-D.Fig2Var{4}.Title =        'STD, across different trials (ratio)';
-D.Fig2Var{4}.PhPw_Data =	squeeze(std(mean(mean(T.CtTtFptPhPw_DataRaw, 1), 3), 0, 2))./...
-                                squeeze(mean(mean(mean(T.CtTtFptPhPw_DataRaw, 1), 2), 3)) ;
-D.Fig2Var{4}.ColorMap =     'parula';    
-
-D.Fig2Var{5}.Title =        'STD, across frames within each trial (ratio)';
-D.Fig2Var{5}.PhPw_Data =	squeeze(std(mean(mean(T.CtTtFptPhPw_DataRaw, 1), 2), 0, 3))./...
-                                squeeze(mean(mean(mean(T.CtTtFptPhPw_DataRaw, 1), 2), 3)) ;
-D.Fig2Var{5}.ColorMap =     'parula'; 
+D.Fig2Var{4}.Title =        'STD, across frames within each trial (ratio)';
+D.Fig2Var{4}.PhPw_Data =	squeeze(std(mean(mean(T.CtTtFptPhPw_DataRaw, 1), 2), 0, 3))./...
+                                T.PhPw_ImageRawMean ;
+D.Fig2Var{4}.ColorMap =     'parula'; 
 
 %% Trial Analysis
 switch D.N_Tt
@@ -162,15 +149,15 @@ switch D.N_Tt
     otherwise;  T.TrialOrder = 1:D.N_Tt;
 end
 % Pixel nomalized in the session by the mean of all frames 
-D.PtOne_MeanForEachPixel =	mean(D.PtFt_A0, 2);
-D.PtFt_NormSes =           D.PtFt_A0./(D.PtOne_MeanForEachPixel*...
+D.PtOne_MeanForEachPixel =	mean(T.PtFt_Raw, 2);
+D.PtFt_NormSes =            T.PtFt_Raw./(D.PtOne_MeanForEachPixel*...
                                 ones(1, D.N_Ft)) - 1;
 D.FptTtCtPhPw_NormSes =	permute( reshape(D.PtFt_NormSes, ...
                                     D.N_Ph, ...
                                     D.N_Pw, ...
                                     D.N_Fpt, ...
                                     D.N_Tt, ...
-                                     D.N_Ct), [3, 4, 5, 1, 2]);
+                                    D.N_Ct), [3, 4, 5, 1, 2]);
 % Pixel nomalized in the session by the mean of prestim/all frames 
 if D.N_Ftpreoff >0
     D.OneTtCtPhPw_PreMean =    mean( D.FptTtCtPhPw_NormSes(...
@@ -218,6 +205,18 @@ D.PtIndex_STD =        squeeze(std(D.FptTtPt_NormTrlM(:,1,D.PtIndex_ROIin), 1));
 D.FptPhPw_NormTrlVid = D.FptPhPw_NormTrlM*T.Polarity;
 
 %% Spectral Analysis  
+% %  Power Meter: To be finished
+% interpolate 0s
+% T.OneFrt_PMRawZero =    (P.RawMeanPower == 0);
+% if sum(P.RawMeanPower == 0) ~=0
+%     % if 
+% else
+%     T.OneFt_PowerRaw =  P.ProcMeanPower;
+% end
+% T.OneFt_PowerRaw =  P.ProcMeanPower;
+% T.OneQt_PowerFFTRaw =   fft(T.OneFt_PowerRaw);
+% T.OneQt_PowerFFTAmp =   abs(T.OneQt_PowerFFTRaw)*2/length(D.Qt_Freqs);
+
 % the normalized FFT
 D.PtQt_FFTRaw =	fft(T.Polarity * D.PtFt_NormSes')';     
 D.PtQt_FFTAmp =	abs(        D.PtQt_FFTRaw)*sqrt(2)/D.N_Qt;	
@@ -255,14 +254,28 @@ end
 
 %% Graphics
 
-delete(T.hFig(1));
+delete(T.hFig1);
 T.hFig(2) = figure(...
                 'Name',         ['"', A.FileName{1}, '" with the sound: "', S.SesSoundFile, '"'],...
                 'Units',        'pixels',...  
                 'Position',     [   10                      10 ...
                                     1600                    900]); 
 % Varience Analysis
-for j = 1:5
+% Figure
+T.VarMag =                  2;
+T.SpecMag =                 3;
+
+T.AxesSS =                  [60 90];    % Axes, Space for the Side
+T.AxesSB =                  10;         % Axes, Space in Between
+T.AxesSCB =                 60;         % Axes, Space for ColorBar
+
+T.N_IntScaleLim =           [0 1];
+T.N_StdScaleLim =           [0.0001,  0.1];
+T.N_StdScaleLimLog =        log10(T.N_StdScaleLim);
+T.N_StdScaleTickLog =       T.N_StdScaleLimLog(1):1:T.N_StdScaleLimLog(2);
+T.N_StdScaleTickLabels =	cellfun(@num2str, num2cell(10.^T.N_StdScaleTickLog),...
+                            'UniformOutput',    false); 
+for j = 1:4
     T.AxesNumH =    j;
     T.AxesNumV =	1;
     T.hFig2AxesVar(j) = axes(...
@@ -281,9 +294,9 @@ for j = 1:5
     set(gca,    'YTick',        []);
     colormap(   T.hFig2AxesVar(j), D.Fig2Var{j}.ColorMap);
     if strcmp(D.Fig2Var{j}.Title(1:3), 'STD')
-        caxis(                  T.N_StdColorLimLog);
+        caxis(                  T.N_StdScaleLimLog);
     else 
-        caxis(                  T.N_IntColorLim);
+        caxis(                  T.N_IntScaleLim);
     end
     T.hFig2VarColorbar(j) = colorbar(...
                 'Units',        'pixels',...
@@ -292,8 +305,8 @@ for j = 1:5
                                     10                      D.N_Ph*T.VarMag]);                     
     if strcmp(D.Fig2Var{j}.Title(1:3), 'STD')
         set(T.hFig2VarColorbar(j),...
-                'Ticks',        T.N_StdColorTickLog,...
-                'TickLabels',   T.N_StdColorTickLabels);
+                'Ticks',        T.N_StdScaleTickLog,...
+                'TickLabels',   T.N_StdScaleTickLabels);
     else
         set(T.hFig2VarColorbar(j),...
                 'Ticks',        0:0.2:1,...
