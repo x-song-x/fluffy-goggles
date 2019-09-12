@@ -25,8 +25,17 @@ TuningH =       getappdata(H,       'TuningH');
 if AmpSUpdt
     SpecH =         getappdata(H,       'SpecH');
     YLimRange =     getappdata(H,       'YLimRange');
-    CurYLim =       get(SpecH,      'YLim'
-    set(SpecH,      'YLim',         [0 1
+    SpecDotH =      getappdata(H,       'SpecDotH');
+    CurYLim =       get(SpecH,          'YLim');
+    CurYLim =       CurYLim(2);
+    CurYLimIdx =    find(YLimRange == CurYLim, 1);
+    if CurYLimIdx == length(YLimRange)
+        CurYLimIdx = 1;
+    else
+        CurYLimIdx = CurYLimIdx +1;
+    end        
+    set(SpecH,      'YLim',             [0 YLimRange(CurYLimIdx)]);
+    set(SpecDotH,   'YData',            YLimRange(CurYLimIdx));
 end
 
 %% Spectrum
@@ -42,7 +51,9 @@ if SpecUpdt
     Spec_N_Qfc =        getappdata(SpecH,   'Spec_N_Qfc');
     Spec_RatioCut_Qfc = getappdata(SpecH,	'Spec_RatioCut_Qfc');
     HistH =         getappdata(SpecH,       'HistH');
-    HistogramH =	getappdata(SpecH,       'HistogramH');
+    HistogramAllH =	getappdata(SpecH,       'HistogramAllH');
+    HistogramInH =	getappdata(SpecH,       'HistogramInH');
+setappdata(T.hFig2AxesSpec,         'PtIndexROIin',     D.PtIndex_ROIin);
     % update SpecNum
     SpecNum = SpecNum + SpecUpDown;
     if SpecNum<1;                   SpecNum = 1;                        end
