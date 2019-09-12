@@ -114,8 +114,9 @@ T.PtQt_ROIout =         D.Pt_ROIout *    ones(1,   length(D.Qt_Freqs));
 
 % Data                                  % ProcDataMat:(Ct, Tt, Ph, Pw, Fpt)         
 T.PhPwFptCt_DataRaw =   squeeze(permute(P.ProcDataMat, [3 4 5 2 1]));
-T.PhPw_ImageRawMean =   squeeze(mean(mean(T.PhPwFptCt_DataRaw, 3), 4));
 T.PtFt_DataRaw =        reshape(T.PhPwFptCt_DataRaw,	D.N_Pt,	D.N_Ft);  
+T.PhPw_ImageMeanRaw =   squeeze(mean(mean(T.PhPwFptCt_DataRaw, 3), 4));
+T.PtOne_ImageMeanRaw =	reshape(T.PhPw_ImageMeanRaw, D.N_Pt, 1);
 
 %% Variance Analysis 
 D.Fig2Var{1}.Title =        'Average intensity (% to saturation)';
@@ -123,17 +124,17 @@ D.Fig2Var{1}.ColorMap =     'hot';
 D.Fig2Var{1}.PhPw_Data =	squeeze(mean(mean(T.PhPwFptCt_DataRaw, 3), 4)) / (2^12*4^2 *P.ProcPixelBinNum^2 *P.ProcFrameBinNum);
 D.Fig2Var{2}.Title =        'STD, entire session';
 D.Fig2Var{2}.ColorMap =     'parula';
-D.Fig2Var{2}.PhPw_Data =	reshape(std(T.PtFt_DataRaw, 0, 2), D.N_Ph, D.N_Pw)  ./T.PhPw_ImageRawMean;
+D.Fig2Var{2}.PhPw_Data =	reshape(std(T.PtFt_DataRaw, 0, 2), D.N_Ph, D.N_Pw)  ./T.PhPw_ImageMeanRaw;
 D.Fig2Var{3}.Title =        'STD, across repetition cycles';
 D.Fig2Var{3}.ColorMap =     'parula';
-D.Fig2Var{3}.PhPw_Data =	squeeze(std(mean(T.PhPwFptCt_DataRaw, 3), 0, 4))    ./T.PhPw_ImageRawMean ;
+D.Fig2Var{3}.PhPw_Data =	squeeze(std(mean(T.PhPwFptCt_DataRaw, 3), 0, 4))    ./T.PhPw_ImageMeanRaw ;
 D.Fig2Var{4}.Title =        'STD, across frames within cycle';
 D.Fig2Var{4}.ColorMap =     'parula'; 
-D.Fig2Var{4}.PhPw_Data =	squeeze(std(mean(T.PhPwFptCt_DataRaw, 4), 0, 3))    ./T.PhPw_ImageRawMean ;
+D.Fig2Var{4}.PhPw_Data =	squeeze(std(mean(T.PhPwFptCt_DataRaw, 4), 0, 3))    ./T.PhPw_ImageMeanRaw ;
 
 %% Trial Analysis
 % Pixel nomalized in the session by the mean of all frames 
-D.PtFt_NormSes =	T.PtFt_DataRaw./(reshape(T.PhPw_ImageRawMean, D.N_Pt, 1)*ones(1, D.N_Ft)) - 1;
+D.PtFt_NormSes =	T.PtFt_DataRaw./(T.PtOne_ImageMeanRaw*ones(1, D.N_Ft)) - 1;
 D.FptTtCtPhPw_NormSes =	permute( reshape(D.PtFt_NormSes, ...
                                     D.N_Ph, ...
                                     D.N_Pw, ...
