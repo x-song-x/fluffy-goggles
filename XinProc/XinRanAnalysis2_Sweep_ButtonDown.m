@@ -212,20 +212,20 @@ if FrmeUpdt
     TempHidH =      getappdata(H,           'TempHidH');
     XLabelH =       getappdata(FrmeImageH,	'XLabelH');
     FrmeNum =       getappdata(FrmeImageH,  'FrmeNum');   
-    FptPhPw_NormTrlVid = ...
-                    getappdata(FrmeImageH,  'FptPhPw_NormTrlVid');
+    FptPhPw_NormTrlAdj = ...
+                    getappdata(FrmeImageH,  'FptPhPw_NormTrlAdj');
 	FrmeDuration =	getappdata(TempHidH,	'FrmeDuration');
     TempDotH =      getappdata(TempHidH,    'TempDotH');
     TempTextH =     getappdata(TempHidH,    'TempTextH');
     % update FrmeNum
-    TrialTotalFrmeNum = size(FptPhPw_NormTrlVid,1);
+    TrialTotalFrmeNum = size(FptPhPw_NormTrlAdj,1);
     FrmeNum =           FrmeNum + FrmeUpDown;
     if FrmeNum<1;                   FrmeNum = 1;                    end
     if FrmeNum>TrialTotalFrmeNum;   FrmeNum = TrialTotalFrmeNum;	end   
     FrmeTime =          FrmeNum * FrmeDuration;
     % update AxesFrme GUI & data
     setappdata(FrmeImageH,	'FrmeNum',  FrmeNum);
-    set(FrmeImageH,         'CData',    squeeze(FptPhPw_NormTrlVid(FrmeNum,:,:)));
+    set(FrmeImageH,         'CData',    squeeze(FptPhPw_NormTrlAdj(FrmeNum,:,:)));
     set(XLabelH,            'string',   sprintf('Adjusted polarity @ %4.1f s',FrmeTime));
     % update AxesTemp GUI & data
     set(TempDotH,           'XData',    FrmeNum);
