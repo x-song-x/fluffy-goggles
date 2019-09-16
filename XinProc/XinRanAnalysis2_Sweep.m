@@ -394,7 +394,7 @@ set(T.hFig2AxesTune, ...
             'YLim',         [1 D.N_Ph],...
             'XTick',        [],...
             'YTick',        []);
-xlabel(sprintf('Hue: %3.1f s compensated phase angle; Value: phase amplitude', T.PsuedoDelay));
+xlabel(sprintf('Hue: %3.1f s compensated phase angle; Value: phase amplitude', T.PseudoDelay));
 % Scalebar: Hue
 T.hFig2AxesTuneFakeHue = axes(...
             'Parent',       T.hFig2,...
@@ -457,7 +457,7 @@ T.hFig2AxesFrmeImage = imagesc(squeeze(D.FptPhPw_NormTrlAdj(1,:,:)),...
             'Parent',       T.hFig2AxesFrme,...
             'Tag',          'PixlSelectionFromFrmeImage',...
             'ButtonDownFcn','XinRanAnalysis2_Sweep_ButtonDown');
-T.hFig2AxesFrmeXLabelH = xlabel(...
+T.hFig2AxesFrmeXLabel = xlabel(...
     sprintf('Amplitude @ %4.1f s, in adjusted polarity, click to play', 1*D.N_Tpf),...
             'Parent',       gca,...
             'VerticalAlignment',    'Top', ...
@@ -617,7 +617,6 @@ setappdata(T.hFig2AxesSpec,         'SpecRepNumH',      T.hFig2AxesSpecTextNum);
 setappdata(T.hFig2AxesSpec,         'SpecSesDurTotal',  S.SesDurTotal);
 setappdata(T.hFig2AxesSpec,         'Spec_N_Qfc',       D.N_Qfc);
 setappdata(T.hFig2AxesSpec,         'Spec_RatioCut_Qfc',S.TrlDurPreStim/S.TrlDurTotal);
-% setappdata(T.hFig2AxesSpec,         'HistH',            T.hFig2AxesHist);
 setappdata(T.hFig2AxesSpec,         'HistogramAllH',	T.hFig2AxesHistHistogramAll);
 setappdata(T.hFig2AxesSpec,         'HistogramInH',     T.hFig2AxesHistHistogramIn);
 setappdata(T.hFig2AxesSpec,         'PtIndexROIin',     D.PtIndex_ROIin);
@@ -652,7 +651,7 @@ setappdata(T.hFig2AxesTuneImage,	'ValLim',           0.1/100);
 % Axes: Frme
 setappdata(T.hFig2AxesFrmeImage,	'FrmeNum',          1);
 setappdata(T.hFig2AxesFrmeImage,    'FptPhPw_NormTrlAdj',  single(D.FptPhPw_NormTrlAdj));
-setappdata(T.hFig2AxesFrmeImage,    'XLabelH',          T.hFig2AxesFrmeXLabelH);         
+setappdata(T.hFig2AxesFrmeImage,    'XLabelH',          T.hFig2AxesFrmeXLabel);         
 setappdata(T.hFig2AxesFrmeImage,    'AxesPixlH',        T.hFig2AxesPixl);      
 setappdata(T.hFig2AxesFrmeScalebar, 'Tmax',             0.2); 
 setappdata(T.hFig2AxesFrmeScalebar, 'TmaxRange',        [   0.005   0.01    0.02 ...
@@ -660,9 +659,9 @@ setappdata(T.hFig2AxesFrmeScalebar, 'TmaxRange',        [   0.005   0.01    0.02
 setappdata(T.hFig2AxesFrmeScalebar, 'AxesFrmeH',        T.hFig2AxesFrme); 
 setappdata(T.hFig2AxesFrmeScalebar, 'AxesTempH',        T.hFig2AxesTemp); 
 setappdata(T.hFig2AxesFrmeScalebar, 'AxesPixlH',        T.hFig2AxesPixl); 
-setappdata(T.hFig2AxesFrmeTitle,    'FrmeNextH',        T.hFig2AxesTempTextRight);
-setappdata(T.hFig2AxesFrmeTitle,    'PlayingNow',       0);
-setappdata(T.hFig2AxesFrmeTitle,    'Sound',            S.SesSoundWave);   
+setappdata(T.hFig2AxesFrmeXLabel,   'FrmeNextH',        T.hFig2AxesTempTextRight);
+setappdata(T.hFig2AxesFrmeXLabel,   'PlayingNow',       0);
+setappdata(T.hFig2AxesFrmeXLabel,   'Sound',            S.SesSoundWave);   
 
 % Axes: Pixl
 setappdata(T.hFig2AxesPixl,         'FptCtPhPw_NormTrl',single(D.FptCtPhPw_NormTrl));

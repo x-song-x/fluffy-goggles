@@ -225,16 +225,16 @@ if FrmeUpdt
     if FrmeNum>TrialTotalFrmeNum;   FrmeNum = TrialTotalFrmeNum;	end   
     FrmeTime =          FrmeNum * FrmeDuration;
     if PlayingNow
-        XLabelString =  sprintf( 'Amplitude @ %4.1f s, in adjusted polarity, playing',...
-                            FrmeNum*FrmeDuration );
+        XLabelString =  
     else
-        XLabelString =  sprintf('Amplitude @ %4.1f s, in adjusted polarity, click to play',...
-                            FrmeNum*FrmeDuration );
     end
     % update AxesFrme GUI & data
     setappdata(FrmeImageH,	'FrmeNum',  FrmeNum);
     set(FrmeImageH,         'CData',    squeeze(FptPhPw_NormTrlAdj(FrmeNum,:,:)));
-    set(XLabelH,            'String',   XLabelString);
+    set(XLabelH,            'string',   sprintf('Adjusted polarity @ %4.1f s',FrmeTime));
+
+%     sprintf('Amplitude @ %4.1f s, in adjusted polarity, click to play', 1*D.N_Tpf),...
+    % update AxesTemp GUI & data
     set(TempDotH,           'XData',    FrmeNum);
     set(TempTextH,          'string',   sprintf('Time: %4.1f s', FrmeTime));  
 end
@@ -257,6 +257,7 @@ if Play
         FrmeNum =               0;  
         setappdata(H,           'AudioPlayerH', hAP); 
         setappdata(FrmeImageH,  'FrmeNum',      FrmeNum);    
+        set(H,                  'string',       'Video playback');
         pause(0.5);
         timebase = tic;
         hAP.play;
@@ -264,11 +265,9 @@ if Play
             if toc(timebase)>(FrmeNum*FrmeDuration)
                 XinRanAnalysis2_Sweep_ButtonDown(FrmeNextH);
                 FrmeNum = FrmeNum + 1;
-            end       
+            end        
             pause(0.05);
         end
-            PlayingNow = 0;
-            setappdata(H,       'PlayingNow',   PlayingNow);
                 XinRanAnalysis2_Sweep_ButtonDown(FrmeNextH);
     else
         hAP = getappdata(H,     'AudioPlayerH');
