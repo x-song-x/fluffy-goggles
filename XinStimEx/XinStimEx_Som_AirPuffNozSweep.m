@@ -14,7 +14,7 @@ stm.TrialPreStimTime =      0;
 stm.TrialStimTime =         20;
 stm.TrialStimChanNum =      8;
 stm.TrialPuffSeqTime =      2.5;
-stm.TrialStimChanBitSeq =   [2 2 2 5 2 2 2 2];
+stm.TrialStimChanBitSeq =   [2 2 2 6 2 2 2 2];
 
 %% 7 nozzles
 % % stm.TrialPreStimTime =      2.5;
@@ -82,7 +82,7 @@ sys.NIDAQ.TaskDO.writeDigitalData(      stm.seq);
 sys.NIDAQ.TaskDO.start();
 
 %% Play until cancelled
-
+disp('ready to be triggered!');
 pause;
 sys.NIDAQ.TaskDO.abort();
 sys.NIDAQ.TaskDO.delete;

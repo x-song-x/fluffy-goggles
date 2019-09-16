@@ -26,7 +26,8 @@ else
     A.FileName =        {[A.FileName, A.FileExt]};
 end
 %% Load data files
-Xin.T.filename = [F.PathName, A.FileName{1}];      
+Xin.T.filename = [F.PathName, A.FileName{1}];     
+global P S
 load([Xin.T.filename(1:end-7) '.mat'], 'S');	% load S (Saved from recording)
 load([Xin.T.filename(1:end-4) '.mat'], 'P');	% load P (Preprocessed)  
 if S.TrlNumTotal == 1
@@ -50,7 +51,7 @@ switch A.FileName{1}([15:17 end-15:end-7])
     case 'Blu_Fluo_GFP';    T.Polarity =     1;     T.PsuedoDelay = 0.0;
     otherwise;              T.Polarity =     1;     T.PsuedoDelay =	2.6;
 end
-%% Figure: ROI
+%% Figure 1: ROI
 T.S_FS =        [120 90];	% Space, Figure Side
     T.hFig1 = figure(...
                     'Name',         ['Determine the ROI in the session "', A.FileName{1}(1:end-7), '"'],...
@@ -86,6 +87,8 @@ T.S_FS =        [120 90];	% Space, Figure Side
 D.N_Ph =            P.ProcPixelHeight;      % Number_PixelHeight
 D.N_Pw =            P.ProcPixelWidth;       % Number_PixelWidth
 D.N_Pt =            D.N_Ph * D.N_Pw;        % Number_PixelTotal(in each frame in the P?.mat)
+D.N_PhSelect =      37;
+D.N_PwSelect =      60;
 
 D.N_Ft =            P.ProcFrameNumTotal;            % Number_FrameTotal
 D.N_Fpc =           D.N_Ft / S.SesCycleNumTotal;	% Number_FramePerCycle
@@ -105,8 +108,7 @@ try
 catch
         D.N_Fps =	80/P.ProcFrameBinNum;
 end
-    % Not necessary
-    D.N_Tt =            S.TrlNumTotal;          % Number_TrialTotal (per cycle)
+
 D.N_Ct =            S.SesCycleNumTotal;     % Number_CycleTotal (in the session)
                         
 % Region of Interest
@@ -124,110 +126,88 @@ D.N_Qfc =               D.N_Ct +1;      % Number_FrequencyOfTheCycle
 D.Qt_Freqs =            0:  1/(D.N_Ft/D.N_Fps): (D.N_Ft-1)/(D.N_Ft/D.N_Fps); 
 T.PtQt_ROIin =          D.Pt_ROIin *     ones(1,   length(D.Qt_Freqs));    
 T.PtQt_ROIout =         D.Pt_ROIout *    ones(1,   length(D.Qt_Freqs));
-
-% Data                                  % ProcDataMat:(Ct, Tt, Ph, Pw, Fpt)         
-T.PhPwFptCt_DataRaw =   squeeze(permute(P.ProcDataMat, [3 4 5 2 1]));
-T.PtFt_DataRaw =        reshape(T.PhPwFptCt_DataRaw,	D.N_Pt,	D.N_Ft);  
-T.PhPw_ImageMeanRaw =   squeeze(mean(mean(T.PhPwFptCt_DataRaw, 3), 4));
-T.PtOne_ImageMeanRaw =	reshape(T.PhPw_ImageMeanRaw, D.N_Pt, 1);
+T.FptCtPhPw_DataRaw =   reshape( permute(P.ProcDataMat, [5 2 1 3 4]),...
+                                D.N_Fpt, D.N_Ct, D.N_Ph, D.N_Pw );
+T.FtPt_DataRaw =        reshape(T.FptCtPhPw_DataRaw,	D.N_Ft,	D.N_Pt);  
+T.PhPw_ImageMeanRaw =   squeeze(mean(mean(T.FptCtPhPw_DataRaw, 1), 2));
+T.OnePt_ImageMeanRaw =	reshape(T.PhPw_ImageMeanRaw, 1, D.N_Pt);
 
 %% Variance Analysis 
 D.Fig2Var{1}.Title =        'Average intensity (% to saturation)';
 D.Fig2Var{1}.ColorMap =     'hot';  
-D.Fig2Var{1}.PhPw_Data =	squeeze(mean(mean(T.PhPwFptCt_DataRaw, 3), 4)) / (2^12*4^2 *P.ProcPixelBinNum^2 *P.ProcFrameBinNum);
+D.Fig2Var{1}.PhPw_Data =	squeeze(mean(mean(T.FptCtPhPw_DataRaw, 1),  2)) / (2^12*4^2 *P.ProcPixelBinNum^2 *P.ProcFrameBinNum);
 D.Fig2Var{2}.Title =        'STD, entire session';
 D.Fig2Var{2}.ColorMap =     'parula';
-D.Fig2Var{2}.PhPw_Data =	reshape(std(T.PtFt_DataRaw, 0, 2), D.N_Ph, D.N_Pw)  ./T.PhPw_ImageMeanRaw;
+D.Fig2Var{2}.PhPw_Data =	reshape(std(T.FtPt_DataRaw, 0, 1), D.N_Ph, D.N_Pw)  ./T.PhPw_ImageMeanRaw;
 D.Fig2Var{3}.Title =        'STD, across repetition cycles';
 D.Fig2Var{3}.ColorMap =     'parula';
-D.Fig2Var{3}.PhPw_Data =	squeeze(std(mean(T.PhPwFptCt_DataRaw, 3), 0, 4))    ./T.PhPw_ImageMeanRaw ;
+D.Fig2Var{3}.PhPw_Data =	squeeze(std(mean(T.FptCtPhPw_DataRaw, 1), 0, 2))    ./T.PhPw_ImageMeanRaw ;
 D.Fig2Var{4}.Title =        'STD, across frames within cycle';
 D.Fig2Var{4}.ColorMap =     'parula'; 
-D.Fig2Var{4}.PhPw_Data =	squeeze(std(mean(T.PhPwFptCt_DataRaw, 4), 0, 3))    ./T.PhPw_ImageMeanRaw ;
-
-%% Trial Analysis
-% Pixel nomalized in the session by the mean of all frames 
-D.PtFt_NormSes =        T.PtFt_DataRaw./(T.PtOne_ImageMeanRaw*ones(1, D.N_Ft)) - 1;
-D.FptCtPhPw_NormSes =	permute( reshape(D.PtFt_NormSes, ...
-                                    D.N_Ph, ...
-                                    D.N_Pw, ...
-                                    D.N_Fpt, ...
-                                    D.N_Ct), [3, 4, 1, 2]);
-% Pixel nomalized in the session by the mean of prestim/all frames 
-if D.N_Ftpreoff >0
-    D.OneCtPhPw_PreMean = mean( D.FptCtPhPw_NormSes(1:D.N_Ftpreoff, :, :, :), 1);   % with pre-stim time as baseline
-else
-    D.OneCtPhPw_PreMean = mean( D.FptCtPhPw_NormSes(1:end,          :, :, :), 1);	% continuous, so total average us baseline
-end
-% for Axes: Pixl
-D.FptCtPhPw_NormTrl = (D.FptCtPhPw_NormSes+1)./(repmat(D.OneCtPhPw_PreMean, D.N_Fpt,1,1,1)+1) -1;
-                            
-D.FptPhPw_NormTrl =	squeeze(mean(D.FptCtPhPw_NormTrl, 2));
-        % for Axes: Temp
-        D.FptPt_NormTrl =	reshape(D.FptPhPw_NormTrl,...
-                                            D.N_Fpt, ...
-                                            D.N_Pt);  
-T.TempMax =             max(max(abs(D.FptPt_NormTrl(:,:,:)))); 
-D.PtIndex_STD =        squeeze(std(D.FptPt_NormTrl(:,D.PtIndex_ROIin), 1));
-        % for Axes: Frme
-        D.FptPhPw_NormTrlAdj =  D.FptPhPw_NormTrl*T.Polarity;
+D.Fig2Var{4}.PhPw_Data =	squeeze(std(mean(T.FptCtPhPw_DataRaw, 2), 0, 1))    ./T.PhPw_ImageMeanRaw ;
 
 %% Spectral Analysis  
-% %  Power Meter: To be finished
-% interpolate 0s
-% T.OneFrt_PMRawZero =    (P.RawMeanPower == 0);
-% if sum(P.RawMeanPower == 0) ~=0
-%     % if 
-% else
-%     T.OneFt_PowerRaw =  P.ProcMeanPower;
-% end
-% T.OneFt_PowerRaw =  P.ProcMeanPower;
-% T.OneQt_PowerFFTRaw =   fft(T.OneFt_PowerRaw);
-% T.OneQt_PowerFFTAmp =   abs(T.OneQt_PowerFFTRaw)*2/length(D.Qt_Freqs);
-
-% the normalized FFT
-D.PtQt_FFTRaw =	fft(T.Polarity * D.PtFt_NormSes')';     
-D.PtQt_FFTAmp =	abs(        D.PtQt_FFTRaw)*sqrt(2)/D.N_Qt;	
+% Power meter
+T.OneQt_PowerFFTRaw =   fft(P.ProcMeanPower);
+T.OneQt_PowerFFTAmp =   abs(T.OneQt_PowerFFTRaw)*sqrt(2)/D.N_Qt / T.OneQt_PowerFFTRaw(1);
+% Camera: normalized
+D.FtPt_NormSes =	T.FtPt_DataRaw./(ones(D.N_Ft, 1)*T.OnePt_ImageMeanRaw) - 1;
+D.PtQt_FFTRaw =     fft(T.Polarity * D.FtPt_NormSes)';     
+D.PtQt_FFTAmp =     abs(        D.PtQt_FFTRaw)*sqrt(2)/D.N_Qt;	
                                 % Amp: mirror combined, thus sqrt(2)
-D.PtQt_FFTAgl =	mod(angle(	D.PtQt_FFTRaw)- ...
-                    T.PsuedoDelay*ones(D.N_Pt,1)*D.Qt_Freqs*2*pi, 2*pi);
+D.PtQt_FFTAgl =     mod(angle(	D.PtQt_FFTRaw)- ...
+                        T.PsuedoDelay*ones(D.N_Pt,1)*D.Qt_Freqs*2*pi, 2*pi);
                                 % Agl: phase in [0, 2*pi], with
                                 % pseudo-delay compensated
 if contains(lower(S.SesSoundFile), 'down')
     D.PtQt_FFTAgl =	2*pi - D.PtQt_FFTAgl;
 end                             % Reverse the angle for DOWN cycle 
 % collapse across pixels
-D.OneQt_FFTAmpMeanOut = sum(D.PtQt_FFTAmp.*T.PtQt_ROIout)/  sum(D.Pt_ROIout);
-D.OneQt_FFTAmpMeanIn =	sum(D.PtQt_FFTAmp.*T.PtQt_ROIin)/   sum(D.Pt_ROIin);
-D.OneQt_FFTAmpMaxIn =	max(D.PtQt_FFTAmp.*T.PtQt_ROIin);
-D.OneQt_FFTAmpStdIn =	std(D.PtQt_FFTAmp(D.PtIndex_ROIin,:),1);
-D.OneQt_FFTAmpMeanPStdIn = D.OneQt_FFTAmpMeanIn + D.OneQt_FFTAmpStdIn;
-if D.N_Tt == 1
-    T.FFTXTick =    [1/S.SesSoundDurTotal                   80/P.ProcFrameBinNum/2];
+D.OneQt_FFTAmpMeanOut =     sum(D.PtQt_FFTAmp.*T.PtQt_ROIout)/  sum(D.Pt_ROIout);
+D.OneQt_FFTAmpMeanIn =      sum(D.PtQt_FFTAmp.*T.PtQt_ROIin)/   sum(D.Pt_ROIin);
+D.OneQt_FFTAmpMeanPStdIn =	D.OneQt_FFTAmpMeanIn + std(D.PtQt_FFTAmp(D.PtIndex_ROIin,:),1);
+    % the locking frequency, Prepare the raw hue, sat, val
+        % S.TrlDurPreStim =   2.5;
+        % S.TrlDurStim =      15;
+    D.PtOne_Hue =	D.PtQt_FFTAgl(:,D.N_Qfc)/(2*pi);
+    D.PtOne_Hue =	(D.PtOne_Hue-S.TrlDurPreStim/S.TrlDurTotal) /...
+                        (S.TrlDurStim/S.TrlDurTotal);   % match the Stimulus ONSET / OFFSET to 0-1
+    D.PtOne_Sat =	ones(D.N_Pt,1);          
+    D.PtOne_Val =	D.PtQt_FFTAmp(:,D.N_Qfc); 
+D.PhPwThree_TuneMap =   zeros(D.N_Ph, D.N_Pw,3);
+% Spectrum scale
+T.N_SpecXTick =         [D.Qt_Freqs(D.N_Ct+1),  mean(D.Qt_Freqs([2, end]))]; 
+T.N_SpecYTick =         [0 0.00025*2.^(0:8)];
+T.N_SpecYTickLabel =	cellfun(@(x) sprintf('%5.3f%%', x), num2cell(round(100000*T.N_SpecYTick)/1000),...
+                            'UniformOutput',    false); 
+T.N_SpecDotX =          D.Qt_Freqs(D.N_Ct+1);
+T.N_SpecDotY =          T.N_SpecYTick( find(T.N_SpecYTick>max( [...
+                            D.OneQt_FFTAmpMeanOut(      D.N_Ct+1),...
+                            D.OneQt_FFTAmpMeanIn(       D.N_Ct+1),...    
+                            D.OneQt_FFTAmpMeanPStdIn(   D.N_Ct+1)]),1));                   
+%% Trial Analysis
+% Pixel nomalized in the session by the mean of all frames 
+% D.PtFt_NormSes =        T.PtFt_DataRaw./(T.PtOne_ImageMeanRaw*ones(1, D.N_Ft)) - 1;
+% D.FptCtPhPw_NormSes =	permute( reshape(D.PtFt_NormSes, ...
+%                                     D.N_Ph, ...
+%                                     D.N_Pw, ...
+%                                     D.N_Fpt, ...
+%                                     D.N_Ct), [3, 4, 1, 2]);
+D.FptCtPhPw_NormSes =	reshape(D.FtPt_NormSes, D.N_Fpt, D.N_Ct, D.N_Ph, D.N_Pw);
+% Pixel nomalized in the session by the mean of prestim/all frames 
+if D.N_Ftpreoff >0
+    D.OneCtPhPw_PreMean = mean( D.FptCtPhPw_NormSes(1:D.N_Ftpreoff, :, :, :), 1);   % with pre-stim time as baseline
 else
-    T.FFTXTick =	[1/S.SesSoundDurTotal	1/S.TrlDurTotal	80/P.ProcFrameBinNum/2];
+    D.OneCtPhPw_PreMean = mean( D.FptCtPhPw_NormSes(1:end,          :, :, :), 1);	% continuous, so total average us baseline
 end
-
-% the locking frequency, Prepare the raw hue, sat, val
-    D.PtOne_Hue =           D.PtQt_FFTAgl(:,D.N_Qfc)/(2*pi);
-    % S.TrlDurPreStim =   2.5;
-    % S.TrlDurStim =      15;
-    D.PtOne_Hue =           (D.PtOne_Hue-S.TrlDurPreStim/S.TrlDurTotal) /...
-                                (S.TrlDurStim/S.TrlDurTotal);
-                            % match the Stimulus ONSET / OFFSET to 0-1
-    D.PtOne_Saturation =	ones(D.N_Pt,1);          
-    D.PtOne_Value =         D.PtQt_FFTAmp(:,D.N_Qfc); 
-
-    D.PhPwThree_TuneMap =   zeros(D.N_Ph, D.N_Pw,3);
+D.FptCtPhPw_NormTrl =   (D.FptCtPhPw_NormSes+1)./(repmat(D.OneCtPhPw_PreMean, D.N_Fpt,1,1,1)+1) -1;	% for Axes: Pixl           
+D.FptPhPw_NormTrl =     squeeze(mean(D.FptCtPhPw_NormTrl, 2));
+D.FptPt_NormTrl =       reshape(D.FptPhPw_NormTrl, D.N_Fpt, D.N_Pt);                                % for Axes: Temp
+    T.TempMax =             max(max(abs(D.FptPt_NormTrl(:,:,:)))); 
+    D.PtIndex_STD =         squeeze(std(D.FptPt_NormTrl(:,D.PtIndex_ROIin), 1));
+D.FptPhPw_NormTrlAdj =  D.FptPhPw_NormTrl*T.Polarity;                                               % for Axes: Frme
 
 %% Graphics
-delete(T.hFig1);
-T.hFig(2) = figure(...
-                'Name',         ['"', A.FileName{1}, '" with the sound: "', S.SesSoundFile, '"'],...
-                'Units',        'pixels',...  
-                'Position',     [   10                      10 ...
-                                    1600                    900]); 
-% Varience Analysis
 % Figure
 T.VarMag =	2.0;        D.N_PwVar = D.N_Pw*T.VarMag;    D.N_PhVar = D.N_Ph*T.VarMag;              
 T.ImgMag =	3.0;        D.N_PwImg = D.N_Pw*T.ImgMag;    D.N_PhImg = D.N_Ph*T.ImgMag; 
@@ -235,7 +215,16 @@ T.S_BA =        [60 90];    % Space, Between Axes
 T.S_B =         10;         % Space, Between Axes
 T.S_CB =        60;         % Space, ColorBar
 T.S_CBW =       10;         % Space, ColorBarWidth
-
+T.FontSizeS =   8;
+T.FontSizeL =   10;
+delete(T.hFig1);
+T.hFig(2) = figure(...
+                'Name',         ['"', A.FileName{1}, '" with the sound: "', S.SesSoundFile, '"'],...
+                'Units',        'pixels',...  
+                'Position',     [   10,                     10, ...
+                                    T.S_FS(1)*2+(T.S_BA(1)*2)*3+D.N_PwVar*4, ...
+                                    T.S_FS(2)*2+(T.S_BA(2)*1)*2+D.N_PhVar*1+D.N_PhImg*2] );
+%% Varience                               
 T.N_IntScaleLim =           [0 1];
 T.N_StdScaleLim =           [0.0001,  0.1];
 T.N_StdScaleLimLog =        log10(T.N_StdScaleLim);
@@ -260,27 +249,27 @@ for i = 1:4
     set(gca,    'XTick',        []);
     set(gca,    'YTick',        []);
     colormap(   T.hFig2AxesVar(i), D.Fig2Var{i}.ColorMap);
-    T.hFig2VarColorbar(i) = colorbar(...
+    T.hFig2AxesVarColorbar(i) = colorbar(...
                 'peer',         T.hFig2AxesVar(i),...
                 'Units',        'pixels',...
                 'Position',     [   T.S_FS(1)+  (T.S_BA(1)*2)*(i-1  )+  D.N_PwVar*(i    )+ T.S_CBW, ...
                                     T.S_FS(2), ...
                                     T.S_CBW,        D.N_PhVar]);                     
     if strcmp(D.Fig2Var{i}.Title(1:3), 'STD')
-        set(T.hFig2VarColorbar(i),...
+        set(T.hFig2AxesVarColorbar(i),...
                 'Ticks',        T.N_StdScaleTickLog,...
                 'TickLabels',   T.N_StdScaleTickLabels);
     else
-        set(T.hFig2VarColorbar(i),...
+        set(T.hFig2AxesVarColorbar(i),...
                 'Ticks',        0:0.2:1,...
                 'TickLabels',   {'0%', '20%', '40%', '60%', '80%', '100%'});
     end
     title(D.Fig2Var{i}.Title);
-    xlabel( {[  'Max for all:  ',	sprintf('%5.2f%%', max(max(D.Fig2Var{i}.PhPw_Data))*100 ) ],...
-             [  'Mean inside: ',	sprintf('%5.2f%%', sum(sum(D.Fig2Var{i}.PhPw_Data.*D.PhPw_ROIin))/sum(D.Pt_ROIin)*100 ) ],...
-             [  'Min for all:   ',	sprintf('%5.2f%%', min(min(D.Fig2Var{i}.PhPw_Data))*100 ) ]} );
+    xlabel( {[  'Max for all:    ',     sprintf('%5.2f%%', max(max(D.Fig2Var{i}.PhPw_Data))*100 ) ],...
+             [  'Mean inside: ',        sprintf('%5.2f%%', sum(sum(D.Fig2Var{i}.PhPw_Data.*D.PhPw_ROIin))/sum(D.Pt_ROIin)*100 ) ],...
+             [  'Min for all:     ',	sprintf('%5.2f%%', min(min(D.Fig2Var{i}.PhPw_Data))*100 ) ]},...
+                'FontSize',     T.FontSizeS);
 end
-
 %% Axes 1:1, Spectrum
 T.hFig2AxesSpec = axes(...
             'Parent',       T.hFig(2),...
@@ -289,21 +278,20 @@ T.hFig2AxesSpec = axes(...
                                 T.S_FS(2)+T.S_BA(2)*(1  )+D.N_PhImg*(0  )+D.N_PhVar*(1  ), ...
                                 D.N_PwImg       D.N_PhImg],...
             'NextPlot',     'add');
-plot(D.Qt_Freqs, D.OneQt_FFTAmpMeanIn);
-plot(D.Qt_Freqs, D.OneQt_FFTAmpMeanOut);
-%     plot(D.Qt_Freqs, T.OneQt_PowerFFTAmp);
-plot(D.Qt_Freqs, D.OneQt_FFTAmpMeanPStdIn, 'b:');
-T.hFig2AxesSpecDot = plot(0.05, 0.02, 'o',...
+    plot(D.Qt_Freqs, D.OneQt_FFTAmpMeanIn);
+    plot(D.Qt_Freqs, D.OneQt_FFTAmpMeanOut);
+    plot(D.Qt_Freqs, D.OneQt_FFTAmpMeanPStdIn, 'b:');
+T.hFig2AxesSpecPixlSelect = ...
+    plot(D.Qt_Freqs, D.PtQt_FFTAmp(D.N_PhSelect + D.N_PwSelect*D.N_Ph,:));
+    plot(D.Qt_Freqs, T.OneQt_PowerFFTAmp);
+T.hFig2AxesSpecDot = plot(T.N_SpecDotX, T.N_SpecDotY, 'o',...
             'MarkerSize',   5,...
             'Color',        [1 0 0]);
-T.N_SpecScaleTick =         [0 0.00025*2.^(0:7)];
-T.N_SpecScaleTickLabel =	cellfun(@(x) sprintf('%5.3f%%', x), num2cell(round(100000*T.N_SpecScaleTick)/1000),...
-                            'UniformOutput',    false); 
-set(gca,    'XTick',        T.FFTXTick,... 
-            'XLim',         [80/P.ProcFrameBinNum/D.N_Ft  80/P.ProcFrameBinNum/2],...
-            'YLim',         [0 T.N_SpecScaleTick(3)],...
-            'YTick',        T.N_SpecScaleTick,...
-            'YTickLabel',   T.N_SpecScaleTickLabel,...
+set(gca,    'XTick',        T.N_SpecXTick,... 
+            'XLim',         [D.Qt_Freqs(2)  mean(D.Qt_Freqs([2, end]))],...
+            'YLim',         [0              T.N_SpecDotY],...
+            'YTick',        T.N_SpecYTick,...
+            'YTickLabel',   T.N_SpecYTickLabel,...
             'XGrid',        'on',...
             'XScale',       'log',...
             'LabelFontSizeMultiplier', 1);
@@ -315,10 +303,10 @@ T.hFig2AxesSpecYLabel = ylabel({['Amplitude']},...
             'VerticalAlignment',    'Bottom',...
             'Tag',          'AmpSpectrum',...
             'ButtonDownFcn','XinRanAnalysis2_Sweep_ButtonDown');
-title(      'Spectrum');
-legend(     {'In ROI mean', 'Out ROI mean', 'In ROI mean+std'},...
+title(      'Spectrum of signal, pixel or average across pixels');
+legend(     {'In ROI mean', 'Out ROI mean', 'In ROI mean+std', 'Selected pixel', 'Power meter'},...
             'Location',     'Northeast',...
-            'FontSize',     8);
+            'FontSize',     T.FontSizeS);
 legend('boxoff'); 
 T.hFig2AxesSpecHid = axes(...
             'Parent',       T.hFig(2),... 
@@ -329,19 +317,19 @@ T.hFig2AxesSpecHid = axes(...
             'YLim',         [0 1],...
             'XTick',        [],...
             'YTick',        []);
-T.hFig2AxesSpecTextNum =    text(   0.98,    0.97, sprintf('Rep#:%d',20),...
+T.hFig2AxesSpecTextNum =    text(   0.98,    0.97, sprintf('Rep#:%d',D.N_Ct),...
             'Parent',       T.hFig2AxesSpecHid,...
-            'FontSize',     8,...
+            'FontSize',     T.FontSizeS,...
             'HorizontalAlignment',	'right');
 T.hFig2AxesSpecTextRight =  text(   0.95,   0.9, '>',...
             'Parent',       T.hFig2AxesSpecHid,...
-            'FontSize',     8,...
+            'FontSize',     T.FontSizeS,...
             'FontWeight',   'Bold',...
             'Tag',          'SpecNumUp',...
             'ButtonDownFcn','XinRanAnalysis2_Sweep_ButtonDown');
 T.hFig2AxesSpecTextLeft =   text(   0.05,   0.9, '<',...
             'Parent',       T.hFig2AxesSpecHid,...
-            'FontSize',     8,...
+            'FontSize',     T.FontSizeS,...
             'FontWeight',   'Bold',...
             'Tag',          'SpecNumDown',...
             'ButtonDownFcn','XinRanAnalysis2_Sweep_ButtonDown');
@@ -574,11 +562,12 @@ elseif	D.N_Ftposton<D.N_Fpt
 else
     set(gca,'XTick',        [0 D.N_Fpt]/P.ProcFrameRate);
 end 
-xlabel({['Trial time (s)'],...
-        ['Max  STD:  ',	sprintf('%5.2f%%', max(D.PtIndex_STD)*100)],...
-        ['Mean STD: ',	sprintf('%5.2f%%', mean(D.PtIndex_STD)*100)] },...
-            'Parent',       gca,...
-            'VerticalAlignment',    'middle');
+% STD is not calculated right
+% xlabel({['Trial time (s)'],...
+%         ['Max  STD:  ',	sprintf('%5.2f%%', max(D.PtIndex_STD)*100)],...
+%         ['Mean STD: ',	sprintf('%5.2f%%', mean(D.PtIndex_STD)*100)] },...
+%             'Parent',       gca,...
+%             'VerticalAlignment',    'middle');
 ylabel({'Norm. signal, raw polarity'},...
             'Parent',       gca,...
             'VerticalAlignment',    'Middle');
@@ -589,7 +578,7 @@ set(gca,    'XGrid',        'on',...
 %% Setup Data
 % Axes: Spec
 setappdata(T.hFig2AxesSpecYLabel,   'SpecH',            T.hFig2AxesSpec);
-setappdata(T.hFig2AxesSpecYLabel,   'YLimRange',        T.N_SpecScaleTick(3:end));
+setappdata(T.hFig2AxesSpecYLabel,   'YLimRange',        T.N_SpecYTick(3:end));
 setappdata(T.hFig2AxesSpecYLabel,   'SpecDotH',         T.hFig2AxesSpecDot);
 setappdata(T.hFig2AxesSpecTextRight,'UpDown',           +1);
 setappdata(T.hFig2AxesSpecTextLeft, 'UpDown',           -1);
@@ -616,8 +605,8 @@ setappdata(T.hFig2SpecScalebarSat,  'TuningH',          T.hFig2AxesTuneImage);
 setappdata(T.hFig2SpecScalebarVal,  'TuningH',          T.hFig2AxesTuneImage);           
 setappdata(T.hFig2AxesTuneImage,    'AxesPixlH',        T.hFig2AxesPixl);         
 setappdata(T.hFig2AxesTuneImage,    'RawHue',           single(D.PtOne_Hue));
-setappdata(T.hFig2AxesTuneImage,    'RawSat',           single(D.PtOne_Saturation));
-setappdata(T.hFig2AxesTuneImage,    'RawVal',           single(D.PtOne_Value));
+setappdata(T.hFig2AxesTuneImage,    'RawSat',           single(D.PtOne_Sat));
+setappdata(T.hFig2AxesTuneImage,    'RawVal',           single(D.PtOne_Val));
 setappdata(T.hFig2AxesTuneImage,    'HueMapOptions', {  'HSLuvCircular',...
                                                         'HSLuvLinear'});        % 'HSLuvZigZag'
 setappdata(T.hFig2AxesTuneImage,    'HueMapOrder',      1);
@@ -675,7 +664,7 @@ XinRanAnalysis2_Sweep_ButtonDown(T.hFig2SpecScalebarHue);
 XinRanAnalysis2_Sweep_ButtonDown(T.hFig2SpecScalebarSat);       
 XinRanAnalysis2_Sweep_ButtonDown(T.hFig2SpecScalebarVal); 
 XinRanAnalysis2_Sweep_ButtonDown(T.hFig2AxesFrmeScalebar);  
-XinRanAnalysis2_Sweep_ButtonDown(T.hFig2AxesSpecYLabel);
+% XinRanAnalysis2_Sweep_ButtonDown(T.hFig2AxesSpecYLabel);
 
 %% Save
 % savefig(T.hFig(2), [F.PathName,A.FileName{1}(1:end-4) '_Sweep.fig'], 'compact');

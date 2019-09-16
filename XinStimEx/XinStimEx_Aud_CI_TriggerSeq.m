@@ -80,6 +80,7 @@ sys.NIDAQ.TaskDO.writeDigitalData(      stm.seq);
 sys.NIDAQ.TaskDO.start();
 
 %% Play until cancelled
+disp('CO task is ready to be triggered!');
 pause;
 sys.NIDAQ.TaskDO.abort();
 sys.NIDAQ.TaskDO.delete;
