@@ -7,6 +7,7 @@ else
 end
 
 ButtonTag =     get(H,              'tag');
+hFig =          gcf;
     
 %% Update "Spec", "Tune", or "Temp", "Frme", "Pixl"
 switch ButtonTag(1:4)
@@ -21,13 +22,13 @@ switch ButtonTag(1:4)
     otherwise
                     SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
 end
-TuningH =       getappdata(H,       'TuningH');
-%% Amplitude of the Spectrum
+%% Amp(litude of the) S(pectrum)
 if AmpSUpdt
-    SpecH =         getappdata(H,       'SpecH');
-    YLimRange =     getappdata(H,       'YLimRange');
-    SpecDotH =      getappdata(H,       'SpecDotH');
-    CurYLim =       get(SpecH,          'YLim');
+    hAxesSpec =     getappdata(hFig,	'hAxesSpec');
+    hDotSpec =      getappdata(hFig,	'hDotSpec');
+    YLimRange =     get(hAxesSpec,      'YTick');
+    CurYLim =       get(hAxesSpec,      'YLim');
+    YLimRange =     YLimRange(3:end);
     CurYLim =       CurYLim(2);
     CurYLimIdx =    find(YLimRange == CurYLim, 1);
     if CurYLimIdx == length(YLimRange)
@@ -35,71 +36,73 @@ if AmpSUpdt
     else
         CurYLimIdx = CurYLimIdx +1;
     end        
-    set(SpecH,      'YLim',             [0 YLimRange(CurYLimIdx)]);
-    set(SpecDotH,   'YData',            YLimRange(CurYLimIdx));
+    set(hAxesSpec,	'YLim',     [0 YLimRange(CurYLimIdx)]);
+    set(hDotSpec,   'YData',	YLimRange(CurYLimIdx));
 end
 
-%% Spectrum
+%% Spec(trum sample number selection)
 if SpecUpdt
-    SpecUpDown =    getappdata(H,       'UpDown');
-    SpecH =         getappdata(H,       'SpecH');
-    SpecNum =       getappdata(SpecH,   'SpecNum');
-    SpecAmp =       getappdata(SpecH,   'SpecAmp');
-    SpecAgl =       getappdata(SpecH,   'SpecAgl');
-    SpecDotH =      getappdata(SpecH,   'SpecDotH');
-    SpecRepNumH =	getappdata(SpecH,   'SpecRepNumH');
-    SpecSesDurTotal =   getappdata(SpecH,   'SpecSesDurTotal');
-    Spec_N_Qfc =        getappdata(SpecH,   'Spec_N_Qfc');
-    Spec_RatioCut_Qfc = getappdata(SpecH,	'Spec_RatioCut_Qfc');
-%     HistH =         getappdata(SpecH,       'HistH');
-    HistogramAllH =	getappdata(SpecH,       'HistogramAllH');
-    HistogramInH =	getappdata(SpecH,       'HistogramInH');
-    PtIndexROIin =  getappdata(SpecH,       'PtIndexROIin');
-    % update SpecNum
-    SpecNum = SpecNum + SpecUpDown;
-    if SpecNum<1;                   SpecNum = 1;                        end
-    if SpecNum>size(SpecAmp,2)/2;   SpecNum = floor(size(SpecAmp,2)/2);	end    
-    % update AxesSpec GUI & data
-    setappdata(SpecH,   'SpecNum',  SpecNum);
-    set(SpecDotH,       'XData',    double((SpecNum-1))/SpecSesDurTotal);
-    set(SpecRepNumH,    'string',   sprintf('rep#:%d', SpecNum-1));
-    % update AxesTune data
-        RawHue =	SpecAgl(:,SpecNum)/(2*pi);
-    if SpecNum == Spec_N_Qfc
-        RawHue =	(RawHue-Spec_RatioCut_Qfc)/(1-2*Spec_RatioCut_Qfc);
+    hDotSpec =          getappdata(hFig,	'hDotSpec');
+    hTextSpecRepNum =	getappdata(hFig,	'hTextSpecRepNum');
+    hHistAll =          getappdata(hFig,	'hHistAll');
+    hHistIn =           getappdata(hFig,	'hHistIn');
+    dTrlDurPreStim =    getappdata(hFig,	'dTrlDurPreStim');
+    dTrlDurStim =       getappdata(hFig,	'dTrlDurStim');
+    dTrlDurTotal =      getappdata(hFig,	'dTrlDurTotal');
+    dSesDurTotal =      getappdata(hFig,	'dSesDurTotal');
+    dQCycNum =          getappdata(hFig,	'dQCycNum');
+    dPtQt_FFTAmp =      getappdata(hFig,	'dPtQt_FFTAmp');
+    dPtQt_FFTAgl =      getappdata(hFig,	'dPtQt_FFTAgl');
+    dPtIndex_ROIin =	getappdata(hFig,	'dPtIndex_ROIin');
+    cQRepNum =          getappdata(hFig,	'cQRepNum');
+    SpecUpDown =        getappdata(H,       'UpDown');
+    % update cQRepNum
+    cQRepNum = cQRepNum + SpecUpDown;
+    if cQRepNum<1;                      cQRepNum = 1;                               end
+    if cQRepNum>size(dPtQt_FFTAmp,2)/2;	cQRepNum = floor(size(dPtQt_FFTAmp,2)/2);	end    
+    % update AxesSpec
+    setappdata(hFig,        'cQRepNum',	cQRepNum);
+    set(hDotSpec,           'XData',    double((cQRepNum-1))/dSesDurTotal);
+    set(hTextSpecRepNum,	'string',   sprintf('rep#:%d', cQRepNum-1));
+    % update AxesTune
+        dRawHue =	dPtQt_FFTAgl(:,cQRepNum)/(2*pi);
+    if cQRepNum == dQCycNum
+        dRawHue =	(dRawHue -   dTrlDurPreStim  /dTrlDurTotal) / ...
+                            (   dTrlDurStim     /dTrlDurTotal);
     end
-        RawVal =    SpecAmp(:,SpecNum);
-    setappdata(TuningH,     'RawHue',   RawHue);
-    setappdata(TuningH,     'RawVal',   RawVal);       
-    % update histogram
-    HistogramAllH.Data =	SpecAgl(:,SpecNum);   
-    HistogramInH.Data =     SpecAgl(PtIndexROIin,SpecNum);     
+        dRawVal =    dPtQt_FFTAmp(:,cQRepNum);
+    setappdata(hFig,     'dRawHue',   dRawHue);
+    setappdata(hFig,     'dRawVal',   dRawVal);       
+    % update AxesHist
+    hHistAll.Data =	dPtQt_FFTAgl(:,cQRepNum);   
+    hHistIn.Data =	dPtQt_FFTAgl(dPtIndex_ROIin,cQRepNum);     
     drawnow;
 end
 
 %% Tuning
 if TuneUpdt
-    RawHue =        getappdata(TuningH,	'RawHue');
-    RawSat =        getappdata(TuningH,	'RawSat');
-    RawVal =        getappdata(TuningH,	'RawVal');
+    hAxesTuneHueHid =	getappdata(hFig,	'hAxesTuneHueHid');
+    hImageTune =		getappdata(hFig,    'hImageTune');
+    dTrlDurStim =       getappdata(hFig,	'dTrlDurStim');
+    dRawHue =	getappdata(hFig,	'dRawHue');
+    dRawSat =	getappdata(hFig,	'dRawSat');
+    dRawVal =	getappdata(hFig,	'dRawVal');
 
-    HueMapOptions = getappdata(TuningH,	'HueMapOptions');
-    HueMapOrder =   getappdata(TuningH,	'HueMapOrder');
-    HueMap =        getappdata(TuningH,	'HueMap');
-    HueTempolate =	getappdata(TuningH,	'HueTempolate');
-    HueColorMap =   getappdata(TuningH,	'HueColorMap');
-    HueAxesH =      getappdata(TuningH,	'HueAxesH');
+    HueMapOptions = getappdata(hImageTune,	'HueMapOptions');
+    HueMapOrder =   getappdata(hImageTune,	'HueMapOrder');
+    HueMap =        getappdata(hImageTune,	'HueMap');
+    HueTempolate =	getappdata(hImageTune,	'HueTempolate');
+    HueColorMap =   getappdata(hImageTune,	'HueColorMap');
 
-    SatParaRange =  getappdata(TuningH, 'SatParaRange');
-    SatParaOrder =  getappdata(TuningH,	'SatParaOrder');
-    SatValSync =    getappdata(TuningH,	'SatValSync');
-    SatGroundOut =  getappdata(TuningH,	'SatGroundOut');
-    SatGroundTime =	getappdata(TuningH,	'SatGroundTime');
-    SatStimTime =   getappdata(TuningH,	'SatStimTime');
+    SatParaRange =  getappdata(hImageTune, 'SatParaRange');
+    SatParaOrder =  getappdata(hImageTune,	'SatParaOrder');
+    SatValSync =    getappdata(hImageTune,	'SatValSync');
+    SatGroundOut =  getappdata(hImageTune,	'SatGroundOut');
+    SatGroundTime =	getappdata(hImageTune,	'SatGroundTime');
 
-    ValLimRange =   getappdata(TuningH,	'ValLimRange');
-    ValLimOrder =   getappdata(TuningH,	'ValLimOrder');
-    ValLim =        getappdata(TuningH,	'ValLim');
+    ValLimRange =   getappdata(hImageTune,	'ValLimRange');
+    ValLimOrder =   getappdata(hImageTune,	'ValLimOrder');
+    ValLim =        getappdata(hImageTune,	'ValLim');
     
     % What TUNE parameter has changed, if any
     switch ButtonTag(5:end)
@@ -111,11 +114,11 @@ if TuneUpdt
             HueMap =        HueMapOptions{HueMapOrder};
             HueTempolate =	HSLuvUniformHue(HueMap);
             HueColorMap =   hsv2rgb([HueTempolate ones(length(HueTempolate),2)]);
-            setappdata(TuningH,	'HueMapOrder',      HueMapOrder);
-            setappdata(TuningH,	'HueMap',           HueMap);
-            setappdata(TuningH,	'HueTempolate',     HueTempolate);
-            setappdata(TuningH,	'HueColorMap',      HueColorMap);
-            colormap(HueAxesH, HueColorMap);        caxis(HueAxesH, [0 1]);   
+            setappdata(hImageTune,	'HueMapOrder',      HueMapOrder);
+            setappdata(hImageTune,	'HueMap',           HueMap);
+            setappdata(hImageTune,	'HueTempolate',     HueTempolate);
+            setappdata(hImageTune,	'HueColorMap',      HueColorMap);
+            colormap(hAxesTuneHueHid, HueColorMap);        caxis(hAxesTuneHueHid, [0 1]);   
             ylabel(H,	'\uparrow Onset                                                    Offset \uparrow',...
                         'FontSize',             8,...
                         'VerticalAlignment',    'Cap');    
@@ -127,10 +130,10 @@ if TuneUpdt
             SatValSync =    SatParaRange(1, SatParaOrder);
             SatGroundOut =  SatParaRange(2, SatParaOrder);
             SatGroundTime =	SatParaRange(3, SatParaOrder);
-            setappdata(TuningH,	'SatParaOrder',     SatParaOrder);
-            setappdata(TuningH,	'SatValSync',       SatValSync);
-            setappdata(TuningH,  'SatGroundOut',     SatGroundOut);
-            setappdata(TuningH,	'SatGroundTime',	SatGroundTime);
+            setappdata(hImageTune,	'SatParaOrder',     SatParaOrder);
+            setappdata(hImageTune,	'SatValSync',       SatValSync);
+            setappdata(hImageTune,  'SatGroundOut',     SatGroundOut);
+            setappdata(hImageTune,	'SatGroundTime',	SatGroundTime);
             switch sprintf('%d',[SatGroundOut SatValSync]) 
                 case '00'; str = '                                                          everything \uparrow';
                 case '01'; str = '\rightarrow sync w/ value \leftarrow';
@@ -147,8 +150,8 @@ if TuneUpdt
                 ValLimOrder = 1;
             end
             ValLim =        ValLimRange(ValLimOrder);
-            setappdata(TuningH,	'ValLimOrder',  ValLimOrder);
-            setappdata(TuningH,	'ValLim',       ValLim);
+            setappdata(hImageTune,	'ValLimOrder',  ValLimOrder);
+            setappdata(hImageTune,	'ValLim',       ValLim);
             ylabel(H,	sprintf('0                       (old plots: %5.3f %%)        %5.3f %%',...
                         ValLim*sqrt(2)*100, ValLim*100), ...
                         'FontSize',             8,...
@@ -158,119 +161,118 @@ if TuneUpdt
     end
 
     % Calculate and Update TUNE image
-    PtOne_Hue =             min(max(RawHue, 0), 1);             % HUE
+    PtOne_Hue =             min(max(dRawHue, 0), 1);             % HUE
     InHueTempolate =        linspace(0, 1, length(HueTempolate))';
     PtOne_Hue =             interp1q(InHueTempolate, HueTempolate, PtOne_Hue);
     if SatValSync                                               % SATURATION
-        PtOne_Sat =         min(RawVal/ValLim,1);
+        PtOne_Sat =         min(dRawVal/ValLim,1);
     else
-        PtOne_Sat =         RawSat;
+        PtOne_Sat =         dRawSat;
     end
     if SatGroundOut
-        PtOne_Sat(RawHue>(1+SatGroundTime/SatStimTime)) =	0;
-        PtOne_Sat(RawHue<(0-SatGroundTime/SatStimTime)) =	0;
+        PtOne_Sat(dRawHue>(1+SatGroundTime/dTrlDurStim)) =	0;
+        PtOne_Sat(dRawHue<(0-SatGroundTime/dTrlDurStim)) =	0;
     end
-    PtOne_Val =             min(RawVal/ValLim,1);               % VALUE
+    PtOne_Val =             min(dRawVal/ValLim,1);               % VALUE
     PtThree_TuneMap =       hsv2rgb([	PtOne_Hue,...           % IMAGE
                                         PtOne_Sat,...
                                         PtOne_Val]);
-    PhPwThree_TuneMap =     uint16reshape(PtThree_TuneMap, 75, 120, 3);
-    set(TuningH,    'CData',        PhPwThree_TuneMap);
+    PhPwThree_TuneMap =     uint8(255*reshape(PtThree_TuneMap, 75, 120, 3));
+    set(hImageTune,    'CData',        PhPwThree_TuneMap);
 end
-%% Temporal Trace (mean)      
+%% Temp(oral) Amp(litude)      
 if TempAmpUpdt  
     % callback is from "hFig2AxesFrmeScalebar"
-    Tmax =          getappdata(H,   'Tmax');
-    TmaxRange =     getappdata(H,   'TmaxRange'); 
-    AxesFrmeH =     getappdata(H,   'AxesFrmeH');
-    AxesTempH =     getappdata(H,   'AxesTempH');
-    AxesPixlH =     getappdata(H,   'AxesPixlH');
-    TmaxIdx =       find(TmaxRange==Tmax);
+    hAxesFrme =     getappdata(hFig,	'hAxesFrme');
+    hAxesTemp =     getappdata(hFig,	'hAxesTemp');
+    hAxesPixl =     getappdata(hFig,	'hAxesPixl');
+    dAxesTempYLims= getappdata(hFig,	'dAxesTempYLims'); 
+    Tmax =          get(hAxesTemp,      'YLim');
+    Tmax =          Tmax(2);
+    TmaxIdx =       find(dAxesTempYLims==Tmax);
     TmaxIdx =       TmaxIdx + 1;
-    if TmaxIdx > length(TmaxRange)
+    if TmaxIdx > length(dAxesTempYLims)
         TmaxIdx =   1;
     end
-    Tmax =          TmaxRange(TmaxIdx);
+    Tmax =          dAxesTempYLims(TmaxIdx);
     TmaxLabels =    {	sprintf('-%3.1f%%',Tmax*100),...
                         '0%',...
                         sprintf(' %3.1f%%',Tmax*100) };
-    caxis(AxesFrmeH,                Tmax*[-1 1]);
+    caxis(hAxesFrme,                Tmax*[-1 1]);
     set(H,          'Limits',       Tmax*[-1 1]);
-    set(AxesTempH,	'YLim',         Tmax*[-1 1]);
-    set(AxesPixlH,	'YLim',         Tmax*[-1 1]);
+    set(hAxesTemp,	'YLim',         Tmax*[-1 1]);
+    set(hAxesPixl,	'YLim',         Tmax*[-1 1]);
     set(H,          'Ticks',        Tmax*[-1 0 1]);
-    set(AxesTempH,	'YTick',        Tmax*[-1 0 1]);
-    set(AxesPixlH,	'YTick',        Tmax*[-1 0 1]);
+    set(hAxesTemp,	'YTick',        Tmax*[-1 0 1]);
+    set(hAxesPixl,	'YTick',        Tmax*[-1 0 1]);
     set(H,          'TickLabels',   TmaxLabels);
-    set(AxesTempH,	'YTickLabels',  TmaxLabels);
-    set(AxesPixlH,	'YTickLabels',  TmaxLabels);
-    setappdata(H,	'Tmax',         Tmax);
+    set(hAxesTemp,	'YTickLabels',  TmaxLabels);
+    set(hAxesPixl,	'YTickLabels',  TmaxLabels);
 end
 %% Frame
 if FrmeUpdt
-    FrmeUpDown =    getappdata(H,           'UpDown');
-    FrmeImageH =	getappdata(H,           'FrmeImageH');
-    TempHidH =      getappdata(H,           'TempHidH');
-    XLabelH =       getappdata(FrmeImageH,	'XLabelH');
-    FrmeNum =       getappdata(FrmeImageH,  'FrmeNum');   
-    FptPhPw_NormTrlAdj = ...
-                    getappdata(FrmeImageH,  'FptPhPw_NormTrlAdj');
-	FrmeDuration =	getappdata(TempHidH,	'FrmeDuration');
-    TempDotH =      getappdata(TempHidH,    'TempDotH');
-    TempTextH =     getappdata(TempHidH,    'TempTextH');
-    PlayingNow =    getappdata(XLabelH,     'PlayingNow');   
-    % update FrmeNum
-    TrialTotalFrmeNum = size(FptPhPw_NormTrlAdj,1);
-    FrmeNum =           FrmeNum + FrmeUpDown;
-    if FrmeNum<1;                   FrmeNum = 1;                    end
-    if FrmeNum>TrialTotalFrmeNum;   FrmeNum = TrialTotalFrmeNum;	end   
-    FrmeTime =          FrmeNum * FrmeDuration;
-    if PlayingNow
+    % callback is either from	"T.H.hFig2AxesTempTextRight" or
+    %                           "T.H.hFig2AxesTempTextLeft"
+    hImageFrme =        getappdata(hFig,	'hImageFrme');
+    hTextTemp =         getappdata(hFig,	'hTextTemp');
+    hTextFrmeXLabel =   getappdata(hFig,	'hTextFrmeXLabel');
+    hDotTemp =          getappdata(hFig,	'hDotTemp');
+	dFrmeTime =         getappdata(hFig,	'dFrmeTime');
+    dFptPhPw_NormTrlAdj =   getappdata(hFig,	'dFptPhPw_NormTrlAdj');
+    cFrmeNum =      getappdata(hFig,	'cFrmeNum');   
+    cPlayingNow =	getappdata(hFig,	'cPlayingNow');   
+    FrmeUpDown =    getappdata(H,       'UpDown');
+    % update cFrmeNum
+    TrialTotalFrmeNum =	size(dFptPhPw_NormTrlAdj,1);
+    cFrmeNum =          cFrmeNum + FrmeUpDown;
+    if cFrmeNum<1;                   cFrmeNum = 1;                  end
+    if cFrmeNum>TrialTotalFrmeNum;   cFrmeNum = TrialTotalFrmeNum;	end   
+    FrmeTime =          cFrmeNum * dFrmeTime;
+    if cPlayingNow
         XLabelString =  sprintf( 'Amplitude @ %4.1f s, in adjusted polarity, playing',...
-                            FrmeNum*FrmeDuration );
+                            cFrmeNum*dFrmeTime );
     else
         XLabelString =  sprintf('Amplitude @ %4.1f s, in adjusted polarity, click to play',...
-                            FrmeNum*FrmeDuration );
+                            cFrmeNum*dFrmeTime );
     end
     % update AxesFrme GUI & data
-    setappdata(FrmeImageH,	'FrmeNum',  FrmeNum);
-    set(FrmeImageH,         'CData',    squeeze(FptPhPw_NormTrlAdj(FrmeNum,:,:)));
-    set(XLabelH,            'String',   XLabelString);
-    set(TempDotH,           'XData',    FrmeNum);
-    set(TempTextH,          'string',   sprintf('Time: %4.1f s', FrmeTime));  
+    setappdata(hFig,        'cFrmeNum',	cFrmeNum);
+    set(hImageFrme,         'CData',    squeeze(dFptPhPw_NormTrlAdj(cFrmeNum,:,:)));
+    set(hTextFrmeXLabel,	'String',   XLabelString);
+    set(hDotTemp,           'XData',    cFrmeNum);
+    set(hTextTemp,          'string',   sprintf('Time: %4.1f s', FrmeTime));  
 end
 %% Playing
 if Play
     % Video Playback
-    PlayingNow = getappdata(H,	'PlayingNow');
-    PlayingNow =    1 - PlayingNow;
-    setappdata(H,               'PlayingNow',   PlayingNow);
-    if PlayingNow
-        FrmeNextH =     getappdata(H,           'FrmeNextH');
-        Sound =         getappdata(H,           'Sound');
-        FrmeImageH =    getappdata(FrmeNextH,	'FrmeImageH');
-        TempHidH =      getappdata(FrmeNextH,	'TempHidH');
-        FrmeDuration =	getappdata(TempHidH,	'FrmeDuration');
-        TrialTotalFrmeNum =     get(TempHidH,   'XLim');
-        TrialTotalFrmeNum =     TrialTotalFrmeNum(2);
-        timelimit =             TrialTotalFrmeNum*FrmeDuration;
-        hAP = audioplayer(Sound, 100e3);        
-        FrmeNum =               0;  
-        setappdata(H,           'AudioPlayerH', hAP); 
-        setappdata(FrmeImageH,  'FrmeNum',      FrmeNum);    
+    cPlayingNow =	getappdata(hFig,	'cPlayingNow');
+    cPlayingNow =	1 - cPlayingNow;
+    setappdata(hFig,	'cPlayingNow',   cPlayingNow);
+    if cPlayingNow
+        hAxesTemp =         getappdata(hFig,	'hAxesTemp');
+        hTextTempRight =	getappdata(hFig,	'hTextTempRight');
+        dFrmeTime =         getappdata(hFig,	'dFrmeTime');
+        dSoundWave =        getappdata(hFig,	'dSoundWave');
+        TrialTotalFrmeNum =	get(hAxesTemp,      'XLim');
+        TrialTotalFrmeNum =	TrialTotalFrmeNum(2);
+        timelimit =         TrialTotalFrmeNum*dFrmeTime;
+        hAP = audioplayer(dSoundWave, 100e3);        
+        cFrmeNum =          0;  
+        setappdata(hFig,	 'AudioPlayerH', hAP); 
+        setappdata(hFig,  'cFrmeNum',      cFrmeNum);    
         pause(0.5);
         timebase = tic;
         hAP.play;
-        while toc(timebase)<timelimit && getappdata(H,	'PlayingNow')
-            if toc(timebase)>(FrmeNum*FrmeDuration)
-                XinRanAnalysis2_Sweep_ButtonDown(FrmeNextH);
-                FrmeNum = FrmeNum + 1;
+        while toc(timebase)<timelimit && getappdata(H,	'cPlayingNow')
+            if toc(timebase)>(cFrmeNum*dFrmeTime)
+                XinRanAnalysis2_Sweep_ButtonDown(hTextTempRight);
+                cFrmeNum = cFrmeNum + 1;
             end       
             pause(0.05);
         end
-            PlayingNow = 0;
-            setappdata(H,       'PlayingNow',   PlayingNow);
-                XinRanAnalysis2_Sweep_ButtonDown(FrmeNextH);
+            cPlayingNow = 0;
+            setappdata(H,       'cPlayingNow',   cPlayingNow);
+                XinRanAnalysis2_Sweep_ButtonDown(hTextTempRight);
     else
         hAP = getappdata(H,     'AudioPlayerH');
         hAP.pause;        
@@ -278,31 +280,30 @@ if Play
 end
 %% Pixel
 if PixlUpdt
-    PixelPosi =         get(gca,                'CurrentPoint');
+    PixelPosi =         get(gca,            'CurrentPoint');
     PixelPosi =         round(PixelPosi(1,1:2));    
     PhInd =             PixelPosi(2);    
     PwInd =             PixelPosi(1);
-    AxesPixlH =         getappdata(H,           'AxesPixlH');
-    AxesSpecH =         getappdata(H,           'AxesSpecH');
-    FptCtPhPw_NormTrl = getappdata(AxesPixlH,   'FptCtPhPw_NormTrl');
-    LineAllH =          getappdata(AxesPixlH,   'LineAllH');
-    LineMeanH =         getappdata(AxesPixlH,   'LineMeanH');
-    TextPixlH =         getappdata(AxesPixlH,   'TextPixlH');
-    LineSpecPixlH =     getappdata(AxesSpecH,   'LineSpecPixlH');
-	SpecAmp =           getappdata(AxesSpecH,   'SpecAmp');
-    PtInd =             PhInd + (PwInd-1)*size(FptCtPhPw_NormTrl,3);
-    for i = 1:length(LineAllH)
-        LineAllH(i).YData =    squeeze(FptCtPhPw_NormTrl(:,i,PhInd,PwInd));
+    hAxesPixl =         getappdata(hFig,	'hAxesPixl');
+    hLinePixlAll =      getappdata(hFig,	'hLinePixlAll');
+    hLinePixlMean =     getappdata(hFig,	'hLinePixlMean');
+    hLineSpecPixl =     getappdata(hFig,	'hLineSpecPixl');
+    hTextPixl =         getappdata(hFig,	'hTextPixl');
+    dFptCtPhPw_NormTrl= getappdata(hFig,	'dFptCtPhPw_NormTrl');
+	dPtQt_FFTAmp =      getappdata(hFig,	'dPtQt_FFTAmp');
+    PtInd =             PhInd + (PwInd-1)*size(dFptCtPhPw_NormTrl,3);
+    for i = 1:length(hLinePixlAll)
+        hLinePixlAll(i).YData =	squeeze(dFptCtPhPw_NormTrl(:,i,PhInd,PwInd));
     end
-    LineMeanH.YData =	mean(squeeze(FptCtPhPw_NormTrl(:,:,PhInd,PwInd)),2);
-    AxesPixlH.Title.String = sprintf('Pixel(%dH,%dW): temporal traces across reps',...
+    hLinePixlMean.YData =       mean(squeeze(dFptCtPhPw_NormTrl(:,:,PhInd,PwInd)),2);
+    hAxesPixl.Title.String =    sprintf('Pixel(%dH,%dW): temporal traces across reps',...
         PhInd,PwInd);
-    TextPixlH.String =	{...
-        sprintf('Across-all:      %5.2f%%', 100*std(reshape(FptCtPhPw_NormTrl(:,:,PhInd,PwInd), 1, []))),...
-        sprintf('Across-rep:    %5.2f%%',	100*std(mean(FptCtPhPw_NormTrl(:,:,PhInd,PwInd), 2), 0, 1)),...
-        sprintf('Across-frame:%5.2f%%',     100*std(mean(FptCtPhPw_NormTrl(:,:,PhInd,PwInd), 1), 0, 2)),...
+    hTextPixl.String =	{...
+        sprintf('Across-all:      %5.2f%%', 100*std(reshape(dFptCtPhPw_NormTrl(:,:,PhInd,PwInd), 1, []))),...
+        sprintf('Across-rep:    %5.2f%%',	100*std(mean(dFptCtPhPw_NormTrl(:,:,PhInd,PwInd), 2), 0, 1)),...
+        sprintf('Across-frame:%5.2f%%',     100*std(mean(dFptCtPhPw_NormTrl(:,:,PhInd,PwInd), 1), 0, 2)),...
         'on STD'};
-    LineSpecPixlH.YData =   SpecAmp(PtInd, :);
+    hLineSpecPixl.YData =       dPtQt_FFTAmp(PtInd, :);
     drawnow;
 end
 %% Title clipping
@@ -319,6 +320,7 @@ if TitlUpdt
         case 'Pixl';    AxesPlus = [    -58 -35 10  17  ];
         case 'Spec';    AxesPlus = [    -70 -35 10  17  ];
         case 'Tune';    AxesPlus = [    -5  -25 100 17  ];
+        case 'TuIm';    AxesPlus = [    -3  -3  0   0   ];
         case 'Frme';    AxesPlus = [    -67 -25 0   17  ];
         case 'Hist';    AxesPlus = [    -55 -57 5   17  ];
         otherwise

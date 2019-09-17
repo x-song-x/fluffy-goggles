@@ -27,16 +27,18 @@ else
     A.FileName =        {[A.FileName, FileExt]};
 end
 %% Load data files
-Xin.T.filename = [A.PathName, A.FileName{1}];     
 global P S
-load([Xin.T.filename(1:end-7) '.mat'], 'S');	% load S (Saved from recording)
-load([Xin.T.filename(1:end-4) '.mat'], 'P');	% load P (Preprocessed)  
+A.FullFileName =    [A.PathName, A.FileName{1}];   
+load([A.FullFileName(1:end-7) '.mat'], 'S');	% load S (Saved from recording)
+load([A.FullFileName(1:end-4) '.mat'], 'P');	% load P (Preprocessed)  
+A.SoundFileName =   S.SesSoundFile;
+A.SoundWave =       S.SesSoundWave;
 if S.TrlNumTotal == 1
     disp([  'Analyzing session: "', A.FileName{1}, ...
-            '" with the sound: "', S.SesSoundFile, '"']);
+            '" with the sound: "', A.SoundFileName, '"']);
 else
     disp([  'Session: "', A.FileName{1}, ...
-            '" with the sound: "', S.SesSoundFile, '" is not a Sweep based session.']);
+            '" with the sound: "', A.SoundFileName, '" is not a Sweep based session.']);
     return
 end
 switch A.FileName{1}([15:17 end-15:end-7])
@@ -63,21 +65,21 @@ T.S.FS1 =        [100 75];	% Space, Figure Side
     T.H.hFig1Axes1 = axes(...
                     'Parent',       T.H.hFig1,...
                     'Units',        'pixels',...  
-                    'Position',     [   T.S.FS1(1),              T.S.FS1(2),...
+                    'Position',     [   T.S.FS1(1),             T.S.FS1(2),...
                                         P.ProcPixelWidth*5,     P.ProcPixelHeight*5 ]);
 	T.H.hFig1Axes1Image1 = imagesc(	squeeze(P.ProcDataMat(1,1,:,:,1)) + ...             
                                     squeeze(P.ProcDataMat(end,end,:,:,end)),...
                     'Parent',       T.H.hFig1Axes1);    
-	colormap(T.H.hFig1Axes1,          'gray');
+	colormap(T.H.hFig1Axes1,        'gray');
     title(                       	'Drag to position the ROI, double click on the circle to finish');
     try 
         if strcmp(S.MkyPrep, 'Skull')
-            T.H.hFig1Axes1ROI = imellipse(gca, [  0	0	121	76]);
+            T.H.hFig1Axes1ROI = imellipse(gca, [	0 	0	121 76]);
         else
-            T.H.hFig1Axes1ROI = imellipse(gca, [  23	0	76	76]);
+            T.H.hFig1Axes1ROI = imellipse(gca, [	23	0	76	76]);
         end
     catch
-            T.H.hFig1Axes1ROI = imellipse(gca, [  23	0	76	76]);            
+            T.H.hFig1Axes1ROI = imellipse(gca, [	23	0	76	76]);            
     end 
     if A.RunningSource == 'D'
         wait(T.H.hFig1Axes1ROI);
@@ -85,47 +87,58 @@ T.S.FS1 =        [100 75];	% Space, Figure Side
     title(                          'Done, start calculating...');
     drawnow;
 %% Setup Parmateters: Data & Numbers 
+A.N_BinSat =        2^12*4^2 *P.ProcPixelBinNum^2 *P.ProcFrameBinNum;          
 A.N_Ph =            P.ProcPixelHeight;      % Number_PixelHeight
 A.N_Pw =            P.ProcPixelWidth;       % Number_PixelWidth
 A.N_Pt =            A.N_Ph * A.N_Pw;        % Number_PixelTotal(in each frame in the P?.mat)
 A.N_PhSelect =      37;
 A.N_PwSelect =      60;
 
-A.N_Ft =            P.ProcFrameNumTotal;            % Number_FrameTotal
-A.N_Fpt =           A.N_Ft / S.SesCycleNumTotal / S.TrlNumTotal;        % Number_FramePerTrial
-A.N_Ftpreoff =      round(  S.TrlDurPreStim *               P.ProcFrameRate); 
-                                                    % Number_FrameTrialPrestimOff
-A.N_Ftstimoff =     round(( S.TrlDurPreStim+S.TrlDurStim) * P.ProcFrameRate);
-                                                    % Number_FrameTrialStimOff
 try
     if S.SysCamFrameRate ~=80
-        A.N_Fps =	S.SysCamFrameRate/P.ProcFrameBinNum;	% Number_FramePerSecond
+        A.N_Tpf =	P.ProcFrameBinNum/S.SysCamFrameRate;	
     else
-        A.N_Fps =	80/P.ProcFrameBinNum;
+        A.N_Tpf =	P.ProcFrameBinNum/80;
     end
 catch
-        A.N_Fps =	80/P.ProcFrameBinNum;
+        A.N_Tpf =	P.ProcFrameBinNum/80;   % Number_TimePerFrame
 end
-A.N_Tpf =           1/A.N_Fps;              % Number_TimePerFrame
-A.N_Ct =            S.SesCycleNumTotal;     % Number_CycleTotal (in the session)
-                        
+A.N_Ttps =          S.TrlDurPreStim;        % Number_TimeTrialPreStim
+A.N_Tts =           S.TrlDurStim;           % Number_TimeTrialStim
+A.N_Ttt =           S.TrlDurTotal;          % Number_TimeTrialTotal
+A.N_Tst =           S.SesDurTotal;          % NUmber_TimeSessionTotal
+A.N_Ct =            S.SesCycleNumTotal;	% Number_CycleTotal (in the session)
+     
+% % % % Manually switch session temporal arrangement if here.
+%     A.N_Ct =  10;       
+%         A.N_Ttt =   A.N_Tst/A.N_Ct;
+%         A.N_Tts =   A.N_Ttt - A.N_Ttps;
+% % % % Manually switch session temporal arrangement if here.
+
+A.N_Fps =           1/A.N_Tpf;              % Number_FramePerSecond
+A.N_Ft =            P.ProcFrameNumTotal;    % Number_FrameTotal
+A.N_Fpt =           A.N_Ft / A.N_Ct;        % Number_FramePerTrial
+A.N_Ftpreoff =      round(  A.N_Ttps *          P.ProcFrameRate); 
+                                            % Number_FrameTrialPrestimOff
+A.N_Ftstimoff =     round(( A.N_Ttps+A.N_Tts) * P.ProcFrameRate);
+                                            % Number_FrameTrialStimOff
 % Region of Interest
-A.PhPw_ROIin =          createMask(T.H.hFig1Axes1ROI);            % ROI in
+A.PhPw_ROIin =          createMask(T.H.hFig1Axes1ROI);          % ROI in
 A.Pt_ROIin =            reshape(A.PhPw_ROIin,     A.N_Pt, []);  % ROI in 
 A.Pt_ROIout =           reshape(~A.PhPw_ROIin,    A.N_Pt, []);  % ROI out
 A.PtIndex_ROIin =       single(find(A.Pt_ROIin));
 
-% Temporal Analysis
-
-% Spectral AnalysisFpt
+% Spectral & Temporal Analysis
 A.N_Qt =                A.N_Ft;         % Number_FrequencyTotal
 A.N_Qfc =               A.N_Ct +1;      % Number_FrequencyOfTheCycle  
 A.Qt_Freqs =            single(0:  1/(A.N_Ft/A.N_Fps): (A.N_Ft-1)/(A.N_Ft/A.N_Fps));
+A.OnePt_ProcPower =     P.ProcMeanPower;
 A.FptCtPhPw_DataRaw =   reshape( permute(P.ProcDataMat, [5 2 1 3 4]),...
                                 A.N_Fpt, A.N_Ct, A.N_Ph, A.N_Pw );
 A.FtPt_DataRaw =        reshape(A.FptCtPhPw_DataRaw,	A.N_Ft,	A.N_Pt);  
 A.PhPw_ImageMeanRaw =   squeeze(mean(mean(A.FptCtPhPw_DataRaw, 1), 2));
 A.OnePt_ImageMeanRaw =	reshape(A.PhPw_ImageMeanRaw, 1, A.N_Pt);
+    % No more data from "S" & "P" is needed below 
 
 %% Variance Analysis 
 T.dAxesVarIntScaleLim =     [0 1];
@@ -138,7 +151,7 @@ T.dAxesVarStdScaleTickLabels =	cellfun(@(x) sprintf('%5.2f%%', x),...
 i=1;
 A.Fig2Var{i}.Title =        'Average intensity (% to saturation)';
 A.Fig2Var{i}.ColorMap =     'gray';  
-A.Fig2Var{i}.PhPw_Data =	single(squeeze(mean(mean(A.FptCtPhPw_DataRaw, 1),  2)) / (2^12*4^2 *P.ProcPixelBinNum^2 *P.ProcFrameBinNum));
+A.Fig2Var{i}.PhPw_Data =	single(squeeze(mean(mean(A.FptCtPhPw_DataRaw, 1),  2)) / A.N_BinSat);
 i=2;
 A.Fig2Var{i}.Title =        'STD across cycles (mean across frames)';
 A.Fig2Var{i}.ColorMap =     'parula';
@@ -153,7 +166,7 @@ A.Fig2Var{i}.PhPw_Data =	single( squeeze(std(mean(A.FptCtPhPw_DataRaw, 2), 0, 1)
 % A.Fig2Var{i}.PhPw_Data =	reshape(std(A.FtPt_DataRaw, 0, 1), A.N_Ph, A.N_Pw)  ./A.PhPw_ImageMeanRaw;
 %% Spectral Analysis  
 % Power meter
-A.OneQt_PowerFFTRaw =   fft(P.ProcMeanPower);
+A.OneQt_PowerFFTRaw =   fft(A.OnePt_ProcPower);
 A.OneQt_PowerFFTAmp =   abs(A.OneQt_PowerFFTRaw)*sqrt(2)/A.N_Qt / A.OneQt_PowerFFTRaw(1);
 % Camera: normalized
 A.FtPt_NormSes =	A.FtPt_DataRaw./(ones(A.N_Ft, 1)*A.OnePt_ImageMeanRaw) - 1;
@@ -164,7 +177,7 @@ A.PtQt_FFTAgl =     mod(angle(	A.PtQt_FFTRaw)- ...
                         A.PseudoDelay*ones(A.N_Pt,1)*A.Qt_Freqs*2*pi, 2*pi);
                                 % Agl: phase in [0, 2*pi], with
                                 % pseudo-delay compensated
-if contains(lower(S.SesSoundFile), 'down')
+if contains(lower(A.SoundFileName), 'down')
     A.PtQt_FFTAgl =	2*pi - A.PtQt_FFTAgl;
 end                             % Reverse the angle for DOWN cycle 
 % collapse across pixels
@@ -172,11 +185,11 @@ A.OneQt_FFTAmpMeanOut =	sum(A.PtQt_FFTAmp.*(A.Pt_ROIout *ones(1,A.N_Qt)))/  sum(
 A.OneQt_FFTAmpMeanIn =	sum(A.PtQt_FFTAmp.*(A.Pt_ROIin  *ones(1,A.N_Qt)))/  sum(A.Pt_ROIin);
 A.OneQt_FFTAmpMeanPStdIn =	A.OneQt_FFTAmpMeanIn + std(A.PtQt_FFTAmp(A.PtIndex_ROIin,:),1);
     % the locking frequency, Prepare the raw hue, sat, val
-        % S.TrlDurPreStim =   2.5;
-        % S.TrlDurStim =      15;
+        % A.N_Ttps =   2.5;
+        % A.N_Tts =      15;
     A.PtOne_Hue =	A.PtQt_FFTAgl(:,A.N_Qfc)/(2*pi);
-    A.PtOne_Hue =	(A.PtOne_Hue-S.TrlDurPreStim/S.TrlDurTotal) /...
-                        (S.TrlDurStim/S.TrlDurTotal);   % match the Stimulus ONSET / OFFSET to 0-1
+    A.PtOne_Hue =	(A.PtOne_Hue-A.N_Ttps/A.N_Ttt) /...
+                        (A.N_Tts/A.N_Ttt);   % match the Stimulus ONSET / OFFSET to 0-1
     A.PtOne_Sat =	single(ones(A.N_Pt,1));          
     A.PtOne_Val =	A.PtQt_FFTAmp(:,A.N_Qfc); 
 A.PhPwThree_TuneMap =   uint8(zeros(A.N_Ph, A.N_Pw,3));
@@ -211,7 +224,7 @@ T.dAxesTempYLimInd =	find(T.dAxesTempYLims>A.PtIn_STD_max, 1);
 if T.dAxesTempYLimInd == 1; T.dAxesTempYLimInd = length(T.dAxesTempYLims);
 else;                       T.dAxesTempYLimInd = T.dAxesTempYLimInd -1;
 end
-T.dAxesTempYLim =              T.dAxesTempYLims(T.dAxesTempYLimInd);
+T.dAxesTempYLim =           T.dAxesTempYLims(T.dAxesTempYLimInd);
 %% Graphics
 % Figure
 T.S.FS2 =       [   75  120;...
@@ -224,12 +237,13 @@ T.S.CBTW =      20;         % Space, ColorBarTextWidth
 T.FontSizeS =   8;
 delete(T.H.hFig1);
 T.H.hFig2 = figure(...
-                'Name',         ['"', A.FileName{1}, '" with the sound: "', S.SesSoundFile, '"'],...
+                'Name',         ['"', A.FileName{1}, '" with the sound: "', A.SoundFileName, '"'],...
                 'Units',        'pixels',...  
                 'Position',     [   10,                     10, ...
                                     sum(T.S.FS2(1,:))+(T.S.BA(1)*1)*2+T.N_PwVar*3, ...
                                     sum(T.S.FS2(2,:))+(T.S.BA(2)*1)*2+T.N_PhVar*1+T.N_PhImg*2],...
                 'Color',        [1 1 1]);
+addToolbarExplorationButtons(gcf);
 %% Axes: Varience        
 for i = 1:length(A.Fig2Var)
     T.H.hFig2AxesVar(i) = axes(...
@@ -239,6 +253,7 @@ for i = 1:length(A.Fig2Var)
                                     T.S.FS2(2,1), ...
                                     T.N_PwVar,  T.N_PhVar],...
                 'Tag',          [num2str(i), 'Var'],...
+                'Toolbar',      [],...
                 'LabelFontSizeMultiplier', 1);
     if strcmp(A.Fig2Var{i}.Title(1:3), 'STD')
         imagesc(    log10(      A.Fig2Var{i}.PhPw_Data)    );
@@ -284,9 +299,11 @@ T.H.hFig2AxesTemp = axes(...
             'Position',     [   T.S.FS2(1,1)+T.S.BA(1)*(0  )+T.N_PwImg*(0  ), ...
                                 T.S.FS2(2,1)+T.S.BA(2)*(1  )+T.N_PhImg*(0  )+T.N_PhVar*(1  ), ...
                                 T.N_PwImg,	T.N_PhImg],...
+            'Toolbar',      [],...
             'LabelFontSizeMultiplier', 1); 
 plot(   (1:A.N_Fpt)*A.N_Tpf, A.FptPt_NormTrl(:,A.PtIndex_ROIin)   );
-set(gca,    'XLim',         A.N_Tpf*    [0 A.N_Fpt]);    
+set(gca,    'XLim',         A.N_Tpf*            [0 A.N_Fpt],...
+            'YLim',         T.dAxesTempYLim*    [-1 1]);    
 if      A.N_Ftpreoff >0 && A.N_Ftstimoff<A.N_Fpt
     set(gca,'XTick',        A.N_Tpf*    [0 A.N_Ftpreoff A.N_Ftstimoff A.N_Fpt]); 
 elseif	A.N_Ftpreoff >0 
@@ -316,6 +333,7 @@ T.H.hFig2AxesTempHid = axes(...
             'YLim',         [0 1],...
             'XTick',        [],...
             'YTick',        [],...
+            'Toolbar',      [],...
             'NextPlot',     'add');
 text(   A.N_Fpt*0.04,	0.03, {'STD:'...
     sprintf('Max:  %5.2f%%',	100*A.PtIn_STD_max),...
@@ -352,6 +370,7 @@ T.H.hFig2AxesPixl = axes(...
                                 T.S.FS2(2,1)+T.S.BA(2)*(2  )+T.N_PhImg*(1  )+T.N_PhVar*(1  ), ...
                                 T.N_PwImg,	T.N_PhImg],...
             'Box',          'on',...
+            'Toolbar',      [],...
             'NextPlot',     'add');  
 T.H.hFig2AxesPixlLineAll = plot(   A.N_Tpf*   (1:A.N_Fpt),...
         squeeze( A.FptCtPhPw_NormTrl(:,:,A.N_PhSelect,A.N_PwSelect) ),...
@@ -389,6 +408,7 @@ T.H.hFig2AxesPixlHid = axes(...
             'YLim',         [0 1],...
             'XTick',        [],...
             'YTick',        [],...
+            'Toolbar',      [],...
             'NextPlot',     'add');
 T.H.hFig2AxesPixlText = text(   A.N_Fpt*0.04,	0.97, {...
     sprintf('Across-all:      %5.2f%%', 100*std(reshape(A.FptCtPhPw_NormTrl(:,:,A.N_PhSelect,A.N_PwSelect), 1, []))),...
@@ -408,6 +428,7 @@ T.H.hFig2AxesSpec = axes(...
                                 T.S.FS2(2,1)+T.S.BA(2)*(1  )+T.N_PhImg*(0  )+T.N_PhVar*(1  ), ...
                                 T.N_PwImg       T.N_PhImg],...
             'Box',          'on',...
+            'Toolbar',      [],...
             'NextPlot',     'add');
     plot(A.Qt_Freqs, A.OneQt_FFTAmpMeanIn);
     plot(A.Qt_Freqs, A.OneQt_FFTAmpMeanOut);
@@ -446,6 +467,7 @@ T.H.hFig2AxesSpecHid = axes(...
             'Units',        'pixels',...                        
             'Position',     get(T.H.hFig2AxesSpec, 'position'),...
             'Color',        'none',...
+            'Toolbar',      [],...
             'XLim',         [0 1],...
             'YLim',         [0 1],...
             'XTick',        [],...
@@ -474,6 +496,7 @@ T.H.hFig2AxesFrme = axes(...
             'Position',     [   T.S.FS2(1,1)+T.S.BA(1)*(1  )+T.N_PwImg*(1  ), ...
                                 T.S.FS2(2,1)+T.S.BA(2)*(2  )+T.N_PhImg*(1  )+T.N_PhVar*(1  ), ...
                                 T.N_PwImg,	T.N_PhImg],...
+            'Toolbar',      [],...
             'LabelFontSizeMultiplier', 1);  
 T.H.hFig2AxesFrmeImage = imagesc(squeeze(A.FptPhPw_NormTrlAdj(1,:,:)),...
             'Parent',       T.H.hFig2AxesFrme,...
@@ -509,6 +532,7 @@ T.H.hFig2AxesTune = axes(...
             'Position',     [   T.S.FS2(1,1)+T.S.BA(1)*(2  )+T.N_PwImg*(2  ), ...
                                 T.S.FS2(2,1)+T.S.BA(2)*(1  )+T.N_PhImg*(0  )+T.N_PhVar*(1  ), ...
                                 T.N_PwImg       T.N_PhImg],...
+            'Toolbar',      [],...
             'NextPlot',     'add',...
             'LabelFontSizeMultiplier', 1);   
 T.H.hFig2AxesTuneTitle = title('Phase, tuning map',...
@@ -584,8 +608,9 @@ T.H.hFig2AxesHist = axes(...
             'Position',     [   T.S.FS2(1,1)+T.S.BA(1)*(2  )+T.N_PwImg*(2  ), ...
                                 T.S.FS2(2,1)+T.S.BA(2)*(2  )+T.N_PhImg*(1  )+T.N_PhVar*(1  ), ...
                                 T.N_PwImg       T.N_PhImg],...
-            'NextPlot',     'add',...
             'Box',          'on',...
+            'Toolbar',      [],...
+            'NextPlot',     'add',...
             'LabelFontSizeMultiplier', 1); 
 T.H.hFig2AxesHistHistogramAll =   histogram(...
 	squeeze(A.PtQt_FFTAgl(:,21)), pi*(0:1/16:2),...
@@ -611,90 +636,81 @@ legend(     {'All pixels', 'In ROI'},...
             'Box',          'off');
 
 %% Setup Data
+setappdata(T.H.hFig2,   'hAxesVar1',        T.H.hFig2AxesVar(1));
+setappdata(T.H.hFig2,   'hAxesVar2',        T.H.hFig2AxesVar(2));
+setappdata(T.H.hFig2,   'hAxesVar3',        T.H.hFig2AxesVar(3));
+setappdata(T.H.hFig2,   'hAxesTemp',        T.H.hFig2AxesTemp);
+setappdata(T.H.hFig2,   'hAxesPixl',        T.H.hFig2AxesPixl);
+setappdata(T.H.hFig2,   'hAxesSpec',        T.H.hFig2AxesSpec);
+setappdata(T.H.hFig2,   'hAxesFrme',        T.H.hFig2AxesFrme);
+setappdata(T.H.hFig2,   'hAxesTune',        T.H.hFig2AxesTune);
+setappdata(T.H.hFig2,	'hAxesTuneHueHid',	T.H.hFig2AxesTuneHidHue); 
+setappdata(T.H.hFig2,   'hAxesHist',        T.H.hFig2AxesHist);
+
+setappdata(T.H.hFig2,   'hImageTune',   T.H.hFig2AxesTuneImage);
+setappdata(T.H.hFig2,   'hImageFrme',   T.H.hFig2AxesFrmeImage);
+
+setappdata(T.H.hFig2,   'hHistAll',	T.H.hFig2AxesHistHistogramAll);
+setappdata(T.H.hFig2,   'hHistIn',	T.H.hFig2AxesHistHistogramIn);
+
+setappdata(T.H.hFig2,	'hLinePixlAll',     T.H.hFig2AxesPixlLineAll);
+setappdata(T.H.hFig2,	'hLinePixlMean',	T.H.hFig2AxesPixlLineMean);
+setappdata(T.H.hFig2,   'hLineSpecPixl',    T.H.hFig2AxesSpecLinePixlSelect);
+
+setappdata(T.H.hFig2,   'hDotTemp',     T.H.hFig2AxesTempDot);
+setappdata(T.H.hFig2,   'hDotSpec',     T.H.hFig2AxesSpecDot);
+
+setappdata(T.H.hFig2,   'hTextTemp',        T.H.hFig2AxesTempTextNum);
+setappdata(T.H.hFig2,   'hTextTempRight',	T.H.hFig2AxesTempTextRight);
+setappdata(T.H.hFig2,   'hTextPixl',        T.H.hFig2AxesPixlText);
+setappdata(T.H.hFig2,   'hTextPixl',        T.H.hFig2AxesPixlText);
+setappdata(T.H.hFig2,	'hTextSpecRepNum',	T.H.hFig2AxesSpecTextNum);
+setappdata(T.H.hFig2,	'hTextFrmeXLabel',	T.H.hFig2AxesFrmeXLabel);     
+
+setappdata(T.H.hFig2,   'dFrmeTime',            A.N_Tpf);
+setappdata(T.H.hFig2,	'dTrlDurPreStim',       A.N_Ttps);
+setappdata(T.H.hFig2,	'dTrlDurStim',          A.N_Tts);
+setappdata(T.H.hFig2,   'dTrlDurTotal',         A.N_Ttt);
+setappdata(T.H.hFig2,   'dSesDurTotal',         A.N_Tst);
+setappdata(T.H.hFig2,   'dQCycNum',             A.N_Qfc);
+setappdata(T.H.hFig2,   'dAxesTempYLims',       T.dAxesTempYLims); 
+setappdata(T.H.hFig2,   'dSoundWave',           A.SoundWave);
+setappdata(T.H.hFig2,   'dFptCtPhPw_NormTrl',   A.FptCtPhPw_NormTrl);
+setappdata(T.H.hFig2,	'dFptPhPw_NormTrlAdj',	A.FptPhPw_NormTrlAdj);
+setappdata(T.H.hFig2,	'dPtQt_FFTAmp',         A.PtQt_FFTAmp);
+setappdata(T.H.hFig2,   'dPtQt_FFTAgl',         A.PtQt_FFTAgl);
+setappdata(T.H.hFig2,   'dPtIndex_ROIin',       A.PtIndex_ROIin);
+setappdata(T.H.hFig2,	'dRawHue',              A.PtOne_Hue);
+setappdata(T.H.hFig2,	'dRawSat',              A.PtOne_Sat);
+setappdata(T.H.hFig2,	'dRawVal',              A.PtOne_Val);
+
+setappdata(T.H.hFig2,   'cFrmeNum',     1);
+setappdata(T.H.hFig2,   'cPlayingNow',  0); 
+setappdata(T.H.hFig2,	'cQRepNum',     A.N_Qfc);
 % setappdata(T.H.hFig2,   '', );
-% Axes: Spec
-setappdata(T.H.hFig2AxesSpecYLabel,   'SpecH',            T.H.hFig2AxesSpec);
-setappdata(T.H.hFig2AxesSpecYLabel,   'YLimRange',        T.dAxesSpecYTick(3:end));
-setappdata(T.H.hFig2AxesSpecYLabel,   'SpecDotH',         T.H.hFig2AxesSpecDot);
-setappdata(T.H.hFig2AxesSpecTextRight,'UpDown',           +1);
-setappdata(T.H.hFig2AxesSpecTextLeft, 'UpDown',           -1);
-setappdata(T.H.hFig2AxesSpecTextRight,'SpecH',            T.H.hFig2AxesSpec);
-setappdata(T.H.hFig2AxesSpecTextLeft, 'SpecH',            T.H.hFig2AxesSpec);
-setappdata(T.H.hFig2AxesSpecTextRight,'TuningH',          T.H.hFig2AxesTuneImage);
-setappdata(T.H.hFig2AxesSpecTextLeft, 'TuningH',          T.H.hFig2AxesTuneImage);
-setappdata(T.H.hFig2AxesSpec,         'SpecNum',          A.N_Qfc);
-setappdata(T.H.hFig2AxesSpec,         'SpecAmp',          single(A.PtQt_FFTAmp));
-setappdata(T.H.hFig2AxesSpec,         'SpecAgl',          single(A.PtQt_FFTAgl));
-setappdata(T.H.hFig2AxesSpec,         'SpecDotH',         T.H.hFig2AxesSpecDot);
-setappdata(T.H.hFig2AxesSpec,         'SpecRepNumH',      T.H.hFig2AxesSpecTextNum);
-setappdata(T.H.hFig2AxesSpec,         'SpecSesDurTotal',  S.SesDurTotal);
-setappdata(T.H.hFig2AxesSpec,         'Spec_N_Qfc',       A.N_Qfc);
-setappdata(T.H.hFig2AxesSpec,         'Spec_RatioCut_Qfc',S.TrlDurPreStim/S.TrlDurTotal);
-setappdata(T.H.hFig2AxesSpec,         'HistogramAllH',	T.H.hFig2AxesHistHistogramAll);
-setappdata(T.H.hFig2AxesSpec,         'HistogramInH',     T.H.hFig2AxesHistHistogramIn);
-setappdata(T.H.hFig2AxesSpec,         'PtIndexROIin',     A.PtIndex_ROIin);
-setappdata(T.H.hFig2AxesSpec,         'LineSpecPixlH',    T.H.hFig2AxesSpecLinePixlSelect);
 
 % Axes: Tune 
-setappdata(T.H.hFig2SpecScalebarHue,  'TuningH',          T.H.hFig2AxesTuneImage);
-setappdata(T.H.hFig2SpecScalebarSat,  'TuningH',          T.H.hFig2AxesTuneImage);
-setappdata(T.H.hFig2SpecScalebarVal,  'TuningH',          T.H.hFig2AxesTuneImage);
-setappdata(T.H.hFig2AxesTuneImage,    'AxesPixlH',        T.H.hFig2AxesPixl);
-setappdata(T.H.hFig2AxesTuneImage,    'AxesSpecH',        T.H.hFig2AxesSpec);   
-setappdata(T.H.hFig2AxesTuneImage,    'RawHue',           single(A.PtOne_Hue));
-setappdata(T.H.hFig2AxesTuneImage,    'RawSat',           single(A.PtOne_Sat));
-setappdata(T.H.hFig2AxesTuneImage,    'RawVal',           single(A.PtOne_Val));
-setappdata(T.H.hFig2AxesTuneImage,    'HueMapOptions', {  'HSLuvCircular',...
-                                                          'HSLuvLinear'});        % 'HSLuvZigZag'
-setappdata(T.H.hFig2AxesTuneImage,    'HueMapOrder',      1);
-setappdata(T.H.hFig2AxesTuneImage,    'HueMap',           'HSLuvCircular');
-setappdata(T.H.hFig2AxesTuneImage,    'HueTempolate',     []);
-setappdata(T.H.hFig2AxesTuneImage,    'HueColorMap',      []);
-setappdata(T.H.hFig2AxesTuneImage,    'HueAxesH',         T.H.hFig2AxesTuneHidHue);    
-setappdata(T.H.hFig2AxesTuneImage,    'SatParaRange', [   0   0   0   0   1   1   1;
-                                                        1   1   1   0   0   1   1;
-                                                        0   0.6 -10 0   0   0.6 0]);
-setappdata(T.H.hFig2AxesTuneImage,    'SatParaOrder',     2);
-setappdata(T.H.hFig2AxesTuneImage,    'SatValSync',       0);
-setappdata(T.H.hFig2AxesTuneImage,    'SatGroundOut',     1);
+setappdata(T.H.hFig2AxesTuneImage,	'HueMapOptions', {  'HSLuvCircular','HSLuvLinear'});        % 'HSLuvZigZag'
+setappdata(T.H.hFig2AxesTuneImage,	'HueMapOrder',      1);
+setappdata(T.H.hFig2AxesTuneImage,	'HueMap',           'HSLuvCircular');
+setappdata(T.H.hFig2AxesTuneImage,	'HueTempolate',     []);
+setappdata(T.H.hFig2AxesTuneImage,	'HueColorMap',      []);   
+setappdata(T.H.hFig2AxesTuneImage,	'SatParaRange',	[   0   0   0           0   1   1   1;
+                                                        1   1   1           0   0   1   1;
+                                                        0   0.6 -A.N_Tts/2  0   0   0.6 0]);
+setappdata(T.H.hFig2AxesTuneImage,	'SatParaOrder',     2);
+setappdata(T.H.hFig2AxesTuneImage,	'SatValSync',       0);
+setappdata(T.H.hFig2AxesTuneImage,	'SatGroundOut',     1);
 setappdata(T.H.hFig2AxesTuneImage,	'SatGroundTime',	0);
-setappdata(T.H.hFig2AxesTuneImage,    'SatStimTime',      S.TrlDurStim);
-setappdata(T.H.hFig2AxesTuneImage,    'ValLimRange',      0.025/100*2.^(0:0.5:7));
-setappdata(T.H.hFig2AxesTuneImage,    'ValLimOrder',      5); 
+setappdata(T.H.hFig2AxesTuneImage,	'ValLimRange',      0.025/100*2.^(0:0.5:7));
+setappdata(T.H.hFig2AxesTuneImage,	'ValLimOrder',      5); 
 setappdata(T.H.hFig2AxesTuneImage,	'ValLim',           0.1/100);   
         
-% Axes: Frme
-setappdata(T.H.hFig2AxesFrmeImage,	'FrmeNum',          1);
-setappdata(T.H.hFig2AxesFrmeImage,    'FptPhPw_NormTrlAdj',  single(A.FptPhPw_NormTrlAdj));
-setappdata(T.H.hFig2AxesFrmeImage,    'XLabelH',          T.H.hFig2AxesFrmeXLabel);         
-setappdata(T.H.hFig2AxesFrmeImage,    'AxesPixlH',        T.H.hFig2AxesPixl);  
-setappdata(T.H.hFig2AxesFrmeImage,    'AxesSpecH',        T.H.hFig2AxesSpec);     
-setappdata(T.H.hFig2AxesFrmeScalebar, 'Tmax',             T.dAxesTempYLim); 
-setappdata(T.H.hFig2AxesFrmeScalebar, 'TmaxRange',        T.dAxesTempYLims); 
-setappdata(T.H.hFig2AxesFrmeScalebar, 'AxesFrmeH',        T.H.hFig2AxesFrme); 
-setappdata(T.H.hFig2AxesFrmeScalebar, 'AxesTempH',        T.H.hFig2AxesTemp); 
-setappdata(T.H.hFig2AxesFrmeScalebar, 'AxesPixlH',        T.H.hFig2AxesPixl); 
-setappdata(T.H.hFig2AxesFrmeXLabel,   'FrmeNextH',        T.H.hFig2AxesTempTextRight);
-setappdata(T.H.hFig2AxesFrmeXLabel,   'PlayingNow',       0);
-setappdata(T.H.hFig2AxesFrmeXLabel,   'Sound',            S.SesSoundWave);   
-
-% Axes: Pixl
-setappdata(T.H.hFig2AxesPixl,         'FptCtPhPw_NormTrl',single(A.FptCtPhPw_NormTrl));
-setappdata(T.H.hFig2AxesPixl,         'LineAllH',         T.H.hFig2AxesPixlLineAll);
-setappdata(T.H.hFig2AxesPixl,         'LineMeanH',        T.H.hFig2AxesPixlLineMean);
-setappdata(T.H.hFig2AxesPixl,         'TextPixlH',        T.H.hFig2AxesPixlText);
-
 % Axes: Temp
+setappdata(T.H.hFig2AxesSpecTextRight,'UpDown',           +1);
+setappdata(T.H.hFig2AxesSpecTextLeft, 'UpDown',           -1);
 setappdata(T.H.hFig2AxesTempTextRight,'UpDown',           +1);
 setappdata(T.H.hFig2AxesTempTextLeft, 'UpDown',           -1);
-setappdata(T.H.hFig2AxesTempTextRight,'TempHidH',         T.H.hFig2AxesTempHid);
-setappdata(T.H.hFig2AxesTempTextLeft, 'TempHidH',         T.H.hFig2AxesTempHid);
-setappdata(T.H.hFig2AxesTempTextRight,'FrmeImageH',       T.H.hFig2AxesFrmeImage);
-setappdata(T.H.hFig2AxesTempTextLeft, 'FrmeImageH',       T.H.hFig2AxesFrmeImage);
-
-setappdata(T.H.hFig2AxesTempHid,      'TempDotH',         T.H.hFig2AxesTempDot);
-setappdata(T.H.hFig2AxesTempHid,      'TempTextH',        T.H.hFig2AxesTempTextNum);
-setappdata(T.H.hFig2AxesTempHid,      'FrmeDuration',     A.N_Tpf);
 
 % Updates
 % drawnow;                                  
@@ -704,4 +720,5 @@ XinRanAnalysis2_Sweep_ButtonDown(T.H.hFig2SpecScalebarVal);
 XinRanAnalysis2_Sweep_ButtonDown(T.H.hFig2AxesFrmeScalebar);  
 
 %% Save
-% savefig(T.H.hFig2, [A.PathName,A.FileName{1}(1:end-4) '_Sweep.fig'], 'compact');
+savefig(T.H.hFig2, [A.PathName,A.FileName{1}(1:end-4) '_Sweep.fig'], 'compact');
+T.H.hFig2.Name = [T.H.hFig2.Name 'SAVED'];
