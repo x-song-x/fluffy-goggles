@@ -108,12 +108,13 @@ A.N_Tts =           S.TrlDurStim;           % Number_TimeTrialStim
 A.N_Ttt =           S.TrlDurTotal;          % Number_TimeTrialTotal
 A.N_Tst =           S.SesDurTotal;          % NUmber_TimeSessionTotal
 A.N_Ct =            S.SesCycleNumTotal;	% Number_CycleTotal (in the session)
-     
-% % % % Manually switch session temporal arrangement if here.
-%     A.N_Ct =  10;       
+A.FileNameMod =     '';
+% % % % % % Manually switch session temporal arrangement if here.
+%     A.N_Ct =  19;       
 %         A.N_Ttt =   A.N_Tst/A.N_Ct;
 %         A.N_Tts =   A.N_Ttt - A.N_Ttps;
-% % % % Manually switch session temporal arrangement if here.
+%         A.FileNameMod = sprintf('_%drep', A.N_Ct);
+% % % % % % Manually switch session temporal arrangement if here.
 
 A.N_Fps =           1/A.N_Tpf;              % Number_FramePerSecond
 A.N_Ft =            P.ProcFrameNumTotal;    % Number_FrameTotal
@@ -720,5 +721,5 @@ XinRanAnalysis2_Sweep_ButtonDown(T.H.hFig2SpecScalebarVal);
 XinRanAnalysis2_Sweep_ButtonDown(T.H.hFig2AxesFrmeScalebar);  
 
 %% Save
-savefig(T.H.hFig2, [A.PathName,A.FileName{1}(1:end-4) '_Sweep.fig'], 'compact');
+savefig(T.H.hFig2, [A.PathName,A.FileName{1}(1:end-4), A.FileNameMod, '_Sweep.fig'], 'compact');
 T.H.hFig2.Name = [T.H.hFig2.Name 'SAVED'];

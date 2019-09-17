@@ -264,8 +264,9 @@ if Play
             end       
             pause(0.05);
         end
+        hAP.pause;     
             cPlayingNow = 0;
-            setappdata(H,       'cPlayingNow',   cPlayingNow);
+            setappdata(hFig,	'cPlayingNow',   cPlayingNow);
                 XinRanAnalysis2_Sweep_ButtonDown(hTextTempRight);
     else
         hAP = getappdata(hFig,	'hAudioPlayer');
