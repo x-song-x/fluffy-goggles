@@ -10,13 +10,14 @@ ButtonTag =     get(H,              'tag');
     
 %% Update "Spec", "Tune", or "Temp", "Frme", "Pixl"
 switch ButtonTag(1:4)
-    case 'Spec';    SpecUpdt=1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
-    case 'Tune';    SpecUpdt=0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
-    case 'Frme';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
-    case 'Temp';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0; PixlUpdt=0; AmpSUpdt=0;
-    case 'Play';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1; PixlUpdt=0; AmpSUpdt=0;
-    case 'Pixl';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=1; AmpSUpdt=0;
-    case 'AmpS';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=1;
+    case 'Spec';    SpecUpdt=1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+    case 'Tune';    SpecUpdt=0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+    case 'Frme';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+    case 'Temp';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+    case 'Play';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+    case 'Pixl';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=1; AmpSUpdt=0; TitlUpdt=0;
+    case 'AmpS';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=1; TitlUpdt=0;
+    case 'Titl';    SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=1;
     otherwise
                     SpecUpdt=0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
 end
@@ -173,7 +174,7 @@ if TuneUpdt
     PtThree_TuneMap =       hsv2rgb([	PtOne_Hue,...           % IMAGE
                                         PtOne_Sat,...
                                         PtOne_Val]);
-    PhPwThree_TuneMap =     reshape(PtThree_TuneMap, 75, 120, 3);
+    PhPwThree_TuneMap =     uint16reshape(PtThree_TuneMap, 75, 120, 3);
     set(TuningH,    'CData',        PhPwThree_TuneMap);
 end
 %% Temporal Trace (mean)      
@@ -225,16 +226,16 @@ if FrmeUpdt
     if FrmeNum>TrialTotalFrmeNum;   FrmeNum = TrialTotalFrmeNum;	end   
     FrmeTime =          FrmeNum * FrmeDuration;
     if PlayingNow
-        XLabelString =  
+        XLabelString =  sprintf( 'Amplitude @ %4.1f s, in adjusted polarity, playing',...
+                            FrmeNum*FrmeDuration );
     else
+        XLabelString =  sprintf('Amplitude @ %4.1f s, in adjusted polarity, click to play',...
+                            FrmeNum*FrmeDuration );
     end
     % update AxesFrme GUI & data
     setappdata(FrmeImageH,	'FrmeNum',  FrmeNum);
     set(FrmeImageH,         'CData',    squeeze(FptPhPw_NormTrlAdj(FrmeNum,:,:)));
-    set(XLabelH,            'string',   sprintf('Adjusted polarity @ %4.1f s',FrmeTime));
-
-%     sprintf('Amplitude @ %4.1f s, in adjusted polarity, click to play', 1*D.N_Tpf),...
-    % update AxesTemp GUI & data
+    set(XLabelH,            'String',   XLabelString);
     set(TempDotH,           'XData',    FrmeNum);
     set(TempTextH,          'string',   sprintf('Time: %4.1f s', FrmeTime));  
 end
@@ -257,7 +258,6 @@ if Play
         FrmeNum =               0;  
         setappdata(H,           'AudioPlayerH', hAP); 
         setappdata(FrmeImageH,  'FrmeNum',      FrmeNum);    
-        set(H,                  'string',       'Video playback');
         pause(0.5);
         timebase = tic;
         hAP.play;
@@ -265,9 +265,11 @@ if Play
             if toc(timebase)>(FrmeNum*FrmeDuration)
                 XinRanAnalysis2_Sweep_ButtonDown(FrmeNextH);
                 FrmeNum = FrmeNum + 1;
-            end        
+            end       
             pause(0.05);
         end
+            PlayingNow = 0;
+            setappdata(H,       'PlayingNow',   PlayingNow);
                 XinRanAnalysis2_Sweep_ButtonDown(FrmeNextH);
     else
         hAP = getappdata(H,     'AudioPlayerH');
@@ -278,18 +280,62 @@ end
 if PixlUpdt
     PixelPosi =         get(gca,                'CurrentPoint');
     PixelPosi =         round(PixelPosi(1,1:2));    
+    PhInd =             PixelPosi(2);    
+    PwInd =             PixelPosi(1);
     AxesPixlH =         getappdata(H,           'AxesPixlH');
+    AxesSpecH =         getappdata(H,           'AxesSpecH');
     FptCtPhPw_NormTrl = getappdata(AxesPixlH,   'FptCtPhPw_NormTrl');
     LineAllH =          getappdata(AxesPixlH,   'LineAllH');
     LineMeanH =         getappdata(AxesPixlH,   'LineMeanH');
+    TextPixlH =         getappdata(AxesPixlH,   'TextPixlH');
+    LineSpecPixlH =     getappdata(AxesSpecH,   'LineSpecPixlH');
+	SpecAmp =           getappdata(AxesSpecH,   'SpecAmp');
+    PtInd =             PhInd + (PwInd-1)*size(FptCtPhPw_NormTrl,3);
     for i = 1:length(LineAllH)
-        LineAllH(i).YData =    squeeze(FptCtPhPw_NormTrl(:,i,PixelPosi(2),PixelPosi(1)));
+        LineAllH(i).YData =    squeeze(FptCtPhPw_NormTrl(:,i,PhInd,PwInd));
     end
-    LineMeanH.YData =	mean(squeeze(FptCtPhPw_NormTrl(:,:,PixelPosi(2),PixelPosi(1))),2);
+    LineMeanH.YData =	mean(squeeze(FptCtPhPw_NormTrl(:,:,PhInd,PwInd)),2);
     AxesPixlH.Title.String = sprintf('Pixel(%dH,%dW): temporal traces across reps',...
-        PixelPosi([2,1]));
+        PhInd,PwInd);
+    TextPixlH.String =	{...
+        sprintf('Across-all:      %5.2f%%', 100*std(reshape(FptCtPhPw_NormTrl(:,:,PhInd,PwInd), 1, []))),...
+        sprintf('Across-rep:    %5.2f%%',	100*std(mean(FptCtPhPw_NormTrl(:,:,PhInd,PwInd), 2), 0, 1)),...
+        sprintf('Across-frame:%5.2f%%',     100*std(mean(FptCtPhPw_NormTrl(:,:,PhInd,PwInd), 1), 0, 2)),...
+        'on STD'};
+    LineSpecPixlH.YData =   SpecAmp(PtInd, :);
     drawnow;
 end
+%% Title clipping
+if TitlUpdt
+    AxesH =             get(H,      'Parent');
+    AxesPosiMatlab =    get(AxesH,  'Position');
+    FigPosiMatlab =     get(gcf,    'Position');
+    MoniPosiMatlab =    get(0,      'MonitorPosition');    
+    switch ButtonTag(5:8)
+        case 'Var1';    AxesPlus = [    -2  -56 54  17  ];
+        case 'Var2';    AxesPlus = [    -2  -56 64  17  ];
+        case 'Var3';    AxesPlus = [    -2  -56 64  17  ];
+        case 'Temp';    AxesPlus = [    -58 -35 10  17  ];
+        case 'Pixl';    AxesPlus = [    -58 -35 10  17  ];
+        case 'Spec';    AxesPlus = [    -70 -35 10  17  ];
+        case 'Tune';    AxesPlus = [    -5  -25 100 17  ];
+        case 'Frme';    AxesPlus = [    -67 -25 0   17  ];
+        case 'Hist';    AxesPlus = [    -55 -57 5   17  ];
+        otherwise
+    end
+    AxesAdd =       AxesPlus;
+    AxesAdd(3:4) =  AxesAdd(3:4)-AxesAdd(1:2);
+    FigCutMatlab =  AxesPosiMatlab + AxesAdd;
+    MoniCutMatlab = FigCutMatlab + [FigPosiMatlab(1:2) 0 0];
+    MoniCutWin =    MoniCutMatlab;
+    MoniCutWin(2) = MoniPosiMatlab(1,4) - MoniCutWin(2) - MoniCutWin(4);
+    % The following function requires NirCmd
+    % http://www.nirsoft.net/utils/nircmd2.html#using
+    % download NirCmd, unzip, and put the .exe files into Windows/System32
+    dos([ 'C:\Windows\System32\Nircmd.exe savescreenshot *clipboard* ', ...
+        sprintf('%d ', MoniCutWin) ]);
+end
+
 
 function OutHueTemplate = HSLuvUniformHue(OutputType)
 % this function outputs a hue tempolate based on a specifed OutputType 
