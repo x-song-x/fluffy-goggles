@@ -306,7 +306,6 @@ if TitlUpdt
     AxesH =             get(H,      'Parent');
     AxesPosiMatlab =    get(AxesH,  'Position');
     FigPosiMatlab =     get(gcf,    'Position');
-    FigName =           get(gcf,    'Name');
     MoniPosiMatlab =    get(0,      'MonitorPosition');
     switch ButtonTag(5:8)
         case 'Var1';    AxesPlus = [    -2  -56 54  17  ];  figclip = 1;
@@ -322,29 +321,21 @@ if TitlUpdt
         case 'Tex1';                                        figclip = 0;
         case 'Tex2';    AxesPlus = [    -1  -1  -1  -1  ];  figclip = 1;
                         AxesPosiMatlab = [ 0 0 FigPosiMatlab(3:4)];
-        case 'Tex3';    SesName =  strtok(FigName, '"');
-                        clipboard('copy',   SesName(1:end-7));...
-                                                            figclip = 0;  
-        case 'Tex4';    [~, SoundName] =    strtok(FigName, '"');
-                        [~, SoundName] =	strtok(SoundName, '"');
-                        clipboard('copy',   SoundName(2:end-1));       
-                                                            figclip = 0;     
+                        
         otherwise
     end
-    if figclip
-        AxesAdd =       AxesPlus;
-        AxesAdd(3:4) =  AxesAdd(3:4)-AxesAdd(1:2);
-        FigCutMatlab =  AxesPosiMatlab + AxesAdd;
-        MoniCutMatlab = FigCutMatlab + [FigPosiMatlab(1:2) 0 0];
-        MoniCutWin =    MoniCutMatlab;
-        MoniCutWin(2) = MoniPosiMatlab(1,4) - MoniCutWin(2) - MoniCutWin(4);
-        % The following function requires NirCmd
-        % http://www.nirsoft.net/utils/nircmd2.html#using
-        % download NirCmd, unzip, and put the .exe files into Windows/System32
-        dos([ 'C:\Windows\System32\Nircmd.exe savescreenshot *clipboard* ', ...
-            sprintf('%d ', MoniCutWin) ]);
-    else
-    end
+    if f
+    AxesAdd =       AxesPlus;
+    AxesAdd(3:4) =  AxesAdd(3:4)-AxesAdd(1:2);
+    FigCutMatlab =  AxesPosiMatlab + AxesAdd;
+    MoniCutMatlab = FigCutMatlab + [FigPosiMatlab(1:2) 0 0];
+    MoniCutWin =    MoniCutMatlab;
+    MoniCutWin(2) = MoniPosiMatlab(1,4) - MoniCutWin(2) - MoniCutWin(4);
+    % The following function requires NirCmd
+    % http://www.nirsoft.net/utils/nircmd2.html#using
+    % download NirCmd, unzip, and put the .exe files into Windows/System32
+    dos([ 'C:\Windows\System32\Nircmd.exe savescreenshot *clipboard* ', ...
+        sprintf('%d ', MoniCutWin) ]);
 end
 
 
