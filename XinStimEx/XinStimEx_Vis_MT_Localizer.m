@@ -15,11 +15,11 @@ global stm sys
 stm.TimerOption =       'NI-DAQ';
 
 % Session Type Options
-% stm.SesOption =         'Cali';
+stm.SesOption =         'Cali';
 % stm.SesOption =         'DLCL';  % Dot Localizer
 % stm.SesOption =         'DCPS';  % Dot Center vs Periphery, Sinusoidal
 % stm.SesOption =         'DRCW';  % Dot Rotating Quarter, Clockwise;
-stm.SesOption =         'DRCWF';  % Dot Rotating Quarter, Clockwise, w/ Face;
+% stm.SesOption =         'DRCWF';  % Dot Rotating Quarter, Clockwise, w/ Face;
 % stm.SesOption =         'DRCC';  % Dot Rotating Quarter, CounterClockwise';
 
 % Session Parameters
@@ -27,8 +27,10 @@ stm.SesOption =         'DRCWF';  % Dot Rotating Quarter, Clockwise, w/ Face;
 % sys.SesCycleNumTotal =          80;     % rep # total
 % stm.SesCycleTime =              5;     % in second
 % sys.SesCycleNumTotal =          80;     % rep # total
-stm.SesCycleTime =              20;     % in second
-sys.SesCycleNumTotal =          20;     % rep # total
+% stm.SesCycleTime =              20;     % in second
+% sys.SesCycleNumTotal =          20;     % rep # total
+stm.SesCycleTime =              1;     % in second
+sys.SesCycleNumTotal =          78;     % rep # total
 sys.SesCycleNumCurrent =        0;
 stm.SesCycleTimeInitial =       tic;
 
@@ -67,9 +69,12 @@ switch stm.SesOption(1)
 %         cali_init(stm.windowPtr, @generate_half_sequence, 'dot', 0.5);  % 80 x 5s
 %         cali_init(stm.windowPtr, @partition_small, 'face', 1);  % 20 x 20s
 %         cali_init(stm.windowPtr, @partition_large, 'face', 1);  % 20 x 20s   
-%         cali_init(stm.windowPtr, @generate_half_sequence, 'face', 1);  % 80 x 1, 2, 4s 
 %         cali_init(stm.windowPtr, @partition_small, 'face', 0.5);  % 20 x 20s
 %         cali_init(stm.windowPtr, @generate_half_sequence, 'dot', 0.5);   % 80 x 5s
+
+        cali_init(stm.windowPtr, @generate_center37_sequence,	'face', 1); % 37x   1, 2s
+%         cali_init(stm.windowPtr, @generate_center78_sequence,	'face', 1); % 78x   1, 2s
+%         cali_init(stm.windowPtr, @generate_full_sequence,       'face', 1); % 144x  1, 2s 
     case 'D'
         stm.DotDiameter =       0.4;        % in degree
         stm.DotMotionSpeedMax =	16;         % in degree / second

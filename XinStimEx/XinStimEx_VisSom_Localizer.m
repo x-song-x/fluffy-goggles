@@ -8,6 +8,7 @@ pause(2);
 clearvars;              % Clear the workspace
 global stm sys
 
+stm.SR = 100e3;
 
 stm.Som.TrialTime =             20;
 stm.Som.TrialPreStimTime =      0;
@@ -174,8 +175,8 @@ switch stm.Vis.TimerOption
         sys.NIDAQ.TaskCO.cfgDigEdgeStartTrig(...
             'RTSI6',            'DAQmx_Val_Rising');
         sys.NIDAQ.TaskCO.registerSignalEvent(...
-            @XinStimEx_Vis_MT_Localizer_Callback, 'DAQmx_Val_CounterOutputEvent');
-        sys.NIDAQ.TaskCO.start();
+            @XinStimEx_VisSom_Localizer_Callback, 'DAQmx_Val_CounterOutputEvent');
+        sys.NIDAQ.TaskCO.start()
         
         sys.NIDAQ.TaskDO = Task('Cochlear Implant Trigger Sequence');
         sys.NIDAQ.TaskDO.createDOChan(...
@@ -185,7 +186,7 @@ switch stm.Vis.TimerOption
         sys.NIDAQ.TaskDO.cfgDigEdgeStartTrig(... 
             'RTSI6',	'DAQmx_Val_Rising');
         sys.NIDAQ.TaskDO.writeDigitalData(      stm.Som.seq);
-        sys.NIDAQ.TaskDO.start();
+        sys.NIDAQ.TaskDO.start()
         
         stm.Vis.Running =               1;
     case 'simulated'
