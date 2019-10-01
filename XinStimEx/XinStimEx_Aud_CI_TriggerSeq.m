@@ -7,8 +7,8 @@ global stm sys
 %% Synthesize the trigger seq
 stm.SR =                    100e3;
 stm.TrialTime =             20;
-stm.TrialPreStimTime =      2.5;
-stm.TrialStimTime =         15.0;
+% stm.TrialPreStimTime =      2.5;
+% stm.TrialStimTime =         15.0;
 
 % stm.TrialStimElectdNum =        2;
 % stm.TrialPipNum =               4;

@@ -14,7 +14,8 @@ stm.Som.TrialPreStimTime =      0;
 stm.Som.TrialStimTime =         20;
 stm.Som.TrialStimChanNum =      8;
 stm.Som.TrialPuffSeqTime =      2.5;
-stm.Som.TrialStimChanBitSeq =   [2 2 2 6 2 2 2 2];
+% stm.Som.TrialStimChanBitSeq =   [2 2 2 6 2 2 2 2];
+stm.Som.TrialStimChanBitSeq =   [5 5 5 6 6 5 5 5];
 
 %% 7 nozzles
 % % stm.Som.TrialPreStimTime =      2.5;
@@ -76,8 +77,8 @@ sys.NIDAQ.TaskDO.createDOChan(...
     'Dev3',     'port0/line0:7');
 sys.NIDAQ.TaskDO.cfgSampClkTiming(...
 	stm.SR,     'DAQmx_Val_ContSamps',	stm.Som.TrialTime*stm.SR);
-sys.NIDAQ.TaskDO.cfgDigEdgeStartTrig(... 
-	'RTSI6',	'DAQmx_Val_Rising');
+% sys.NIDAQ.TaskDO.cfgDigEdgeStartTrig(... 
+% 	'RTSI6',	'DAQmx_Val_Rising');
 sys.NIDAQ.TaskDO.writeDigitalData(      stm.Som.seq);
 sys.NIDAQ.TaskDO.start();
 

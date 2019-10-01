@@ -4,26 +4,26 @@ global stm sys
 % This function is called everytime 
 %   stm.Vis.TimerOption = 'simulated':  an event happens on the software timer
 %   stm.Vis.TimerOption = 'NI-DAQ':     a signal event happens on the hardware CO
-if toc(stm.Vis.SesCycleTimeInitial) > 0.1    
+if toc(sys.Vis.CycleDurCurrentTimer) > 0.1    
     % This "if" is necessary for 'NI-DAQ' to require
     % at least 0.1s between real rising-edge triggering events to avoid 
     % pseudo-triggering by the falling-edge events
-    sys.SesCycleNumCurrent =   sys.SesCycleNumCurrent + 1;
-    stm.Vis.SesCycleTimeInitial =  tic;
+    sys.Vis.CycleNumCurrent =   sys.Vis.CycleNumCurrent + 1;
+    sys.Vis.CycleDurCurrentTimer =  tic;
     tt = datestr(now, 'HH:MM:SS.FFF');
-    disp([sprintf('cycle: #%d ', sys.SesCycleNumCurrent), tt]); 
+    disp([sprintf('cycle: #%d ', sys.Vis.CycleNumCurrent), tt]); 
     if strcmp(stm.Vis.SesOption, 'Cali')
-        cali_run(sys.SesCycleNumCurrent);
+        cali_run(sys.Vis.CycleNumCurrent);
     end
     drawnow;
     if isfield(sys, 'MsgBox')
         if ~ishandle(sys.MsgBox)
-            sys.SesCycleNumCurrent = sys.SesCycleNumTotal +1;
+            sys.Vis.CycleNumCurrent = sys.Vis.CycleNumTotal +1;
         end
     end
 end
 %% Stop the session
-if sys.SesCycleNumCurrent == sys.SesCycleNumTotal + 1  
+if sys.Vis.CycleNumCurrent == sys.Vis.CycleNumTotal + 1  
     stm.Vis.Running =               0;    
     try
         sys.NIDAQ.TaskCO.abort();

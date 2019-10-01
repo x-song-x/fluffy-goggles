@@ -30,7 +30,7 @@ stm.SesOption =         'Cali';
 % stm.SesCycleTime =              20;     % in second
 % sys.SesCycleNumTotal =          20;     % rep # total
 stm.SesCycleTime =              1;     % in second
-sys.SesCycleNumTotal =          78;     % rep # total
+sys.SesCycleNumTotal =          80;     % rep # total
 sys.SesCycleNumCurrent =        0;
 stm.SesCycleTimeInitial =       tic;
 
@@ -39,7 +39,7 @@ stm.SesCycleTimeInitial =       tic;
 % stm.MonitorDistance =   75;         % in cm
 % stm.MonitorHeight =     29.5;       % in cm
 % stm.MonitorWidth =      52.7;       % in cm
-stm.MonitorName =       'Samsung LG 32GK850F-B';
+stm.MonitorName =       'LG 32GK850F-B';
 stm.MonitorDistance =   75;             % in cm
 stm.MonitorHeight =     0.02724*1440;	% in cm
 stm.MonitorWidth =      0.02724*2560;	% in cm
@@ -48,14 +48,17 @@ stm.MonitorWidth =      0.02724*2560;	% in cm
 % Here we call some default settings for setting up Psychtoolbox
                                                 PsychDefaultSetup(2);
 % Draw to the external screen
+% screenNumber = 2;
 screenNumber = 1;
 % Define black and white
 white = WhiteIndex(screenNumber);
-black = BlackIndex(screenNumber);               
+black = BlackIndex(screenNumber);     
+gray =  GrayIndex(screenNumber, 0.5);              
                                                 Screen('Preference', 'VisualDebugLevel', 1);
                                                 Screen('Preference', 'SkipSyncTests', 1);
 % Open an on screen window
-[stm.windowPtr, windowRect] =                   PsychImaging('OpenWindow', screenNumber, black);
+% [stm.windowPtr, windowRect] =                   PsychImaging('OpenWindow', screenNumber, black);
+[stm.windowPtr, windowRect] =                   PsychImaging('OpenWindow', screenNumber, gray);
 % Query: Get the size of the on screen window
 [stm.MonitorPixelNumX, stm.MonitorPixelNumY] =  Screen('WindowSize', stm.windowPtr);
 % Query: the frame duration
@@ -72,7 +75,9 @@ switch stm.SesOption(1)
 %         cali_init(stm.windowPtr, @partition_small, 'face', 0.5);  % 20 x 20s
 %         cali_init(stm.windowPtr, @generate_half_sequence, 'dot', 0.5);   % 80 x 5s
 
-        cali_init(stm.windowPtr, @generate_center37_sequence,	'face', 1); % 37x   1, 2s
+%         cali_init(stm.windowPtr, @generate_center80_sequence,	'dot',  0.5, 'center'); 
+        cali_init(stm.windowPtr, @generate_center80_sequence,	'face', 1, 'center');
+        cali_init(stm.windowPtr, @generate_center80_sequence,	'face', 0.5, 'center');
 %         cali_init(stm.windowPtr, @generate_center78_sequence,	'face', 1); % 78x   1, 2s
 %         cali_init(stm.windowPtr, @generate_full_sequence,       'face', 1); % 144x  1, 2s 
     case 'D'
@@ -276,4 +281,4 @@ end
 % end
 pause(2);
 sca;
-% dos('C:\Windows\System32\DisplaySwitch.exe /clone');
+dos('C:\Windows\System32\DisplaySwitch.exe /clone');
