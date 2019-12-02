@@ -32,8 +32,8 @@ stm.TrialPipDutyCycle =         0.5;
 
 % stm.TrialPreStimTime =      2;
 % stm.TrialStimTime =         16;
-% stm.TrialStimElectdNum =        8;
-% stm.TrialPipNum =               5;
+% stm.TrialStimElectdNum =        5;
+% stm.TrialPipNum =               8;
 % stm.TrialPipTime =              0.25;
 % stm.TrialPipDutyCycle =         0.5;
 

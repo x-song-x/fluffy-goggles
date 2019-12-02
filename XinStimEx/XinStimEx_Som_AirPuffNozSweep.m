@@ -13,9 +13,24 @@ stm.Som.TrialTime =             20;
 stm.Som.TrialPreStimTime =      0;
 stm.Som.TrialStimTime =         20;
 stm.Som.TrialStimChanNum =      8;
-stm.Som.TrialPuffSeqTime =      2.5;
+% stm.Som.TrialPuffSeqTime =      2.5;
+% 
+% % stm.Som.TrialStimChanBitSeq =   [2 2 2 6 2 2 2 2];
+% % stm.Som.TrialStimChanBitSeq =   [5 5 5 6 6 5 5 5];
+% % stm.Som.TrialStimChanBitSeq =   0*stm.Som.TrialStimChanBitSeq;
+% % stm.Som.TrialStimChanBitSeq =   [4 4 0 0 0 0 4 4];
+% stm.Som.TrialStimChanBitSeq =   [4 4 5 5 5 5 4 4];
+% stm.Som.TrialStimChanNormSeq =   [64 64 36 36 36 36 64 64];
+
+
+stm.Som.TrialStimChanNum =      4;
+stm.Som.TrialPuffSeqTime =      5;
+
 % stm.Som.TrialStimChanBitSeq =   [2 2 2 6 2 2 2 2];
-stm.Som.TrialStimChanBitSeq =   [5 5 5 6 6 5 5 5];
+% stm.Som.TrialStimChanBitSeq =   [5 5 5 6 6 5 5 5];
+% stm.Som.TrialStimChanBitSeq =   0*stm.Som.TrialStimChanBitSeq;
+% stm.Som.TrialStimChanBitSeq =   [4 4 0 0 0 0 4 4];
+stm.Som.TrialStimChanBitSeq =   [4 5 5 4];
 
 %% 7 nozzles
 % % stm.Som.TrialPreStimTime =      2.5;
@@ -39,7 +54,7 @@ stm.Som.TrialStimChanBitSeq =   [5 5 5 6 6 5 5 5];
 % stm.Som.TrialStimChanNum =      2;
 % stm.Som.TrialStimChanNormSeq =   [2^5 2^0+2^3+2^4];
 % 
-stm.Som.TrialPuffFreq =         10;
+stm.Som.TrialPuffFreq =         20;
 stm.Som.TrialPuffDutyCycle =	0.5;
 
 stm.Som.SmplNumTrialPreStim =	round(stm.SR*stm.Som.TrialPreStimTime); 

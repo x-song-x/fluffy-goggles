@@ -196,7 +196,7 @@ A.OneQt_FFTAmpMeanPStdIn =	A.OneQt_FFTAmpMeanIn + std(A.PtQt_FFTAmp(A.PtIndex_RO
 A.PhPwThree_TuneMap =   uint8(zeros(A.N_Ph, A.N_Pw,3));
 % Spectrum scale
 T.dAxesSpecXTick =      [A.Qt_Freqs(A.N_Ct+1),  mean(A.Qt_Freqs([2, end]))]; 
-T.dAxesSpecYTick =      [0 0.00025*2.^(0:8)];
+T.dAxesSpecYTick =      [0 0.000125*2.^(0:8)];
 T.dAxesSpecYTickLabel =	cellfun(@(x) sprintf('%5.3f%%', x),...
                             num2cell(round(100000*T.dAxesSpecYTick)/1000),...
                             'UniformOutput',    false); 
