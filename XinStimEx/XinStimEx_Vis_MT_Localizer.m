@@ -21,6 +21,7 @@ stm.SesOption =         'Cali';
 % stm.SesOption =         'DRCWF';  % Dot Rotating Quarter, Clockwise, w/ Face;
 % stm.SesOption =         'DRCCF';  % Dot Rotating Quarter, CounterClockwise';
 % stm.SesOption =         'DRCW';  % Dot Rotating Quarter, Clockwise;
+stm.DotAngleDivide =        8;
 
 if stm.SesOption(1) == 'C'
 	stm.SesCycleTime =              1.5;	% in second
@@ -149,7 +150,7 @@ switch stm.SesOption(1)
                     end
                 end
             case 'CPS'
-                stm.DotAngleDivide =        12;
+                stm.DotAngleDivide =        stm.DotAngleDivide;
         end
         Screen('DrawDots', stm.windowPtr, [stm.DotVecPositionX; stm.DotVecPositionY],...
             stm.DotDiameterInPixel, white,	stm.MonitorCenter, 2);
@@ -301,4 +302,4 @@ end
 % end
 pause(2);
 sca;
-dos('C:\Windows\System32\DisplaySwitch.exe /clone');
+% dos('C:\Windows\System32\DisplaySwitch.exe /clone');

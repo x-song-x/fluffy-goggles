@@ -3,7 +3,7 @@
 %% Switch multi-display mode
 % for triple monitor @190925, #1=Outside Right, #2=Inside, #3=Outside Main.
 % "extend" should be set on triple screens before openning the current Matlab
-% dos('C:\Windows\System32\DisplaySwitch.exe /extend');
+dos('C:\Windows\System32\DisplaySwitch.exe /extend');
 sca;                    % Clear the screen       
 clearvars;              % Clear the workspace
 pause(2);
@@ -13,12 +13,14 @@ stm.SR =                100e3;
 stm.SesDurTotal =       396;                                
                                 %   F:Face;	B:Body;     O:Object;
                                 %   P:Phase scambled;   S:Spatial scambled
-stm.Vis.SesOptionMore = 0;  stm.Vis.SesOptionContrast = 'All';	% Dots
+% stm.Vis.SesOptionMore = 0;  stm.Vis.SesOptionContrast = 'All';	% Dots
 % stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'BvF';	% Body vs Face
 % stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'OvF';  % Object vs Face
 % stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'PvF';  % Phase SCRBD Face vs Face 
-% stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'SvF';  % Spatial SCRBD Face vs Face 
+stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'SvF';  % Spatial SCRBD Face vs Face 
 % stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'OvB';  % Object vs Body
+% stm.Vis.PicSource = 'Wang';
+stm.Vis.PicSource = 'Hung';
 
 %% Somatosensory DO parameters
 stm.Som.CycleDurTotal =         22;
@@ -30,7 +32,8 @@ stm.Som.TrialPuffSeqTime =      2.0;
 % stm.Som.TrialStimChanBitSeq =   [2 2 2 2 6 6 6 2 2 2 2];
 % stm.Som.TrialStimChanBitSeq =   [5 5 5 5 6 6 6 5 5 5 5];
 % stm.Som.TrialStimChanBitSeq =   [4 4 4 4 6 6 6 4 4 4 4];
-stm.Som.TrialStimChanBitSeq =   [4 4 4 4 0 0 0 4 4 4 4];
+% stm.Som.TrialStimChanBitSeq =   [4 4 4 4 0 0 0 4 4 4 4];
+stm.Som.TrialStimChanBitSeq =   [6 6 6 6 0 0 0 6 6 6 6];
 % stm.Som.TrialStimChanBitSeq =   [2 2 2 6 2 2 2 2];
 
 stm.Som.TrialPuffFreq =         10;
@@ -96,7 +99,11 @@ gray =  GrayIndex(screenNumber, 0.5);
                                                 Screen('Preference', 'VisualDebugLevel', 1);
                                                 Screen('Preference', 'SkipSyncTests', 1);
 % Open an on screen window
-[stm.Vis.windowPtr, windowRect] =               PsychImaging('OpenWindow', screenNumber, black);
+if stm.Vis.SesOptionMore 
+    [stm.Vis.windowPtr, windowRect] =           PsychImaging('OpenWindow', screenNumber, gray);
+else
+    [stm.Vis.windowPtr, windowRect] =           PsychImaging('OpenWindow', screenNumber, black);
+end
 % Query: Get the size of the on screen window
 [stm.Vis.MonitorPixelNumX, stm.Vis.MonitorPixelNumY] = ...
                                                 Screen('WindowSize', stm.Vis.windowPtr);
@@ -148,7 +155,7 @@ switch stm.Vis.SesOption(1)
         if length(stm.Vis.SesOption)>4
             if stm.Vis.SesOption(5) == 'F'
                 % read in texture patches
-                stm.Vis.TexImDir =	'D:\GitHub\EyeTrackerCalibration\facephase\Wang\phase_stimuli\';
+                stm.Vis.TexImDir =	['D:\GitHub\EyeTrackerCalibration\facephase\', stm.Vis.PicSource, '\phase_stimuli\'];
                 for i = 1:20
                     stm.Vis.TexImFaceOri{i} =	imread([stm.Vis.TexImDir 'm'  num2str(i) '.png']);
                     stm.Vis.TexImFacePhs{i} =	imread([stm.Vis.TexImDir 'mp' num2str(i) '.png']);
@@ -166,7 +173,7 @@ switch stm.Vis.SesOption(1)
                         stm.Vis.TexIdxAll =             [];
                 for i = 1:stm.Vis.CycleNumTotal
                     for j = 1:3
-                        stm.Vis.TexIdxAll(i, j, :) =    randperm(20, 6);
+                        stm.Vis.TexIdxAll(i, j, :) =    randperm(20, 18);
                     end
                 end
                 stm.Vis.TexIdxAll =     stm.Vis.TexIdxAll(:,[1 1 1 2 3],:);
@@ -175,32 +182,54 @@ switch stm.Vis.SesOption(1)
                         stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/10;   % 10 images / trial
                         stm.Vis.TexSeq =    [   3   3   4   4   1   1   5   5   2   2;...
                                                 1   2   1   2   1   2   1   2   1   2];
+%                     case 'BvF'
+%                         stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/12;   % 12 images / trial
+%                         stm.Vis.TexSeq =    [   4   4   4   1   1   1   1   1   1   4   4   4;...
+%                                                 1   2   3   1   2   3   4   5   6   4   5   6];
+%                     case 'OvF'
+%                         stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/12;   % 12 images / trial
+%                         stm.Vis.TexSeq =    [   5   5   5   1   1   1   1   1   1   5   5   5;...
+%                                                 1   2   3   1   2   3   4   5   6   4   5   6];
+%                     case 'PvF'
+%                         stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/12;   % 12 images / trial
+%                         stm.Vis.TexSeq =    [   2   2   2   1   1   1   1   1   1   2   2   2;...
+%                                                 1   2   3   1   2   3   4   5   6   4   5   6];
+%                     case 'SvF'
+%                         stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/12;   % 12 images / trial
+%                         stm.Vis.TexSeq =    [   3   3   3   1   1   1   1   1   1   3   3   3;...
+%                                                 1   2   3   1   2   3   4   5   6   4   5   6];
+%                     case 'OvB'
+%                         stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/12;   % 12 images / trial
+%                         stm.Vis.TexSeq =    [   5   5   5   4   4   4   4   4   4   5   5   5;...
+%                                                 1   2   3   1   2   3   4   5   6   4   5   6];
                     case 'BvF'
-                        stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/12;   % 12 images / trial
-                        stm.Vis.TexSeq =    [   4   4   4   1   1   1   1   1   1   4   4   4;...
-                                                1   2   3   1   2   3   4   5   6   4   5   6];
+                        stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/36;   % 36 images / trial 
+                        stm.Vis.TexSeq =    [   4*ones(1,9) 1*ones(1,18)    4*ones(1,9);...
+                                                1:9         1:18            10:18];
                     case 'OvF'
-                        stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/12;   % 12 images / trial
-                        stm.Vis.TexSeq =    [   5   5   5   1   1   1   1   1   1   5   5   5;...
-                                                1   2   3   1   2   3   4   5   6   4   5   6];
+                        stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/36;   % 36 images / trial 
+                        stm.Vis.TexSeq =    [   5*ones(1,9) 1*ones(1,18)    5*ones(1,9);...
+                                                1:9         1:18            10:18];
                     case 'PvF'
-                        stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/12;   % 12 images / trial
-                        stm.Vis.TexSeq =    [   2   2   2   1   1   1   1   1   1   2   2   2;...
-                                                1   2   3   1   2   3   4   5   6   4   5   6];
+                        stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/36;   % 36 images / trial 
+                        stm.Vis.TexSeq =    [   2*ones(1,9) 1*ones(1,18)    2*ones(1,9);...
+                                                1:9         1:18            10:18];
                     case 'SvF'
-                        stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/12;   % 12 images / trial
-                        stm.Vis.TexSeq =    [   3   3   3   1   1   1   1   1   1   3   3   3;...
-                                                1   2   3   1   2   3   4   5   6   4   5   6];
+                        stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/36;   % 36 images / trial 
+                        stm.Vis.TexSeq =    [   3*ones(1,9) 1*ones(1,18)    3*ones(1,9);...
+                                                1:9         1:18            10:18];
                     case 'OvB'
-                        stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/12;   % 12 images / trial
-                        stm.Vis.TexSeq =    [   5   5   5   4   4   4   4   4   4   5   5   5;...
-                                                1   2   3   1   2   3   4   5   6   4   5   6];
+                        stm.Vis.TexTocTime =    stm.Vis.CycleDurTotal/36;   % 36 images / trial 
+                        stm.Vis.TexSeq =    [   5*ones(1,9) 1*ones(1,18)    5*ones(1,9);...
+                                                1:9         1:18            10:18];
                     otherwise
                 end
             end
         end
-        Screen('DrawDots', stm.Vis.windowPtr, [stm.Vis.DotVecPositionX; stm.Vis.DotVecPositionY],...
-            stm.Vis.DotDiameterInPixel, white,	stm.Vis.MonitorCenter, 2);
+        if ~stm.Vis.SesOptionMore 
+            Screen('DrawDots', stm.Vis.windowPtr, [stm.Vis.DotVecPositionX; stm.Vis.DotVecPositionY],...
+                stm.Vis.DotDiameterInPixel, white,	stm.Vis.MonitorCenter, 2);
+        end
         vbl = Screen('Flip', stm.Vis.windowPtr);
     otherwise
 end
@@ -306,8 +335,10 @@ while stm.Vis.Running
                                     (stm.Vis.DotVecRadiusOut/stm.Vis.MonitorPixelAngle);
 
         %% Display 
-        Screen('DrawDots', stm.Vis.windowPtr, [stm.Vis.DotVecPositionX; stm.Vis.DotVecPositionY],...
-            stm.Vis.DotDiameterInPixel, white,	stm.Vis.MonitorCenter, 2);      % dots
+        if ~stm.Vis.SesOptionMore 
+            Screen('DrawDots', stm.Vis.windowPtr, [stm.Vis.DotVecPositionX; stm.Vis.DotVecPositionY],...
+                stm.Vis.DotDiameterInPixel, white,	stm.Vis.MonitorCenter, 2);      % dots
+        end
         if length(stm.Vis.SesOption)>4 && stm.Vis.SesOn
             if stm.Vis.SesOption(5) == 'F'
                 a = stm.Vis.TexIdxCurrent;
@@ -317,14 +348,25 @@ while stm.Vis.Running
                     disp([sprintf('frame time:   '), datestr(now, 'HH:MM:SS.FFF')]);
                 end
                 if stm.Vis.SesOptionMore
-                    Screen('DrawTextures', stm.Vis.windowPtr,...
-                        stm.Vis.TexInd(...
-                            stm.Vis.TexIdxAll(...
-                                stm.Vis.CycleNumCurrent,...
-                                stm.Vis.TexSeq(1, stm.Vis.TexIdxCurrent),...
-                                stm.Vis.TexSeq(2, stm.Vis.TexIdxCurrent) ),...
-                            stm.Vis.TexSeq(1, stm.Vis.TexIdxCurrent)        ),...
-                        [], (stm.Vis.MonitorCenter([1 2 1 2]) + 240* [1 -1 -1 1])');
+                    if      stm.Vis.PicSource(1) == 'W'
+                        Screen('DrawTextures', stm.Vis.windowPtr,...
+                            stm.Vis.TexInd(...
+                                stm.Vis.TexIdxAll(...
+                                    stm.Vis.CycleNumCurrent,...
+                                    stm.Vis.TexSeq(1, stm.Vis.TexIdxCurrent),...
+                                    stm.Vis.TexSeq(2, stm.Vis.TexIdxCurrent) ),...
+                                stm.Vis.TexSeq(1, stm.Vis.TexIdxCurrent)        ),...
+                            [], (stm.Vis.MonitorCenter([1 2 1 2]) + 240* [1 -1 -1 1])');
+                    elseif	stm.Vis.PicSource(1) == 'H'
+                        Screen('DrawTextures', stm.Vis.windowPtr,...
+                            stm.Vis.TexInd(...
+                                stm.Vis.TexIdxAll(...
+                                    stm.Vis.CycleNumCurrent,...
+                                    stm.Vis.TexSeq(1, stm.Vis.TexIdxCurrent),...
+                                    stm.Vis.TexSeq(2, stm.Vis.TexIdxCurrent) ),...
+                                stm.Vis.TexSeq(1, stm.Vis.TexIdxCurrent)        ),...
+                            [], (stm.Vis.MonitorCenter([1 2 1 2]) + [250 -150 -250 150])');
+                    end
                 else
                     Screen('DrawTextures', stm.Vis.windowPtr,...
                         stm.Vis.TexInd(...
