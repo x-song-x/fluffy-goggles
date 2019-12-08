@@ -7,7 +7,7 @@ function XinList
 clear all
 global F
 F.DirectoryFull = uigetdir(...
-    'Z:\',... 
+    'X:\',... 
     'Pick a parent directory');
 
 disp(['Xintrinsic Listing for the folder " ' ...
@@ -16,7 +16,12 @@ disp(['Xintrinsic Listing for the folder " ' ...
 CurText =   'ExpFolder\tSesRec\tRepTtl\tAddAtts\tSesSound\n';
                         fprintf(CurText);
 % Subfolder Listing
-[F.DirList, F.DirH, F.DirText] = Listing(F.DirectoryFull);
+    DirectoryFull = F.DirectoryFull;
+[DirList, DirH, DirText] = Listing(DirectoryFull);
+F.DirList = DirList;
+F.DirH =    DirH;
+F.DirText = DirText;
+F.DirectoryFull =     DirectoryFull;
 % Write to File
 F.SummaryReportFileH = fopen([...
     F.DirectoryFull, '\', 'DirReport@', datestr(now,'yymmdd'), '.txt'], 'w');
@@ -73,7 +78,31 @@ function [DirList, DirH, DirText] = Listing(DirectoryFull)
                     CurText = [...
                         '\t',   RecFileS.S.SesSoundFile];     
                         fprintf(CurText);   DirText = [DirText CurText];           
-                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
+                
+                %%%% Here down is the host for customization code	%%%%%%
+                option = 'S';   % XinRanAnalysis2_Sweep
+                try
+                    switch option
+                        case 'S'
+                            if ~isfile([DirectoryFull, '\', RecFileName, '_P1_Sweep.fig'])
+                                XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_P1.mat']);
+                                pause(2);
+                                close(gcf);
+                                drawnow;
+                            end
+                    end
+                    CurText = [...
+                        '\t',   'function successfully excuted'];     
+                        fprintf(CurText);   DirText = [DirText CurText];
+                catch
+                    CurText = [...
+                        '\t',   'function cannot be excuted'];     
+                        fprintf(CurText);   DirText = [DirText CurText];
+                end
+                %%%% Here up is the host for customization code     %%%%%%
+                
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
                     CurText = '\n';
                         fprintf(CurText);   DirText = [DirText CurText];  
             end

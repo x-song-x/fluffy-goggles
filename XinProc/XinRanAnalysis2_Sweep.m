@@ -33,13 +33,15 @@ load([A.FullFileName(1:end-7) '.mat'], 'S');	% load S (Saved from recording)
 load([A.FullFileName(1:end-4) '.mat'], 'P');	% load P (Preprocessed)  
 A.SoundFileName =   S.SesSoundFile;
 A.SoundWave =       S.SesSoundWave;
-if S.TrlNumTotal == 1
-    disp([  'Analyzing session: "', A.FileName{1}, ...
-            '" with the sound: "', A.SoundFileName, '"']);
-else
-    disp([  'Session: "', A.FileName{1}, ...
-            '" with the sound: "', A.SoundFileName, '" is not a Sweep based session.']);
-    return
+if A.RunningSource == 'D'
+    if S.TrlNumTotal == 1
+        disp([  'Analyzing session: "', A.FileName{1}, ...
+                '" with the sound: "', A.SoundFileName, '"']);
+    else
+        disp([  'Session: "', A.FileName{1}, ...
+                '" with the sound: "', A.SoundFileName, '" is not a Sweep based session.']);
+        return
+    end
 end
 switch A.FileName{1}([15:17 end-15:end-7])
     case 'NIR_Ring_PBS';    A.Polarity =    -1;     A.PseudoDelay =	2.6;
@@ -54,6 +56,7 @@ switch A.FileName{1}([15:17 end-15:end-7])
     case 'Blu_Fluo_GFP';    A.Polarity =     1;     A.PseudoDelay = 0.0;
     otherwise;              A.Polarity =     1;     A.PseudoDelay =	2.6;
 end
+A.PseudoDelay =	2.6;
 %% Figure 1: ROI
 T.S.FS1 =        [100 75];	% Space, Figure Side
     T.H.hFig1 = figure(...
@@ -196,7 +199,7 @@ A.OneQt_FFTAmpMeanPStdIn =	A.OneQt_FFTAmpMeanIn + std(A.PtQt_FFTAmp(A.PtIndex_RO
 A.PhPwThree_TuneMap =   uint8(zeros(A.N_Ph, A.N_Pw,3));
 % Spectrum scale
 T.dAxesSpecXTick =      [A.Qt_Freqs(A.N_Ct+1),  mean(A.Qt_Freqs([2, end]))]; 
-T.dAxesSpecYTick =      [0 0.00025*2.^(0:8)];
+T.dAxesSpecYTick =      [0 0.000125*2.^(0:8)];
 T.dAxesSpecYTickLabel =	cellfun(@(x) sprintf('%5.3f%%', x),...
                             num2cell(round(100000*T.dAxesSpecYTick)/1000),...
                             'UniformOutput',    false); 

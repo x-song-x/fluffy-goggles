@@ -9,10 +9,11 @@
 
 %% Shared Settings
 clear H;
-H0 =	(0:0.5:359.5)';
+% H0 =	(0:0.5:359.5)';
+H0 =	linspace(0, 359.5, 300)';
 Hnum =	length(H0);
 S0 =	ones(Hnum,1);
-figure;
+figure(     'Units',            'normalized');
 
 %% HSV
 i = 1;
@@ -49,7 +50,13 @@ H{i}.Colormap =         hsv2rgb([H{i}.ColormapHSV(:,1) S0 S0]);
 %% Plot the result
 mapnum = length(H);
 for i = 1:mapnum
-    gh.axes(i) = subplot(mapnum,1,i);       axis off;
+    gh.axes(i) = axes(...
+            'position',         [   0.05, ...
+                                    0.9 - 0.3*i, ...
+                                    0.9,...
+                                    0.1],...
+            'XTick',            [],...
+            'YTick',            []);
     colormap(gh.axes(i),            H{i}.Colormap);
     gh.colorbar(i) =                colorbar('SouthOutSide');
     gh.test(i) = ylabel(gh.colorbar(i),     H{i}.Name);
