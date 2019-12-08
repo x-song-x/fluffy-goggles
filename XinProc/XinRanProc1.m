@@ -134,6 +134,7 @@ for i = 1: length(F.FileName)
     ylabel(T.hAx(2),        'Pixel Mean (ADU)');
     
     save([T.filename(1:end-4) '_P1.mat'], 'P', '-v7.3');     
+    fclose(T.fid);
 end
 
 close(T.hWaitbar);

@@ -18,19 +18,25 @@ stm.TimerOption =       'NI-DAQ';
 stm.SesOption =         'Cali';
 % stm.SesOption =         'DLCL';  % Dot Localizer
 % stm.SesOption =         'DCPS';  % Dot Center vs Periphery, Sinusoidal
-% stm.SesOption =         'DRCW';  % Dot Rotating Quarter, Clockwise;
 % stm.SesOption =         'DRCWF';  % Dot Rotating Quarter, Clockwise, w/ Face;
-% stm.SesOption =         'DRCC';  % Dot Rotating Quarter, CounterClockwise';
+% stm.SesOption =         'DRCCF';  % Dot Rotating Quarter, CounterClockwise';
+% stm.SesOption =         'DRCW';  % Dot Rotating Quarter, Clockwise;
+stm.DotAngleDivide =        8;
 
+if stm.SesOption(1) == 'C'
+	stm.SesCycleTime =              1.5;	% in second
+    sys.SesCycleNumTotal =          80;     % rep # total
+else
+    stm.SesCycleTime =              20;     % in second
+    sys.SesCycleNumTotal =          20;     % rep # total
+end
+    
 % Session Parameters
 % stm.SesCycleTime =              1.25;     % in second
 % sys.SesCycleNumTotal =          80;     % rep # total
 % stm.SesCycleTime =              5;     % in second
 % sys.SesCycleNumTotal =          80;     % rep # total
-% stm.SesCycleTime =              20;     % in second
-% sys.SesCycleNumTotal =          20;     % rep # total
-stm.SesCycleTime =              1;     % in second
-sys.SesCycleNumTotal =          80;     % rep # total
+
 sys.SesCycleNumCurrent =        0;
 stm.SesCycleTimeInitial =       tic;
 
@@ -48,8 +54,9 @@ stm.MonitorWidth =      0.02724*2560;	% in cm
 % Here we call some default settings for setting up Psychtoolbox
                                                 PsychDefaultSetup(2);
 % Draw to the external screen
-% screenNumber = 2;
-screenNumber = 1;
+% screenNumber = 1;
+screenNumber = 2;
+% screenNumber = 3;
 % Define black and white
 white = WhiteIndex(screenNumber);
 black = BlackIndex(screenNumber);     
@@ -57,8 +64,11 @@ gray =  GrayIndex(screenNumber, 0.5);
                                                 Screen('Preference', 'VisualDebugLevel', 1);
                                                 Screen('Preference', 'SkipSyncTests', 1);
 % Open an on screen window
-% [stm.windowPtr, windowRect] =                   PsychImaging('OpenWindow', screenNumber, black);
-[stm.windowPtr, windowRect] =                   PsychImaging('OpenWindow', screenNumber, gray);
+if strcmp(stm.SesOption, 'Cali')
+    [stm.windowPtr, windowRect] =               PsychImaging('OpenWindow', screenNumber, gray);
+else
+    [stm.windowPtr, windowRect] =               PsychImaging('OpenWindow', screenNumber, black);
+end
 % Query: Get the size of the on screen window
 [stm.MonitorPixelNumX, stm.MonitorPixelNumY] =  Screen('WindowSize', stm.windowPtr);
 % Query: the frame duration
@@ -77,7 +87,7 @@ switch stm.SesOption(1)
 
 %         cali_init(stm.windowPtr, @generate_center80_sequence,	'dot',  0.5, 'center'); 
         cali_init(stm.windowPtr, @generate_center80_sequence,	'face', 1, 'center');
-        cali_init(stm.windowPtr, @generate_center80_sequence,	'face', 0.5, 'center');
+%         cali_init(stm.windowPtr, @generate_center80_sequence,	'face', 0.5, 'center');
 %         cali_init(stm.windowPtr, @generate_center78_sequence,	'face', 1); % 78x   1, 2s
 %         cali_init(stm.windowPtr, @generate_full_sequence,       'face', 1); % 144x  1, 2s 
     case 'D'
@@ -128,8 +138,19 @@ switch stm.SesOption(1)
                 end
             case 'RCC'
                 stm.DotAngleMinInitial =    -135;
+                if length(stm.SesOption)>4
+                    if stm.SesOption(5) == 'F'
+                        for i = 1:9
+                            stm.FaceLib{i} =    imread(['D:\GitHub\EyeTrackerCalibration\images\m' num2str(i) '.png']);
+                            stm.FaceTexLib(i) = Screen('MakeTexture', stm.windowPtr, stm.FaceLib{i});
+                            stm.FaceTic =       tic;
+                            stm.FaceTocTime =   2;
+                            stm.FaceIdxCurrent = randi([1 length(stm.FaceTexLib)]);
+                        end
+                    end
+                end
             case 'CPS'
-                stm.DotAngleDivide =        10;
+                stm.DotAngleDivide =        stm.DotAngleDivide;
         end
         Screen('DrawDots', stm.windowPtr, [stm.DotVecPositionX; stm.DotVecPositionY],...
             stm.DotDiameterInPixel, white,	stm.MonitorCenter, 2);
@@ -145,7 +166,7 @@ switch stm.TimerOption
         sys.NIDAQ.D.CycleSmplLow =      sys.NIDAQ.D.InTimebaseRate * stm.SesCycleTime - ...
                                         sys.NIDAQ.D.CycleSmplHigh;
         import dabs.ni.daqmx.*
-        sys.NIDAQ.TaskCO = Task('Recording Session Cycle Switcher');
+        sys.NIDAQ.TaskCO = Task('Recording Session Cycle Switcher2');
         sys.NIDAQ.TaskCO.createCOPulseChanTicks(...
             'Dev3', 1, 'Cycle Counter', '100kHzTimebase', ...
             sys.NIDAQ.D.CycleSmplLow, sys.NIDAQ.D.CycleSmplHigh,...
@@ -281,4 +302,4 @@ end
 % end
 pause(2);
 sca;
-dos('C:\Windows\System32\DisplaySwitch.exe /clone');
+% dos('C:\Windows\System32\DisplaySwitch.exe /clone');

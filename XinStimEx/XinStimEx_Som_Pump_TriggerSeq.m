@@ -7,25 +7,13 @@ global stm sys
 %% Synthesize the trigger seq
 stm.SR =                    100e3;
 stm.TrialTime =             20;
-% stm.TrialPreStimTime =      2.5;
-% stm.TrialStimTime =         15.0;
-
-% stm.TrialStimElectdNum =        2;
-% stm.TrialPipNum =               4;
-% stm.TrialPipTime =              0.25;
-% stm.TrialPipDutyCycle =         0.5;
-
-% stm.TrialStimElectdNum =        6;
-% stm.TrialPipNum =               10;
-% stm.TrialPipTime =              0.25;
-% stm.TrialPipDutyCycle =         0.5;
 
 stm.TrialPreStimTime =      5;
-stm.TrialStimTime =         10.0;
-stm.TrialStimElectdNum =        1;
-stm.TrialPipNum =               40;
-stm.TrialPipTime =              0.25;
-stm.TrialPipDutyCycle =         0.5;
+stm.TrialStimTime =         1.0;
+stm.TrialStimElectdNum =    1;
+stm.TrialPipNum =           1;
+stm.TrialPipTime =          1;
+stm.TrialPipDutyCycle =     0.5;
 % % stm.TrialPipNum =               5;
 % % stm.TrialPipTime =              0.25;
 % % stm.TrialPipDutyCycle =         0.5;
@@ -69,7 +57,7 @@ stm.seq = uint32(stm.seq);
 
 %% Setup NI-DAQ
 import dabs.ni.daqmx.*
-sys.NIDAQ.TaskDO = Task('Cochlear Implant Trigger Sequence');
+sys.NIDAQ.TaskDO = Task('Pump Trigger Sequence');
 sys.NIDAQ.TaskDO.createDOChan(...
     'Dev3',     'port0/line0:7');
 sys.NIDAQ.TaskDO.cfgSampClkTiming(...
