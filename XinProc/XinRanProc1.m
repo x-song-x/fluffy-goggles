@@ -133,7 +133,9 @@ for i = 1: length(F.FileName)
     ylabel(T.hAx(1),        'Power Mean (volt)');
     ylabel(T.hAx(2),        'Pixel Mean (ADU)');
     
-    save([T.filename(1:end-4) '_P1.mat'], 'P', '-v7.3');     
+    save([T.filename(1:end-4),...
+        sprintf('_%dx%d@%dfps', P.ProcPixelHeight, P.ProcPixelWidth, P.ProcFrameRate),...
+        '_P1.mat'], 'P', '-v7.3');     
     fclose(T.fid);
 end
 

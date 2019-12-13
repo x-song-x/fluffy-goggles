@@ -29,7 +29,9 @@ end
 %% Load data files
 global P S
 A.FullFileName =    [A.PathName, A.FileName{1}];   
-load([A.FullFileName(1:end-7) '.mat'], 'S');	% load S (Saved from recording)
+A.FileNameSplits =	strsplit(A.FileName{1}, '_');
+A.FileNameS =       strjoin(A.FileNameSplits(1:5), '_');
+load([A.PathName A.FileNameS '.mat'], 'S');	% load S (Saved from recording)
 load([A.FullFileName(1:end-4) '.mat'], 'P');	% load P (Preprocessed)  
 A.SoundFileName =   S.SesSoundFile;
 A.SoundWave =       S.SesSoundWave;
@@ -43,7 +45,7 @@ if A.RunningSource == 'D'
         return
     end
 end
-switch A.FileName{1}([15:17 end-15:end-7])
+switch [A.FileNameSplits{2}(1:3) '_' A.FileNameSplits{4}(1:4) '_'  A.FileNameSplits{5}(1:3)]
     case 'NIR_Ring_PBS';    A.Polarity =    -1;     A.PseudoDelay =	2.6;
     case 'NIR_Pola_PBS';    A.Polarity =    -1;     A.PseudoDelay =	2.6;
     case 'Far_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	2.6;
@@ -56,20 +58,23 @@ switch A.FileName{1}([15:17 end-15:end-7])
     case 'Blu_Fluo_GFP';    A.Polarity =     1;     A.PseudoDelay = 0.0;
     otherwise;              A.Polarity =     1;     A.PseudoDelay =	2.6;
 end
-A.PseudoDelay =	2.6;
+A.PseudoDelay =	3.7;
+A.DispPixelWidth0 =     120;
+A.DispPixelHeight0 =	75;
+
 %% Figure 1: ROI
 T.S.FS1 =        [100 75];	% Space, Figure Side
     T.H.hFig1 = figure(...
                     'Name',         ['Determine the ROI in the session "', A.FileName{1}(1:end-7), '"'],...
                     'Units',        'pixels',...  
                     'Position',     [   10,                     10,...
-                                        T.S.FS1(1)*2+P.ProcPixelWidth*5,...
-                                        T.S.FS1(2)*2+P.ProcPixelHeight*5 ]);
+                                        T.S.FS1(1)*2+A.DispPixelWidth0*5,...
+                                        T.S.FS1(2)*2+A.DispPixelHeight0*5 ]);
     T.H.hFig1Axes1 = axes(...
                     'Parent',       T.H.hFig1,...
                     'Units',        'pixels',...  
                     'Position',     [   T.S.FS1(1),             T.S.FS1(2),...
-                                        P.ProcPixelWidth*5,     P.ProcPixelHeight*5 ]);
+                                        A.DispPixelWidth0*5,	A.DispPixelHeight0*5 ]);
 	T.H.hFig1Axes1Image1 = imagesc(	squeeze(P.ProcDataMat(1,1,:,:,1)) + ...             
                                     squeeze(P.ProcDataMat(end,end,:,:,end)),...
                     'Parent',       T.H.hFig1Axes1);    
@@ -77,12 +82,15 @@ T.S.FS1 =        [100 75];	% Space, Figure Side
     title(                       	'Drag to position the ROI, double click on the circle to finish');
     try 
         if strcmp(S.MkyPrep, 'Skull')
-            T.H.hFig1Axes1ROI = imellipse(gca, [	0 	0	121 76]);
+            T.H.hFig1Axes1ROI = imellipse(gca, [	0 	0   ...
+                                                    P.ProcPixelWidth+1 P.ProcPixelHeight+1]);
         else
-            T.H.hFig1Axes1ROI = imellipse(gca, [	23	0	76	76]);
+            T.H.hFig1Axes1ROI = imellipse(gca, [	ceil(0.5*(P.ProcPixelWidth-P.ProcPixelHeight))	0	...
+                                                    P.ProcPixelHeight+1	P.ProcPixelHeight+1]);
         end
     catch
-            T.H.hFig1Axes1ROI = imellipse(gca, [	23	0	76	76]);            
+            T.H.hFig1Axes1ROI = imellipse(gca, [	ceil(0.5*(P.ProcPixelWidth-P.ProcPixelHeight))	0	...
+                                                    P.ProcPixelHeight+1	P.ProcPixelHeight+1]);            
     end 
     if A.RunningSource == 'D'
         wait(T.H.hFig1Axes1ROI);
@@ -233,8 +241,8 @@ T.dAxesTempYLim =           T.dAxesTempYLims(T.dAxesTempYLimInd);
 % Figure
 T.S.FS2 =       [   75      120;...
                     105     30];
-T.VarMag =	3.0;        T.N_PwVar = A.N_Pw*T.VarMag;    T.N_PhVar = A.N_Ph*T.VarMag;              
-T.ImgMag =	3.0;        T.N_PwImg = A.N_Pw*T.ImgMag;    T.N_PhImg = A.N_Ph*T.ImgMag; 
+T.VarMag =	3.0;        T.N_PwVar = A.DispPixelWidth0*T.VarMag;    T.N_PhVar = A.DispPixelHeight0*T.VarMag;              
+T.ImgMag =	3.0;        T.N_PwImg = A.DispPixelWidth0*T.ImgMag;    T.N_PhImg = A.DispPixelHeight0*T.ImgMag; 
 T.S.BA =        [90 90];    % Space, Between Axes
 T.S.CBW =       10;         % Space, ColorBarWidth
 T.S.CBTW =      20;         % Space, ColorBarTextWidth
@@ -284,7 +292,7 @@ T.H.hFig2Text4 = uicontrol(...
                 'Enable',       'off',...
                 'Tag',          'TitlTex4',...
                 'ButtonDownFcn',@XinRanAnalysis2_Sweep_ButtonDown);      
-%% Axes: Varience        
+%% Axes: Variance        
 for i = 1:length(A.Fig2Var)
     T.H.hFig2AxesVar(i) = axes(...
                 'Parent',       T.H.hFig2,...
@@ -759,6 +767,12 @@ XinRanAnalysis2_Sweep_ButtonDown(T.H.hFig2SpecScalebarSat);
 XinRanAnalysis2_Sweep_ButtonDown(T.H.hFig2SpecScalebarVal); 
 XinRanAnalysis2_Sweep_ButtonDown(T.H.hFig2AxesFrmeScalebar);  
 
+drawnow;
+
 %% Save
-savefig(T.H.hFig2, [A.PathName,A.FileName{1}(1:end-4), A.FileNameMod, '_Sweep.fig'], 'compact');
+% remember to set Preference -> General -> Mat-files to be
+% "MATLAB Version 7.3 or later (save -7.3)" to save data > 2GB, even for
+% saving figure through savefig, it applies.
+A.FileNameMod = [A.FileNameMod sprintf('_%3.1fs', A.PseudoDelay)];
+savefig(T.H.hFig2, [A.PathName,A.FileName{1}(1:end-7), A.FileNameMod, '_Sweep.fig'], 'compact'); 
 T.H.hFig2.Name = [T.H.hFig2.Name 'SAVED'];
