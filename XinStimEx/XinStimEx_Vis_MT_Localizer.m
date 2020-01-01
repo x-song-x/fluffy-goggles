@@ -1,6 +1,19 @@
 %% MT localizer with multiple options
 
 %% Switch multi-display mode
+if max(Screen('Screens')) ~=3
+    opts = struct(  'WindowStyle',  'modal',... 
+                    'Interpreter',  'tex');
+    errordlg(...
+        [   '\fontsize{20} The monitors are not in all extended mode \newline ',...
+            'Close thecurrent Matlab \newline',...
+            'Extend all screens in windows \newline' ,...
+            'And restart Matlab'],...
+        '', opts)
+    return
+else
+    
+end
 dos('C:\Windows\System32\DisplaySwitch.exe /extend');
 sca;                    % Clear the screen       
 pause(2);
@@ -9,6 +22,14 @@ clearvars;              % Clear the workspace
 global stm sys
 
 %% Specify Session Parameters
+% locate the screen number
+for i = 1: max(Screen('Screens'))
+    info = Screen('Resolution', i);
+    if info.hz ==144
+        sys.screenNumber = i;
+        break
+    end
+end
 
 % Session Timer 
 % stm.TimerOption =       'simulated';
@@ -18,7 +39,7 @@ stm.TimerOption =       'NI-DAQ';
 % stm.SesOption =         'Cali';
 % stm.SesOption =         'DLCL';  % Dot Localizer
 % stm.SesOption =         'DCPS';  % Dot Center vs Periphery, Sinusoidal
-% stm.SesOption =         'DRCWF';  % Dot Rotating Quarter, Clockwise, w/ Face;
+stm.SesOption =         'DRCWF';  % Dot Rotating Quarter, Clockwise, w/ Face;
 % stm.SesOption =         'DRCCF';  % Dot Rotating Quarter, CounterClockwise';
 % stm.SesOption =         'DRCW';  % Dot Rotating Quarter, Clockwise;
 stm.DotAngleDivide =        10;
@@ -53,21 +74,17 @@ stm.MonitorWidth =      0.02724*2560;	% in cm
 %% Prepare the Psychtoolbox window
 % Here we call some default settings for setting up Psychtoolbox
                                                 PsychDefaultSetup(2);
-% Draw to the external screen
-% screenNumber = 1;
-screenNumber = 2;
-% screenNumber = 3;
 % Define black and white
-white = WhiteIndex(screenNumber);
-black = BlackIndex(screenNumber);     
-gray =  GrayIndex(screenNumber, 0.5);              
+white = WhiteIndex(sys.screenNumber);
+black = BlackIndex(sys.screenNumber);     
+gray =  GrayIndex(sys.screenNumber, 0.5);              
                                                 Screen('Preference', 'VisualDebugLevel', 1);
                                                 Screen('Preference', 'SkipSyncTests', 1);
 % Open an on screen window
 if strcmp(stm.SesOption, 'Cali')
-    [stm.windowPtr, windowRect] =               PsychImaging('OpenWindow', screenNumber, gray);
+    [stm.windowPtr, windowRect] =               PsychImaging('OpenWindow', sys.screenNumber, gray);
 else
-    [stm.windowPtr, windowRect] =               PsychImaging('OpenWindow', screenNumber, black);
+    [stm.windowPtr, windowRect] =               PsychImaging('OpenWindow', sys.screenNumber, black);
 end
 % Query: Get the size of the on screen window
 [stm.MonitorPixelNumX, stm.MonitorPixelNumY] =  Screen('WindowSize', stm.windowPtr);

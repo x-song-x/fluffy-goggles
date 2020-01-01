@@ -1,13 +1,35 @@
 %% MT localizer with multiple options
 
 %% Switch multi-display mode
-% for triple monitor @190925, #1=Outside Right, #2=Inside, #3=Outside Main.
-% "extend" should be set on triple screens before openning the current Matlab
+if max(Screen('Screens')) ~=3
+    opts = struct(  'WindowStyle',  'modal',... 
+                    'Interpreter',  'tex');
+    errordlg(...
+        [   '\fontsize{20} The monitors are not in all extended mode \newline ',...
+            'Close thecurrent Matlab \newline',...
+            'Extend all screens in windows \newline' ,...
+            'And restart Matlab'],...
+        '', opts)
+    return
+else
+    
+end
 dos('C:\Windows\System32\DisplaySwitch.exe /extend');
 sca;                    % Clear the screen       
-clearvars;              % Clear the workspace
 pause(2);
+% close all;
+clearvars;              % Clear the workspace
 global stm sys
+
+%% Specify Session Parameters
+% locate the screen number
+for i = 1: max(Screen('Screens'))
+    info = Screen('Resolution', i);
+    if info.hz ==144
+        sys.screenNumber = i;
+        break
+    end
+end
 
 stm.SR =                100e3;
 stm.SesDurTotal =       396;                                
@@ -86,24 +108,18 @@ stm.Vis.MonitorWidth =      0.02724*2560;	% in cm
 %% Prepare the Psychtoolbox window
 % Here we call some default settings for setting up Psychtoolbox
                                                 PsychDefaultSetup(2);
-% Draw to the external screen
-% for triple monitor @190925, #1=Outside Right, #2=Inside, #3=Outside Main.
-% for triple monitor @190925, #1=Outside Right, #2=Outside Main #3=Inside.
-% screenNumber = 1;
-screenNumber = 2;
-% screenNumber = 3;
 
 % Define shades
-white = WhiteIndex(screenNumber);
-black = BlackIndex(screenNumber);   
-gray =  GrayIndex(screenNumber, 0.5);   
+white = WhiteIndex(sys.screenNumber);
+black = BlackIndex(sys.screenNumber);   
+gray =  GrayIndex(sys.screenNumber, 0.5);   
                                                 Screen('Preference', 'VisualDebugLevel', 1);
                                                 Screen('Preference', 'SkipSyncTests', 1);
 % Open an on screen window
 if stm.Vis.SesOptionMore 
-    [stm.Vis.windowPtr, windowRect] =           PsychImaging('OpenWindow', screenNumber, gray);
+    [stm.Vis.windowPtr, windowRect] =           PsychImaging('OpenWindow', sys.screenNumber, gray);
 else
-    [stm.Vis.windowPtr, windowRect] =           PsychImaging('OpenWindow', screenNumber, black);
+    [stm.Vis.windowPtr, windowRect] =           PsychImaging('OpenWindow', sys.screenNumber, black);
 end
 % Query: Get the size of the on screen window
 [stm.Vis.MonitorPixelNumX, stm.Vis.MonitorPixelNumY] = ...
@@ -268,8 +284,10 @@ sys.NIDAQ.TaskDO.cfgDigEdgeStartTrig(...
 sys.NIDAQ.TaskDO.writeDigitalData(      stm.Som.seq);
 sys.NIDAQ.TaskDO.start()
 
-stm.Vis.Running =               1; 
-sys.MsgBox =        msgbox('Click to terminate the session after current visual cycle');
+stm.Vis.Running =               1;     
+    opts = struct(  'WindowStyle',  'non-modal',... 
+                    'Interpreter',  'tex');
+sys.MsgBox =	msgbox('\fontsize{20} Click to terminate the session after current visual cycle','', opts);
 
 %% Play 
 while stm.Vis.Running
