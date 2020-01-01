@@ -15,13 +15,13 @@ global stm sys
 stm.TimerOption =       'NI-DAQ';
 
 % Session Type Options
-stm.SesOption =         'Cali';
+% stm.SesOption =         'Cali';
 % stm.SesOption =         'DLCL';  % Dot Localizer
 % stm.SesOption =         'DCPS';  % Dot Center vs Periphery, Sinusoidal
 % stm.SesOption =         'DRCWF';  % Dot Rotating Quarter, Clockwise, w/ Face;
 % stm.SesOption =         'DRCCF';  % Dot Rotating Quarter, CounterClockwise';
 % stm.SesOption =         'DRCW';  % Dot Rotating Quarter, Clockwise;
-stm.DotAngleDivide =        8;
+stm.DotAngleDivide =        10;
 
 if stm.SesOption(1) == 'C'
 	stm.SesCycleTime =              1.5;	% in second
@@ -301,5 +301,7 @@ end
 %     XinStimEx_Vis_MT_Localizer_Callback;
 % end
 pause(2);
+Screen('CloseAll') 
+close all;
 sca;
 % dos('C:\Windows\System32\DisplaySwitch.exe /clone');

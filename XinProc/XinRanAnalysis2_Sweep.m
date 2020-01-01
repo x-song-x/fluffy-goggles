@@ -6,11 +6,19 @@ function XinRanAnalysis2_Sweep(varargin)
 clear global
 global A T
 %% Get preprocessed ('*_P?.mat') file
+[~, T.pcname] = system('hostname');
+if strcmp(T.pcname(1:end-1), 'FANTASIA-425')
+    % if current computer is the recording computer 
+        T.folder = 'D:\=XINTRINSIC=\';    
+else
+    % if current computer is NOT a recording computer
+        T.folder = 'X:\';       
+end
 if nargin ==0
     % Calling from direct running of the function
     A.RunningSource =   'D';
     [A.FileName, A.PathName, A.FilterIndex] = uigetfile(...
-                        'W:\*_P?.mat',...
+                        [T.folder '*_P?.mat'],...
                         'Select a "_P1.mat" file to process');
     if A.FilterIndex == 0
         clear A;
@@ -114,6 +122,11 @@ try
 catch
         A.N_Tpf =	P.ProcFrameBinNum/80;   % Number_TimePerFrame
 end
+% OVERWRITING
+% S.TrlDurPreStim =   0;        % Number_TimeTrialPreStim
+% S.TrlDurStim =      S.TrlDurTotal;    
+% OVERWRITING
+
 A.N_Ttps =          S.TrlDurPreStim;        % Number_TimeTrialPreStim
 A.N_Tts =           S.TrlDurStim;           % Number_TimeTrialStim
 A.N_Ttt =           S.TrlDurTotal;          % Number_TimeTrialTotal
@@ -121,7 +134,7 @@ A.N_Tst =           S.SesDurTotal;          % NUmber_TimeSessionTotal
 A.N_Ct =            S.SesCycleNumTotal;	% Number_CycleTotal (in the session)
 A.FileNameMod =     '';
 % % % % % % Manually switch session temporal arrangement if here.
-%     A.N_Ct =  19;       
+%     A.N_Ct =  19;       % Cycle (Rep) Number
 %         A.N_Ttt =   A.N_Tst/A.N_Ct;
 %         A.N_Tts =   A.N_Ttt - A.N_Ttps;
 %         A.FileNameMod = sprintf('_%drep', A.N_Ct);

@@ -107,7 +107,7 @@ if TuneUpdt
         case 'ScalebarHue'  
             HueMapOptions = {...
                 'HSLuv',        'HSLuv',        'HSVadjusted';
-                'Circular',     'Linear',       'Linear'};
+                'Circular',     'Linear',       'Circular'};
             HueMapOrder =   HueMapOrder + 1;
             if HueMapOrder> length(HueMapOptions)
                 HueMapOrder = 1;

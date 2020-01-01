@@ -3,8 +3,16 @@
 
 %% Locate Files 
 clear all
+[~, T.pcname] = system('hostname');
+if strcmp(T.pcname(1:end-1), 'FANTASIA-425')
+    % if current computer is the recording computer 
+        T.folder = 'D:\=XINTRINSIC=\';    
+else
+    % if current computer is NOT a recording computer
+        T.folder = 'X:\';       
+end
 [F.FileName, F.PathName, F.FilterIndex] = uigetfile(...
-    'Z:\2018.03 T2 (Marmoset 80Z, Xintrinsic, Green & Fluo)\*.rec',...
+    [T.folder '*.rec'],...
     'Select raw recording files to process',...
     'MultiSelect',              'On');
 if F.FilterIndex == 0
@@ -48,8 +56,7 @@ for i = 1: length(F.FileName)
     disp([  'Processing: "', F.FileName{i}, ...
             '" with the sound: "', S.SesSoundFile, '"']);
     
-    %% Parameter initialization for Spatial & Temporal Binning
-    
+    %% Parameter initialization for Spatial & Temporal Binning  
     R.SesTrlNumTotal =          length(S.SesTrlOrderVec);
     R.SysCamFramePerTrial =     S.TrlDurTotal * R.SysCamFrameRate;
     P.ProcFramePerTrial =       S.TrlDurTotal * P.ProcFrameRate;   
@@ -68,7 +75,7 @@ for i = 1: length(F.FileName)
                                     P.ProcPixelHeight,...
                                     P.ProcPixelWidth,...
                                     P.ProcFramePerTrial...
-                                    );                         
+                                    );   
     for j = 1:S.SesCycleNumTotal
         for k = 1:S.TrlNumTotal
             m = (j-1)*S.TrlNumTotal + k;

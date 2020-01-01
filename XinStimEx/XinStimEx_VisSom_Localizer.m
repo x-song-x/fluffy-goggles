@@ -13,11 +13,11 @@ stm.SR =                100e3;
 stm.SesDurTotal =       396;                                
                                 %   F:Face;	B:Body;     O:Object;
                                 %   P:Phase scambled;   S:Spatial scambled
-% stm.Vis.SesOptionMore = 0;  stm.Vis.SesOptionContrast = 'All';	% Dots
+stm.Vis.SesOptionMore = 0;  stm.Vis.SesOptionContrast = 'All';	% Dots
 % stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'BvF';	% Body vs Face
 % stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'OvF';  % Object vs Face
 % stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'PvF';  % Phase SCRBD Face vs Face 
-stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'SvF';  % Spatial SCRBD Face vs Face 
+% stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'SvF';  % Spatial SCRBD Face vs Face 
 % stm.Vis.SesOptionMore = 1;  stm.Vis.SesOptionContrast = 'OvB';  % Object vs Body
 % stm.Vis.PicSource = 'Wang';
 stm.Vis.PicSource = 'Hung';
@@ -34,6 +34,7 @@ stm.Som.TrialPuffSeqTime =      2.0;
 % stm.Som.TrialStimChanBitSeq =   [4 4 4 4 6 6 6 4 4 4 4];
 % stm.Som.TrialStimChanBitSeq =   [4 4 4 4 0 0 0 4 4 4 4];
 stm.Som.TrialStimChanBitSeq =   [6 6 6 6 0 0 0 6 6 6 6];
+% stm.Som.TrialStimChanBitSeq =   [1 1 1 1 0 0 0 1 1 1 1];
 % stm.Som.TrialStimChanBitSeq =   [2 2 2 6 2 2 2 2];
 
 stm.Som.TrialPuffFreq =         10;
@@ -394,5 +395,7 @@ sys.NIDAQ.TaskDO.abort();
 sys.NIDAQ.TaskDO.delete;
         try sys.MsgBox.delete();    catch
         end
+Screen('CloseAll') 
+close all;
 sca;
 % dos('C:\Windows\System32\DisplaySwitch.exe /clone');
