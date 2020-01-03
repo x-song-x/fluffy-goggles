@@ -86,7 +86,7 @@ function [DirList, DirH, DirText] = Listing(DirectoryFull)
                     switch option
                         case 'S'
                             if ~isfile([DirectoryFull, '\', RecFileName, '_P1_Sweep.fig'])
-                                XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_P1.mat']);
+                                XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_300x480@5fps_P1.mat']);
                                 pause(2);
                                 close(gcf);
                                 drawnow;
