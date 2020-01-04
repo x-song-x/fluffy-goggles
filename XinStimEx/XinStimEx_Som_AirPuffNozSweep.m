@@ -90,7 +90,7 @@ stm.Som.TrialStimChanNum =      8;
 
 stm.Som.TrialStimChanNum =      10;
 stm.Som.TrialPuffSeqTime =      2;
-stm.Som.TrialStimChanNormSeq =  (11)*ones(1, 10);	%
+stm.Som.TrialStimChanNormSeq =  (116)*ones(1, 10);	%
 
 stm.Som.TrialPuffFreq =         10;
 stm.Som.TrialPuffDutyCycle =	0.3;
@@ -126,8 +126,9 @@ end
 stm.Som.seq = uint32(stm.Som.seq);
 
 %% Setup NI-DAQ
+sys.taskName = 'Air Puff Nozzle Multiple';
 import dabs.ni.daqmx.*
-sys.NIDAQ.TaskDO = Task('Cochlear Implant Trigger Sequence2');
+sys.NIDAQ.TaskDO = Task(sys.taskName);
 sys.NIDAQ.TaskDO.createDOChan(...
     'Dev3',     'port0/line0:7');
 sys.NIDAQ.TaskDO.cfgSampClkTiming(...
@@ -145,3 +146,14 @@ pause;
 sys.NIDAQ.TaskDO.abort();
 sys.NIDAQ.TaskDO.writeDigitalData(uint32(0));
 sys.NIDAQ.TaskDO.delete;
+% Reset
+    sys.NIDAQ.TaskDO = Task(sys.taskName);
+    sys.NIDAQ.TaskDO.createDOChan(...
+        'Dev3',     'port0/line0:7');
+    sys.NIDAQ.TaskDO.cfgSampClkTiming(...
+        stm.SR,     'DAQmx_Val_ContSamps',	stm.Som.SmplNumSesTotal );
+    sys.NIDAQ.TaskDO.writeDigitalData(      uint32(stm.Som.seq*0));
+    sys.NIDAQ.TaskDO.start();
+    pause(1);
+    sys.NIDAQ.TaskDO.abort();
+    sys.NIDAQ.TaskDO.delete;
