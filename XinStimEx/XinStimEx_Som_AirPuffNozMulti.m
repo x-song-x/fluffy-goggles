@@ -68,20 +68,20 @@ stm.Som.Trial(i).DurStim =          4;
 stm.Som.Trial(i).PuffFreq =         10;
 stm.Som.Trial(i).PuffDutyCycle =    stm.Som.Ses.PuffDutyCycle;
 i = 2;
-stm.Som.Trial(i).StimChCode =       10;     % 00111110  Facial: 23 reps
+stm.Som.Trial(i).StimChCode =       10;     % 00001010  Facial: 23 reps
 stm.Som.Trial(i).DurTotal =         19;
 stm.Som.Trial(i).DurStim =          4;
 stm.Som.Trial(i).PuffFreq =         10;
 stm.Som.Trial(i).PuffDutyCycle =    stm.Som.Ses.PuffDutyCycle;
 i = 3;                                      % Masking Ch should be the last
-stm.Som.Trial(i).StimChCode =       116;      % 01000000  Masking: 23 reps
+stm.Som.Trial(i).StimChCode =       116;    % 01110100  Masking: 23 reps
 stm.Som.Trial(i).DurTotal =         19;         
 stm.Som.Trial(i).DurStim =          19;
 stm.Som.Trial(i).PuffFreq =         10;
 stm.Som.Trial(i).PuffDutyCycle =    stm.Som.Ses.PuffDutyCycle;
 stm.Som.Trial(i).MaskingCh =        true; 
 
-% stm.Som.HardwareTrigger =       1;
+stm.Som.HardwareTrigger =       1;
 
 %% Routine Numbers
 stm.SR =                    100e3;
@@ -147,7 +147,7 @@ end
     
 %% Play until cancelled
 disp('ready to be triggered!');
-close(gcf)
+% close(gcf)
 pause;
 sys.NIDAQ.TaskDO.abort();
 sys.NIDAQ.TaskDO.delete;

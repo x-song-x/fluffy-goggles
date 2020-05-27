@@ -318,6 +318,12 @@ if TitlUpdt
     FigPosiMatlab =     get(gcf,    'Position');
     FigName =           get(gcf,    'Name');
     MoniPosiMatlab =    get(0,      'MonitorPosition');
+    MoniNumMain =       find(MoniPosiMatlab(:,1) == 1);
+    % -x -y are counted from the lowerleft corner of the WINDOWS MAIN DISPLAY
+    %   MATLAB® sets the display information values for this property at startup.
+    %   The values are static. If your system display settings change, 
+    %   for example, if you plug in a new monitor, then the values do not update. 
+    %   To refresh the values, restart MATLAB.
     switch ButtonTag(5:8)
         case 'Var1';    AxesPlus = [    -2  -56 54  17  ];  figclip = 1;
         case 'Var2';    AxesPlus = [    -2  -56 64  17  ];  figclip = 1;
@@ -347,12 +353,15 @@ if TitlUpdt
         FigCutMatlab =  AxesPosiMatlab + AxesAdd;
         MoniCutMatlab = FigCutMatlab + [FigPosiMatlab(1:2) 0 0];
         MoniCutWin =    MoniCutMatlab;
-        MoniCutWin(2) = MoniPosiMatlab(1,4) - MoniCutWin(2) - MoniCutWin(4);
+        MoniCutWin(2) = MoniPosiMatlab(MoniNumMain,4) - MoniCutWin(2) - MoniCutWin(4);
         % The following function requires NirCmd
         % http://www.nirsoft.net/utils/nircmd2.html#using
         % download NirCmd, unzip, and put the .exe files into Windows/System32
         dos([ 'C:\Windows\System32\Nircmd.exe savescreenshot *clipboard* ', ...
             sprintf('%d ', MoniCutWin) ]);
+        % The coordinates for Nircmd is: -x, -y, width, height
+        %   -x, -y are counted from the upperleft corner of the WINDOWS MAIN DISPLAY
+        
     else
     end
 end

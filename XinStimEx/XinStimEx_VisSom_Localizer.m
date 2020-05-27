@@ -1,7 +1,7 @@
 %% MT localizer with multiple options
 
 %% Switch multi-display mode
-if max(Screen('Screens')) ~=3
+if max(Screen('Screens')) ~=2
     opts = struct(  'WindowStyle',  'modal',... 
                     'Interpreter',  'tex');
     errordlg(...

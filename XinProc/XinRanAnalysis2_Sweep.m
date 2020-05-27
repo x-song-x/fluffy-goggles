@@ -15,9 +15,11 @@ else
         T.folder = 'X:\';       
 end
         T.version = version;
-if str2double(T.version(end-5:end-2))>2018;     T.version = true;
-elseif str2double(T.version(end-5:end-2))==2018
-    if T.version(end-1) == 'b';                 T.version = true;
+        slot = strfind(T.version, 'R20');
+        T.version = T.version(slot:slot+5);
+if str2double(T.version(2:5))>2018;             T.version = true;
+elseif str2double(T.version(2:5))==2018
+    if T.version(end) == 'b';                 T.version = true;
     else                                        T.version = false;
     end
 else                                            T.version = false;
@@ -75,7 +77,7 @@ switch [A.FileNameSplits{2}(1:3) '_' A.FileNameSplits{4}(1:4) '_'  A.FileNameSpl
     case 'Blu_Fluo_GFP';    A.Polarity =     1;     A.PseudoDelay = 0.0;
     otherwise;              A.Polarity =     1;     A.PseudoDelay =	2.6;
 end
-A.PseudoDelay =	3.7;
+A.PseudoDelay =	3.3;
 A.DispPixelWidth0 =     120;
 A.DispPixelHeight0 =	75;
 
