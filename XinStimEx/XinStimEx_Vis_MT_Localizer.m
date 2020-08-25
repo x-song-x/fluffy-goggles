@@ -1,7 +1,7 @@
 %% MT localizer with multiple options
 
 %% Switch multi-display mode
-if max(Screen('Screens')) ~=3
+if max(Screen('Screens')) ~=2
     opts = struct(  'WindowStyle',  'modal',... 
                     'Interpreter',  'tex');
     errordlg(...
@@ -14,6 +14,7 @@ if max(Screen('Screens')) ~=3
 else
     
 end
+Screen('Close');
 dos('C:\Windows\System32\DisplaySwitch.exe /extend');
 sca;                    % Clear the screen       
 pause(2);
@@ -36,10 +37,10 @@ end
 stm.TimerOption =       'NI-DAQ';
 
 % Session Type Options
-% stm.SesOption =         'Cali';
+stm.SesOption =         'Cali';
 % stm.SesOption =         'DLCL';  % Dot Localizer
 % stm.SesOption =         'DCPS';  % Dot Center vs Periphery, Sinusoidal
-stm.SesOption =         'DRCWF';  % Dot Rotating Quarter, Clockwise, w/ Face;
+% stm.SesOption =         'DRCWF';  % Dot Rotating Quarter, Clockwise, w/ Face;
 % stm.SesOption =         'DRCCF';  % Dot Rotating Quarter, CounterClockwise';
 % stm.SesOption =         'DRCW';  % Dot Rotating Quarter, Clockwise;
 stm.DotAngleDivide =        10;

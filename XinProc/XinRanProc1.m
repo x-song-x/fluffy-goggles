@@ -161,4 +161,5 @@ end
 
 close(T.hWaitbar);
 disp('All files are processed');
+clear T P R
 return;
