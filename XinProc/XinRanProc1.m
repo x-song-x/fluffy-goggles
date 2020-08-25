@@ -1,8 +1,10 @@
-%% Xintrinsic Processing 1 
-%% DATA BINNNING
+function XinRanProc1(varargin)
+% Xintrinsic preProcessing 1 
+% DATA BINNNING
 
-%% Locate Files 
-clear all
+clear global
+global A T R P
+%% Get preprocessed ('*.rec') file
 [~, T.pcname] = system('hostname');
 if strcmp(T.pcname(1:end-1), 'FANTASIA-425')
     % if current computer is the recording computer 
@@ -11,20 +13,31 @@ else
     % if current computer is NOT a recording computer
         T.folder = 'X:\';       
 end
-[F.FileName, F.PathName, F.FilterIndex] = uigetfile(...
-    [T.folder '*.rec'],...
-    'Select raw recording files to process',...
-    'MultiSelect',              'On');
-if F.FilterIndex == 0
-    clear F;                    % nothing selected
-    return
-end
-if iscell(F.FileName) == 0      % single file selected
-    F.FileName = {F.FileName};
+
+if nargin ==0
+    % Calling from direct running of the function
+    A.RunningSource =   'D';
+    [A.FileName, A.PathName, A.FilterIndex] = uigetfile(...
+        [T.folder '*.rec'],...
+        'Select raw recording files to process',...
+        'MultiSelect',              'On');
+    if A.FilterIndex == 0
+        clear A;                    % nothing selected
+        return
+    end
+    if iscell(A.FileName) == 0      % single file selected
+        A.FileName = {A.FileName};
+    end
+else
+    A.RunningSource =   'S';
+    % Calling from another script
+    [A.PathName, A.FileName, FileExt] = fileparts(varargin{1});
+    A.PathName =        [A.PathName, '\'];
+    A.FileName =        {[A.FileName, FileExt]};
 end
 
 disp(['Xintrinsic Processing Stage 1 (spatiotemporal binning) is about to start on ' ...
-    num2str(length(F.FileName)) ' files']);
+    num2str(length(A.FileName)) ' files']);
 
 %% Parmateters
 % R: Recorded
@@ -37,7 +50,7 @@ R.SysCamPixelBinNum =           4;
 R.SysCamFrameRate =             80;
 
 % Bin 16 x 16 pixels together   (F)
-P.ProcPixelBinNum =             4;
+P.ProcPixelBinNum =             1;
 P.ProcPixelHeight =             R.SysCamPixelHeight/P.ProcPixelBinNum;
 P.ProcPixelWidth =              R.SysCamPixelWidth/P.ProcPixelBinNum;
 
@@ -48,12 +61,12 @@ P.ProcFrameBinNum =             R.SysCamFrameRate/P.ProcFrameRate;
 T.hWaitbar =                    waitbar(0, 'processing');
 
 %% DATA BINNING
-for i = 1: length(F.FileName)
+for i = 1: length(A.FileName)
    
     %% Load 'S'
-    T.filename = [F.PathName, F.FileName{i}];
+    T.filename = [A.PathName, A.FileName{i}];
     load([T.filename(1:end-3) 'mat']);  
-    disp([  'Processing: "', F.FileName{i}, ...
+    disp([  'Processing: "', A.FileName{i}, ...
             '" with the sound: "', S.SesSoundFile, '"']);
     
     %% Parameter initialization for Spatial & Temporal Binning  
@@ -124,7 +137,7 @@ for i = 1: length(F.FileName)
     %% Show Figure
     T.timeraw =                 (1:S.SesFrameTotal)/R.SysCamFrameRate;
     T.timebinned =              (1:P.ProcFrameNumTotal)/P.ProcFrameRate;
-    figure(     'Name',         F.FileName{i});
+    figure(     'Name',         A.FileName{i});
     subplot(2,1,1);
     [T.hAx,~,~] =       plotyy(	T.timeraw,      P.RawMeanPower, ...
                                 T.timeraw,      P.RawMeanPixel);

@@ -29,11 +29,12 @@ switch OutputType
     case 'Linear';     HueStart = 0;                    HueZigZag = 0;
         switch HueType
             case 'HSVadjusted';     HueStop = 10/12;
-            case 'HSLuv';           HueStop = 11/12;
+            case 'HSLuv';           HueStop = 10/12;
             case 'CIELCh';          HueStop = 11/12;
             otherwise;              HueStop = 10/12;
         end
-    case 'ZigZag';     HueStart = 1/3; HueStop = 2/3;	HueZigZag = 1;
+    case 'ZigZag';      HueStart = 0;   HueStop = 1/2;	HueZigZag = 1;
+    case 'ZigZagR';     HueStart = 1/2; HueStop = 1;	HueZigZag = 1;
     otherwise
 end
 IndexHueStart =         find(HueData>HueStart, 1, 'first');

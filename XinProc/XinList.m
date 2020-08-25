@@ -81,12 +81,25 @@ function [DirList, DirH, DirText] = Listing(DirectoryFull)
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
                 
                 %%%% Here down is the host for customization code	%%%%%%
+%                 option = 'P';   % XinRanProc1
                 option = 'S';   % XinRanAnalysis2_Sweep
                 try
                     switch option
+                        case 'P'
+%                             if ~isfile([DirectoryFull, '\', RecFileName, '_75x120@5fps_P1.mat'])
+                            if ~isfile([DirectoryFull, '\', RecFileName, '_300x480@5fps_P1.mat'])
+                                XinRanProc1([DirectoryFull, '\', RecFileName '.rec']);
+                                pause(2);
+                                close(gcf);
+                                drawnow;
+                            end
                         case 'S'
-                            if ~isfile([DirectoryFull, '\', RecFileName, '_P1_Sweep.fig'])
+                            if ~isfile([DirectoryFull, '\', RecFileName, '_300x480@5fps_3.7s_Sweep.fig'])
                                 XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_300x480@5fps_P1.mat']);
+%                             if ~isfile([DirectoryFull, '\', RecFileName, '_75x120@5fps_3.7s_Sweep.fig'])
+%                                 XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_75x120@5fps_P1.mat']);
+%                             if ~isfile([DirectoryFull, '\', RecFileName, '_Sweep.fig'])
+%                                 XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_P1.mat']);
                                 pause(2);
                                 close(gcf);
                                 drawnow;
