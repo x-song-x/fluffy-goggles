@@ -37,7 +37,7 @@ R.SysCamPixelBinNum =           4;
 R.SysCamFrameRate =             80;
 
 % Bin 16 x 16 pixels together   (F)
-P.ProcPixelBinNum =             4;
+P.ProcPixelBinNum =             4;      % 4 = 75x120, 1 = 300*480
 P.ProcPixelHeight =             R.SysCamPixelHeight/P.ProcPixelBinNum;
 P.ProcPixelWidth =              R.SysCamPixelWidth/P.ProcPixelBinNum;
 
