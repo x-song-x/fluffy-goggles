@@ -6,11 +6,6 @@
 function XinList
 clear all
 global F
-% F.Opt = {'L'};                          % Listing
-% F.Opt = {'P','75x120@5fps'};            % Listing & Preprocessing           w/ XinProc1
-% F.Opt = {'S','75x120@5fps', '3.7s'};	% Listing & Ploting                 w/ XinRanAnalysis2_Sweep
-% F.Opt = {'S','300x480@5fps','3.7s'};	% Listing & Ploting                 w/ XinRanAnalysis2_Sweep
-F.Opt = {'B','75x120@5fps', '3.7s'};	% Listing & Preprocessing & Ploting	w/ both above
 F.DirectoryFull = uigetdir(...
     'X:\',... 
     'Pick a parent directory');
@@ -34,7 +29,6 @@ fprintf(    F.SummaryReportFileH,   [CurText,   F.DirText]);
 fclose(     F.SummaryReportFileH);
 
 function [DirList, DirH, DirText] = Listing(DirectoryFull)
-    global F
     DirList =   dir(DirectoryFull);
     DirH =      [];
     
@@ -87,37 +81,29 @@ function [DirList, DirH, DirText] = Listing(DirectoryFull)
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                
                 
                 %%%% Here down is the host for customization code	%%%%%%
+%                 option = 'P';   % XinRanProc1
+                option = 'S';   % XinRanAnalysis2_Sweep
                 try
-                    switch F.Opt
-                        case 'L'
+                    switch option
                         case 'P'
-                            if ~isfile([DirectoryFull, '\', RecFileName, '_', F.Opt{2}, '_P1.mat'])
+%                             if ~isfile([DirectoryFull, '\', RecFileName, '_75x120@5fps_P1.mat'])
+                            if ~isfile([DirectoryFull, '\', RecFileName, '_300x480@5fps_P1.mat'])
                                 XinRanProc1([DirectoryFull, '\', RecFileName '.rec']);
                                 pause(2);
                                 close(gcf);
                                 drawnow;
                             end
                         case 'S'
-                            if ~isfile([DirectoryFull, '\', RecFileName, '_', F.Opt{2}, '_', F.Opt{3}, '_Sweep.fig'])
-                                XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_', F.Opt{2}, '_P1.mat']);
+                            if ~isfile([DirectoryFull, '\', RecFileName, '_300x480@5fps_3.7s_Sweep.fig'])
+                                XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_300x480@5fps_P1.mat']);
+%                             if ~isfile([DirectoryFull, '\', RecFileName, '_75x120@5fps_3.7s_Sweep.fig'])
+%                                 XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_75x120@5fps_P1.mat']);
+%                             if ~isfile([DirectoryFull, '\', RecFileName, '_Sweep.fig'])
+%                                 XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_P1.mat']);
                                 pause(2);
                                 close(gcf);
                                 drawnow;
                             end
-                        case 'B'
-                            if ~isfile([DirectoryFull, '\', RecFileName, '_', F.Opt{2}, '_P1.mat'])
-                                XinRanProc1([DirectoryFull, '\', RecFileName '.rec']);
-                                pause(2);
-                                close(gcf);
-                                drawnow;
-                            end
-                            if ~isfile([DirectoryFull, '\', RecFileName, '_', F.Opt{2}, '_', F.Opt{3}, '_Sweep.fig'])
-                                XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_', F.Opt{2}, '_P1.mat']);
-                                pause(2);
-                                close(gcf);
-                                drawnow;
-                            end
-                        otherwise
                     end
                     CurText = [...
                         '\t',   'function successfully excuted'];     
