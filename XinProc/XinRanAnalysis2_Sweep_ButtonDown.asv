@@ -47,11 +47,18 @@ end
 if SpecUpdt
     hDotSpec =          getappdata(hFig,	'hDotSpec');
     hTextSpecRepNum =	getappdata(hFig,	'hTextSpecRepNum');
-    cQRepNum =          getappdata(hFig,	'cQRepNum');
-    dFrmeTime =         getappdata(hFig,	'dFrmeTime');
+    hHistAll =          getappdata(hFig,	'hHistAll');
+    hHistIn =           getappdata(hFig,	'hHistIn');
+    dTrlDurPreStim =    getappdata(hFig,	'dTrlDurPreStim');
+    dTrlDurStim =       getappdata(hFig,	'dTrlDurStim');
+    dTrlDurTotal =      getappdata(hFig,	'dTrlDurTotal');
     dSesDurTotal =      getappdata(hFig,	'dSesDurTotal');
+    dQCycNum =          getappdata(hFig,	'dQCycNum');
+    dPtQt_FFTAmp =      getappdata(hFig,	'dPtQt_FFTAmp');
+    dPtQt_FFTAgl =      getappdata(hFig,	'dPtQt_FFTAgl');
+    dPtIndex_ROIin =	getappdata(hFig,	'dPtIndex_ROIin');
+    cQRepNum =          getappdata(hFig,	'cQRepNum');
     SpecUpDown =        getappdata(H,       'UpDown');  % Rep Num up/down
-                                                        % Call from GUI
     try
         dPseudoDelayOri =   getappdata(hFig,    'dPseudoDelayOri');
         dPseudoDelayCur =   getappdata(hFig,    'dPseudoDelayCur'); 
@@ -63,69 +70,57 @@ if SpecUpdt
         setappdata(hFig,	'dPseudoDelayCur',	dPseudoDelayCur);
     end
     % update cQRepNum
-    cQRepNum =      cQRepNum + SpecUpDown;
-    tRepNumMax =    (dSesDurTotal/dFrmeTime)/2;
-    if cQRepNum<1;          cQRepNum = 1;                   end
-    if cQRepNum>tRepNumMax;	cQRepNum = floor(tRepNumMax);	end
+    cQRepNum = cQRepNum + SpecUpDown;
+    if cQRepNum<1;                      cQRepNum = 1;                               end
+    if cQRepNum>size(dPtQt_FFTAmp,2)/2;	cQRepNum = floor(size(dPtQt_FFTAmp,2)/2);	end
     % update AxesSpec
     setappdata(hFig,        'cQRepNum',	cQRepNum);
     set(hDotSpec,           'XData',    double((cQRepNum-1))/dSesDurTotal);
-    set(hTextSpecRepNum,	'string',   sprintf('rep#:%d', cQRepNum-1));   
-end
-
-%% Del(a)y (update)
-if DelyUpdt
-    hHistAll =          getappdata(hFig,	'hHistAll');
-    hHistIn =           getappdata(hFig,	'hHistIn');
-    hTextHistXLabel =   getappdata(hFig,	'hTextHistXLabel'); 
-    hTextTuneXLabel =   getappdata(hFig,    'hTextTuneXLabel');  
-    dPseudoDelayOri =   getappdata(hFig,    'dPseudoDelayOri');
-    dPseudoDelayCur =   getappdata(hFig,    'dPseudoDelayCur'); 
-    dTrlDurTotal =      getappdata(hFig,	'dTrlDurTotal');
-    dPtQt_FFTAgl =      getappdata(hFig,	'dPtQt_FFTAgl');
-    cQRepNum =          getappdata(hFig,	'cQRepNum');
-    dPtIndex_ROIin =	getappdata(hFig,	'dPtIndex_ROIin');
-    dSesName =  get(hFig, 'Name');
-    
-    switch ButtonTag(1:4)
-        case 'Spec';    DelyUpDown =    0;
-        case 'Dely';    DelyUpDown =	getappdata(H,	'UpDown');  % Delay up/down
-                        dPseudoDelayCur = (round(dPseudoDelayCur/0.2)+DelyUpDown)*0.2
-            if dPseudoDelayCur<0;   dPseudoDelayCur = 5.6;   end
-            if dPseudoDelayCur>5.6; dPseudoDelayCur = 0;     end
-            hTextHistXLabel.String = sprintf('Phase, %3.1f s compensated', dPseudoDelayCur);
-            hTextTuneXLabel.String = sprintf('Hue: %3.1f s compensated phase angle; Value: phase amplitude', dPseudoDelayCur);
-            setappdata(hFig, 'dPseudoDelayCur', dPseudoDelayCur);
-        otherwise
-    end
-    % update AxesHist
-    tPhase = (dPseudoDelayOri-dPseudoDelayCur)/dTrlDurTotal*2*pi;
-    tAngle = dPtQt_FFTAgl(:,cQRepNum);    
-    if contains(lower(dSesName), 'down')    % Reverse the angle for DOWN cycle
-        tAngle = 2*pi - tAngle;
-    end 
-        tAngle = mod(tPhase+tAngle, 2*pi);  % re-compensate the delay
-    if contains(lower(dSesName), 'down')    % Reverse the angle for DOWN cycle
-        tAngle = 2*pi - tAngle;
-    end 
-    hHistAll.Data =	tAngle;   
-    hHistIn.Data =	tAngle(dPtIndex_ROIin);     
-    drawnow;
-       
-	% update AxesTune  
-    dPtQt_FFTAmp =      getappdata(hFig,	'dPtQt_FFTAmp');
-    dQCycNum =          getappdata(hFig,	'dQCycNum');
-    dTrlDurPreStim =    getappdata(hFig,	'dTrlDurPreStim');
-    dTrlDurStim =       getappdata(hFig,	'dTrlDurStim');
-    dTrlDurTotal =      getappdata(hFig,	'dTrlDurTotal'); 
-            dRawHue =	tAngle/(2*pi);
+    set(hTextSpecRepNum,	'string',   sprintf('rep#:%d', cQRepNum-1)); 
+        % update AxesHist
+        hHistAll.Data =	dPtQt_FFTAgl(:,cQRepNum);   
+        hHistIn.Data =	dPtQt_FFTAgl(dPtIndex_ROIin,cQRepNum);     
+        drawnow;
+        % update AxesTune
+            dRawHue =	dPtQt_FFTAgl(:,cQRepNum)/(2*pi);
         if cQRepNum == dQCycNum
             dRawHue =	(dRawHue -   dTrlDurPreStim  /dTrlDurTotal) / ...
                                 (   dTrlDurStim     /dTrlDurTotal);
         end
             dRawVal =    dPtQt_FFTAmp(:,cQRepNum);
         setappdata(hFig,     'dRawHue',   dRawHue);
-        setappdata(hFig,     'dRawVal',   dRawVal);
+        setappdata(hFig,     'dRawVal',   dRawVal);      
+end
+
+%% Del(a)y (update)
+if DelyUpdt
+    hTextTuneXLabel =   getappdata(hFig,    'hTextTuneXLabel');  
+    hTextHistXLabel =   getappdata(hFig,	'hTextHistXLabel'); 
+    dPseudoDelayOri =   getappdata(hFig,    'dPseudoDelayOri');
+    dPseudoDelayCur =   getappdata(hFig,    'dPseudoDelayCur'); 
+    dSesName =  get(hFig, 'Name');
+    switch ButtonTag(1:4)
+        case 'Spec';    DelyUpDown =    0;
+        case 'Dely';    DelyUpDown =	getappdata(H,	'UpDown');  % Delay up/down
+                        dPseudoDelayCur = (ceil(dPseudoDelayCur/0.2)+DelyUpDown)*0.2;
+            if dPseudoDelayCur<0
+        otherwise
+    end
+
+        % update AxesHist
+%         hHistAll.Data =	dPtQt_FFTAgl(:,cQRepNum);   
+%         hHistIn.Data =	dPtQt_FFTAgl(dPtIndex_ROIin,cQRepNum);     
+
+% A.PtQt_FFTAgl =     mod(angle(	A.PtQt_FFTRaw)- ...
+%                         A.PseudoDelay*ones(A.N_Pt,1)*A.Qt_Freqs*2*pi, 2*pi);
+%                                 % Agl: phase in [0, 2*pi], with
+%                                 % pseudo-delay compensated
+% if contains(lower(A.SoundFileName), 'down')
+%     A.PtQt_FFTAgl =	2*pi - A.PtQt_FFTAgl;
+% end                             % Reverse the angle for DOWN cycle 
+
+        drawnow;
+    
 end
 
 %% Tuning
