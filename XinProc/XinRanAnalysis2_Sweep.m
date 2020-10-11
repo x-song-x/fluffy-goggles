@@ -859,6 +859,6 @@ drawnow;
 % remember to set Preference -> General -> Mat-files to be
 % "MATLAB Version 7.3 or later (save -7.3)" to save data > 2GB, even for
 % saving figure through savefig, it applies.
-A.FileNameMod = [A.FileNameMod sprintf('_%3.1fs', A.PseudoDelay)];
+% A.FileNameMod = [A.FileNameMod sprintf('_%3.1fs', A.PseudoDelay)];
 savefig(T.H.hFig2, [A.PathName,A.FileName{1}(1:end-7), A.FileNameMod, '_Sweep.fig'], 'compact'); 
 T.H.hFig2.Name = [T.H.hFig2.Name 'SAVED'];
