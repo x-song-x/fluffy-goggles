@@ -3,7 +3,8 @@ function XinRanAnalysis2_Sweep(varargin)
 %   S.TrlNumTotal is supposed to be 1
 %   Stimulation is supposed to vary a feature continuously in a cycle
 % clearvars;
-clear global
+global A T
+clear A T
 global A T
 %% Get preprocessed ('*_P?.mat') file
 [~, T.pcname] = system('hostname');
@@ -64,20 +65,21 @@ if A.RunningSource == 'D'
         return
     end
 end
-switch [A.FileNameSplits{2}(1:3) '_' A.FileNameSplits{4}(1:4) '_'  A.FileNameSplits{5}(1:3)]
-    case 'NIR_Ring_PBS';    A.Polarity =    -1;     A.PseudoDelay =	2.6;
-    case 'NIR_Pola_PBS';    A.Polarity =    -1;     A.PseudoDelay =	2.6;
-    case 'Far_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	2.6;
-    case 'FRe_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	2.6;
-    case 'Red_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	2.6;
-    case 'Yel_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	2.6;
-    case 'Amb_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	2.6;
-    case 'Gre_Pola_PBS';    A.Polarity =    -1;     A.PseudoDelay =	2.6;
-    case 'Blu_Pola_PBS';    A.Polarity =    -1;     A.PseudoDelay =	2.6;
-    case 'Blu_Fluo_GFP';    A.Polarity =     1;     A.PseudoDelay = 0.0;
-    otherwise;              A.Polarity =     1;     A.PseudoDelay =	2.6;
-end
 A.PseudoDelay =	3.6;
+switch [A.FileNameSplits{2}(1:3) '_' A.FileNameSplits{4}(1:4) '_'  A.FileNameSplits{5}(1:3)]
+    case 'NIR_Ring_PBS';    A.Polarity =    -1;     A.PseudoDelay =	A.PseudoDelay;
+    case 'NIR_Pola_PBS';    A.Polarity =    -1;     A.PseudoDelay =	A.PseudoDelay;
+    case 'Far_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	A.PseudoDelay;
+    case 'FRe_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	A.PseudoDelay;
+    case 'Red_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	A.PseudoDelay;
+    case 'Yel_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	A.PseudoDelay;
+    case 'Amb_Pola_PBS';    A.Polarity =     1;     A.PseudoDelay =	A.PseudoDelay;
+    case 'Gre_Pola_PBS';    A.Polarity =    -1;     A.PseudoDelay =	A.PseudoDelay;
+    case 'Blu_Pola_PBS';    A.Polarity =    -1;     A.PseudoDelay =	A.PseudoDelay;
+    case 'Blu_Fluo_GFP';    A.Polarity =     1;     A.PseudoDelay = 0.0;
+    otherwise;              A.Polarity =     1;     A.PseudoDelay =	A.PseudoDelay;
+end
+
 A.DispPixelWidth0 =     120;
 A.DispPixelHeight0 =	75;
 
@@ -124,15 +126,7 @@ A.N_Pt =            A.N_Ph * A.N_Pw;        % Number_PixelTotal(in each frame in
 A.N_PhSelect =      37;
 A.N_PwSelect =      60;
 
-try
-    if S.SysCamFrameRate ~=80
-        A.N_Tpf =	P.ProcFrameBinNum/S.SysCamFrameRate;	
-    else
-        A.N_Tpf =	P.ProcFrameBinNum/80;
-    end
-catch
-        A.N_Tpf =	P.ProcFrameBinNum/80;   % Number_TimePerFrame
-end
+
 % OVERWRITING
 % S.TrlDurPreStim =   0;        % Number_TimeTrialPreStim
 % S.TrlDurStim =      S.TrlDurTotal;    
@@ -143,6 +137,17 @@ A.N_Tts =           S.TrlDurStim;           % Number_TimeTrialStim
 A.N_Ttt =           S.TrlDurTotal;          % Number_TimeTrialTotal
 A.N_Tst =           S.SesDurTotal;          % NUmber_TimeSessionTotal
 A.N_Ct =            S.SesCycleNumTotal;	% Number_CycleTotal (in the session)
+A.N_Tpf =           A.N_Ttt/size(P.ProcDataMat,5); % Number_TimePerFrame
+% try
+%     if S.SysCamFrameRate ~=80
+%         A.N_Tpf =	P.ProcFrameBinNum/S.SysCamFrameRate;	
+%     else
+%         A.N_Tpf =	P.ProcFrameBinNum/80;
+%     end
+% catch
+%         A.N_Tpf =	P.ProcFrameBinNum/80;   % Number_TimePerFrame
+% end
+
 A.FileNameMod =     '';
 % % % % % % Manually switch session temporal arrangement if here.	      
 %         A.N_Ttps =	0;
@@ -190,18 +195,32 @@ i=1;
 A.Fig2Var{i}.Title =        'Average intensity (% to saturation)';
 A.Fig2Var{i}.ColorMap =     'gray';  
 A.Fig2Var{i}.PhPw_Data =	single(squeeze(mean(mean(A.FptCtPhPw_DataRaw, 1),  2)) / A.N_BinSat);
+A.Fig2Var{i}.XLabelStr =    {[  'Max for all:    ',     sprintf('%5.2f%%', max(max(A.Fig2Var{i}.PhPw_Data))*100 ) ],...
+                             [  'Mean inside: ',        sprintf('%5.2f%%', sum(sum(A.Fig2Var{i}.PhPw_Data.*A.PhPw_ROIin))/sum(A.Pt_ROIin)*100 ) ],...
+                             [  'Min for all:     ',	sprintf('%5.2f%%', min(min(A.Fig2Var{i}.PhPw_Data))*100 ) ]};
 i=2;
-A.Fig2Var{i}.Title =        'STD across cycles (mean across frames)';
+A.Fig2Var{i}.Title =        'STD: cross-cycle, average acros within-cycle frames 1st';
 A.Fig2Var{i}.ColorMap =     'parula';
 A.Fig2Var{i}.PhPw_Data =	single( squeeze(std(mean(A.FptCtPhPw_DataRaw, 1), 0, 2))    ./A.PhPw_ImageMeanRaw );
+A.Fig2Var{i}.XLabelStr =    {[  'Max for all:    ',     sprintf('%5.2f%%', max(max(A.Fig2Var{i}.PhPw_Data))*100 ) ],...
+                             [  'Mean inside: ',        sprintf('%5.2f%%', sum(sum(A.Fig2Var{i}.PhPw_Data.*A.PhPw_ROIin))/sum(A.Pt_ROIin)*100 ) ],...
+                             [  'Min for all:     ',	sprintf('%5.2f%%', min(min(A.Fig2Var{i}.PhPw_Data))*100 ) ]};
 i=3;
-A.Fig2Var{i}.Title =        'STD across frames (mean across cycles)';
+A.Fig2Var{i}.Title =        'STD: within-cycle, average across cycles 1st';
 A.Fig2Var{i}.ColorMap =     'parula'; 
 A.Fig2Var{i}.PhPw_Data =	single( squeeze(std(mean(A.FptCtPhPw_DataRaw, 2), 0, 1))    ./A.PhPw_ImageMeanRaw );
-% i=4;
-% A.Fig2Var{i}.Title =        'STD, entire session';
-% A.Fig2Var{i}.ColorMap =     'parula';
-% A.Fig2Var{i}.PhPw_Data =	reshape(std(A.FtPt_DataRaw, 0, 1), A.N_Ph, A.N_Pw)  ./A.PhPw_ImageMeanRaw;
+A.Fig2Var{i}.XLabelStr =    {[  'Max for all:    ',     sprintf('%5.2f%%', max(max(A.Fig2Var{i}.PhPw_Data))*100 ) ],...
+                             [  'Mean inside: ',        sprintf('%5.2f%%', sum(sum(A.Fig2Var{i}.PhPw_Data.*A.PhPw_ROIin))/sum(A.Pt_ROIin)*100 ) ],...
+                             [  'Min for all:     ',	sprintf('%5.2f%%', min(min(A.Fig2Var{i}.PhPw_Data))*100 ) ]};
+i=4;
+A.Fig2Var{i}.Title =        'STD, cross-all, among frames of the entire session';
+A.Fig2Var{i}.ColorMap =     'parula';
+A.Fig2Var{i}.PhPw_Data =	single(reshape(std(A.FtPt_DataRaw, 0, 1), A.N_Ph, A.N_Pw)   ./A.PhPw_ImageMeanRaw );
+A.Fig2Var{i}.XLabelStr =    {[  'Max for all:    ',     sprintf('%5.2f%%', max(max(A.Fig2Var{i}.PhPw_Data))*100 ) ],...
+                             [  'Mean inside: ',        sprintf('%5.2f%%', sum(sum(A.Fig2Var{i}.PhPw_Data.*A.PhPw_ROIin))/sum(A.Pt_ROIin)*100 ) ],...
+                             [  'Min for all:     ',	sprintf('%5.2f%%', min(min(A.Fig2Var{i}.PhPw_Data))*100 ) ]};
+A.dVarSTDs(1:3) = A.Fig2Var(2:4);
+                         
 %% Spectral Analysis  
 % Power meter
 A.OneQt_PowerFFTRaw =   fft(A.OnePt_ProcPower);
@@ -319,7 +338,7 @@ T.H.hFig2Text4 = uicontrol(...
                 'Tag',          'TitlTex4',...
                 'ButtonDownFcn',@XinRanAnalysis2_Sweep_ButtonDown);      
 %% Axes: Variance        
-for i = 1:length(A.Fig2Var)
+for i = 1:2 %length(A.Fig2Var)
     T.H.hFig2AxesVar(i) = axes(...
                 'Parent',       T.H.hFig2,...
                 'Units',        'pixels',...  
@@ -329,7 +348,11 @@ for i = 1:length(A.Fig2Var)
                 'Tag',          [num2str(i), 'Var'],...
                 'LabelFontSizeMultiplier', 1);
     if strcmp(A.Fig2Var{i}.Title(1:3), 'STD')
-        imagesc(    log10(      A.Fig2Var{i}.PhPw_Data)    );
+%         imagesc(    log10(      A.Fig2Var{i}.PhPw_Data)    );
+        T.H.hFig2AxesVstdImage = imagesc( log10(A.Fig2Var{i}.PhPw_Data),...
+                'Parent',       T.H.hFig2AxesVar(i),...
+                'Tag',          'VstdImage',...
+                'ButtonDownFcn','XinRanAnalysis2_Sweep_ButtonDown');
         caxis(                  T.dAxesVarStdScaleLimLog);
     else
         imagesc(                A.Fig2Var{i}.PhPw_Data     );
@@ -761,12 +784,11 @@ T.H.hFig2AxesHistTextLeft =   text(   0.05,   0.9, '<',...
         T.H.hFig2AxesHist.Toolbar =         [];  
         T.H.hFig2AxesHistHid.Toolbar =      [];  
 	end
-          
     
 %% Setup Data
 setappdata(T.H.hFig2,   'hAxesVar1',        T.H.hFig2AxesVar(1));
 setappdata(T.H.hFig2,   'hAxesVar2',        T.H.hFig2AxesVar(2));
-setappdata(T.H.hFig2,   'hAxesVar3',        T.H.hFig2AxesVar(3));
+% setappdata(T.H.hFig2,   'hAxesVar3',        T.H.hFig2AxesVar(3));
 setappdata(T.H.hFig2,   'hAxesTemp',        T.H.hFig2AxesTemp);
 setappdata(T.H.hFig2,   'hAxesPixl',        T.H.hFig2AxesPixl);
 setappdata(T.H.hFig2,   'hAxesSpec',        T.H.hFig2AxesSpec);
@@ -804,6 +826,7 @@ setappdata(T.H.hFig2,   'dTrlDurTotal',         A.N_Ttt);
 setappdata(T.H.hFig2,   'dSesDurTotal',         A.N_Tst);
 setappdata(T.H.hFig2,   'dQCycNum',             A.N_Qfc);
 setappdata(T.H.hFig2,   'dAxesTempYLims',       T.dAxesTempYLims); 
+setappdata(T.H.hFig2,   'dVarSTDs',             A.dVarSTDs);
 setappdata(T.H.hFig2,   'dSoundWave',           A.SoundWave);
 setappdata(T.H.hFig2,   'dFptCtPhPw_NormTrl',   A.FptCtPhPw_NormTrl);
 setappdata(T.H.hFig2,	'dFptPhPw_NormTrlAdj',	A.FptPhPw_NormTrlAdj);
@@ -816,6 +839,7 @@ setappdata(T.H.hFig2,	'dRawVal',              A.PtOne_Val);
 setappdata(T.H.hFig2,   'dPseudoDelayOri',      A.PseudoDelay);
 setappdata(T.H.hFig2,   'dPseudoDelayCur',      A.PseudoDelay);
 
+setappdata(T.H.hFig2,   'cVstdNum',     1);
 setappdata(T.H.hFig2,   'cFrmeNum',     1);
 setappdata(T.H.hFig2,   'cPlayingNow',  0); 
 setappdata(T.H.hFig2,	'cQRepNum',     A.N_Qfc);

@@ -11,20 +11,37 @@ hFig =          gcf;
     
 %% Update "Spec", "Tune", or "Temp", "Frme", "Pixl"
 switch ButtonTag(1:4)
-    case 'Spec';    SpecUpdt=1; DelyUpdt = 1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-    case 'Dely';    SpecUpdt=0; DelyUpdt = 1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-    case 'Tune';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+    % Update Label: [       Spec	Tune 	Frame	Pixel	Title 
+    % Update Label:             Delay 	TempAmp	Play 	AmpSpec	VarSTD 
+    case 'Spec';    Updt =[ 1   1   1   0   0   0   0   0   0   0];
+    case 'Dely';    Updt =[ 0   1   1   0   0   0   0   0   0   0];
+    case 'Tune';    Updt =[ 0   0   1   0   0   0   0   0   0   0];  
+    case 'Frme';    Updt =[ 0   0   0   1   0   0   0   0   0   0];
+    case 'Temp';    Updt =[ 0   0   0   0   1   0   0   0   0   0];
+    case 'Play';    Updt =[ 0   0   0   0   0   1   0   0   0   0];
+    case 'Pixl';    Updt =[ 0   0   0   0   0   0   1   0   0   0];
+    case 'AmpS';    Updt =[ 0   0   0   0   0   0   0   1   0   0];
+    case 'Titl';    Updt =[ 0   0   0   0   0   0   0   0   1   0];
+    case 'Vstd';    Updt =[ 0   0   0   0   0   0   0   0   0   1];
         
-    case 'Frme';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-    case 'Temp';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-    case 'Play';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-    case 'Pixl';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=1; AmpSUpdt=0; TitlUpdt=0;
-    case 'AmpS';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=1; TitlUpdt=0;
-        
-    case 'Titl';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=1;
+%     case 'Spec';    SpecUpdt=1; DelyUpdt = 1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+%     case 'Dely';    SpecUpdt=0; DelyUpdt = 1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+%     case 'Tune';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+%         
+%     case 'Frme';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+%     case 'Temp';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+%     case 'Play';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
+%     case 'Pixl';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=1; AmpSUpdt=0; TitlUpdt=0;
+%     case 'AmpS';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=1; TitlUpdt=0;
+%         
+%     case 'Titl';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=1;
     otherwise
                     SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
 end
+	SpecUpdt=Updt(1);       DelyUpdt=Updt(2);       TuneUpdt=Updt(3);   
+    TempAmpUpdt=Updt(4);    FrmeUpdt=Updt(5);       Play=Updt(6); 
+    PixlUpdt=Updt(7);       AmpSUpdt=Updt(8);       TitlUpdt=Updt(9);
+    VstdUpdt=Updt(10);
 %% Amp(litude of the) S(pectrum)
 if AmpSUpdt
     hAxesSpec =     getappdata(hFig,	'hAxesSpec');
@@ -90,7 +107,7 @@ if DelyUpdt
     switch ButtonTag(1:4)
         case 'Spec';    DelyUpDown =    0;
         case 'Dely';    DelyUpDown =	getappdata(H,	'UpDown');  % Delay up/down
-                        dPseudoDelayCur = (round(dPseudoDelayCur/0.2)+DelyUpDown)*0.2
+                        dPseudoDelayCur = (round(dPseudoDelayCur/0.2)+DelyUpDown)*0.2;
             if dPseudoDelayCur<0;   dPseudoDelayCur = 5.6;   end
             if dPseudoDelayCur>5.6; dPseudoDelayCur = 0;     end
             hTextHistXLabel.String = sprintf('Phase, %3.1f s compensated', dPseudoDelayCur);
@@ -141,7 +158,7 @@ if TuneUpdt
     HueMapOrder =   getappdata(hImageTune,	'HueMapOrder');
     HueTempolate =	getappdata(hImageTune,	'HueTempolate');
 
-    SatParaRange =  getappdata(hImageTune,	'SatParaRange');
+%     SatParaRange =  getappdata(hImageTune,	'SatParaRange');
     SatParaOrder =  getappdata(hImageTune,	'SatParaOrder');
     SatValSync =    getappdata(hImageTune,	'SatValSync');
     SatGroundOut =  getappdata(hImageTune,	'SatGroundOut');
@@ -154,9 +171,15 @@ if TuneUpdt
     % What TUNE parameter has changed, if any
     switch ButtonTag(5:end)
         case 'ScalebarHue'  
+%             HueMapOptions = {...
+%                 'HSLuv',        'HSLuv',        'HSVadjusted';
+%                 'Circular',     'Linear',       'Circular'};
+%             HueMapOptions = {...
+%                 'HSLuv',	'HSV30',	'HSV210',	'HSVadjusted';
+%                 'Circular',	'Opposite',	'Opposite', 'Circular'};
             HueMapOptions = {...
-                'HSLuv',        'HSLuv',        'HSVadjusted';
-                'Circular',     'Linear',       'Circular'};
+                'HSLuv',	'HSV0',     'HSVadjusted';
+                'Circular',	'Opposite',	'Circular'};
             HueMapOrder =   HueMapOrder + 1;
             if HueMapOrder> length(HueMapOptions)
                 HueMapOrder = 1;
@@ -165,7 +188,7 @@ if TuneUpdt
                                 HueMapOptions{2, HueMapOrder}   ];
             HueTempolate =	HueRedist(  HueMapOptions{1, HueMapOrder},...
                                         HueMapOptions{2, HueMapOrder});
-            HueColorMap =   hsv2rgb([HueTempolate ones(length(HueTempolate),2)]);
+            HueColorMap =   hsv2rgb([HueTempolate ones(length(HueTempolate),2)]);            
             setappdata(hImageTune,	'HueMapOptions',    HueMapOptions);
             setappdata(hImageTune,	'HueMapOrder',      HueMapOrder);
             setappdata(hImageTune,	'HueMap',           HueMap);
@@ -176,24 +199,49 @@ if TuneUpdt
                         'FontSize',             8,...
                         'VerticalAlignment',    'Cap');    
         case 'ScalebarSat'
-            SatParaOrder =  SatParaOrder + 1;
+            SatParaRange =	[   0   0   0               0   2   1   1   1;
+                                1   1   1               0   0   0   1   1;
+                            	0   0.6 -dTrlDurStim/2  0   0   0   0.6 0];
+            if nargin==0 
+                SatParaOrder =  SatParaOrder + 1;
+            else
+                switch HueMapOrder
+                    case 1; SatParaOrder =  6;
+                    case 2; SatParaOrder =  5;
+                    case 3; SatParaOrder =  6;
+                end
+            end
             if SatParaOrder> length(SatParaRange)
                 SatParaOrder = 1;
             end
-            SatValSync =    SatParaRange(1, SatParaOrder);
-            SatGroundOut =  SatParaRange(2, SatParaOrder);
-            SatGroundTime =	SatParaRange(3, SatParaOrder);
+            SatValSync =    SatParaRange(1, SatParaOrder);  % 0:Sat=1,  1:Sat synched w/ Val,   2:Sat as Hue
+            SatGroundOut =  SatParaRange(2, SatParaOrder);  % 0:No Side Cut,    1:Side Cut
+            SatGroundTime =	SatParaRange(3, SatParaOrder);  % Side Ground Out Time
             setappdata(hImageTune,	'SatParaOrder',     SatParaOrder);
             setappdata(hImageTune,	'SatValSync',       SatValSync);
             setappdata(hImageTune,  'SatGroundOut',     SatGroundOut);
             setappdata(hImageTune,	'SatGroundTime',	SatGroundTime);
-            switch sprintf('%d',[SatGroundOut SatValSync]) 
+            switch sprintf('%d',[SatValSync SatGroundOut]) 
                 case '00'; str = '                                                          everything \uparrow';
-                case '01'; str = '\rightarrow sync w/ value \leftarrow';
-                case '10'; str = ['\uparrow out of stim\pm', sprintf('%4.1fs range', abs(SatGroundTime)) '       wihtin the range \uparrow']; 
+                case '10'; str = '\rightarrow sync w/ value \leftarrow';
+                case '01'; str = ['\uparrow out of stim\pm', sprintf('%4.1fs range', abs(SatGroundTime)) '       wihtin the range \uparrow']; 
                 case '11'; str = ['\uparrow out of stim\pm', sprintf('%4.1fs range', abs(SatGroundTime)) '  \rightarrow sync w/ value \leftarrow   ']; 
+                case '20'; str = '\rightarrow replace hue to show phase \leftarrow';
                 otherwise
             end
+            hAxesTuneSatHid = getappdata(hFig,	'hAxesTuneSatHid');
+            if isempty(hAxesTuneSatHid)
+            	aa=findall(gcf,'Type','axes');  hAxesTuneSatHid = aa(4);
+            end
+            if SatValSync==2
+                
+                colormap(hAxesTuneSatHid,hsv2rgb([1/3*ones(65,1) [  1:-1/16:1/16 ...
+                                                                                    0:1/16:15/16 ...
+                                                                                    1:-1/16:1/16 ...
+                                                                                    0:1/16:1]'  1.0*ones(65,1)]) );	caxis( [0 1]);
+            else               
+                colormap(hAxesTuneSatHid,hsv2rgb([1/3*ones(65,1) (0:1/64:1)'    0.5*ones(65,1)]) );	caxis( [0 1]);
+            end           
             ylabel(H,	str,...
                         'FontSize',             8,...
                         'VerticalAlignment',    'Cap');
@@ -216,10 +264,10 @@ if TuneUpdt
     PtOne_Hue =             min(max(dRawHue, 0), 1);            % HUE
     InHueTempolate =        linspace(0, 1, length(HueTempolate))';
     PtOne_Hue =             interp1q(InHueTempolate, HueTempolate, PtOne_Hue);
-    if SatValSync                                               % SATURATION
-        PtOne_Sat =         min(dRawVal/ValLim,1);
-    else
-        PtOne_Sat =         dRawSat;
+    switch SatValSync                                           % SATURATION
+        case 2; PtOne_Sat =	min(max(abs(abs(dRawHue-0.5)*2-0.5)*2, 0), 1);
+        case 1; PtOne_Sat =	min(dRawVal/ValLim,1);
+        case 0; PtOne_Sat =	dRawSat;
     end
     if SatGroundOut
         PtOne_Sat(dRawHue>(1+SatGroundTime/dTrlDurStim)) =	0;
@@ -235,6 +283,11 @@ if TuneUpdt
                                 SizeImageTune(2),...
                                 SizeImageTune(3) ) );
     set(hImageTune,    'CData',        PhPwThree_TuneMap);
+        if strcmp(ButtonTag, 'TuneScalebarHue')
+            H2 = findobj(gcf, 'tag', 'TuneScalebarSat');
+            XinRanAnalysis2_Sweep_ButtonDown(H2);
+        end
+    drawnow;
 end
 %% Temp(oral) Amp(litude)      
 if TempAmpUpdt  
@@ -387,12 +440,15 @@ if TitlUpdt
         case 'Tex1';                                        figclip = 0;
         case 'Tex2';    AxesPlus = [    -1  -1  -1  -1  ];  figclip = 1;
                         AxesPosiMatlab = [ 0 0 FigPosiMatlab(3:4)];
-        case 'Tex3';    SesName =  strtok(FigName, '"');
-                        clipboard('copy',   SesName(1:end-7));...
+        case 'Tex3';    SesName =   strtok(FigName, '"');
+                        SesName =   split(SesName, '_');
+                        SesName =   join(SesName(1:5), '_');
+                        clipboard('copy',   SesName{1});...
                                                             figclip = 0;  
         case 'Tex4';    [~, SoundName] =    strtok(FigName, '"');
                         [~, SoundName] =	strtok(SoundName, '"');
-                        clipboard('copy',   SoundName(2:end-1));       
+                        [SoundName, ~] =	strtok(SoundName, '"');
+                        clipboard('copy',   SoundName);       
                                                             figclip = 0;     
         otherwise
     end
@@ -413,4 +469,21 @@ if TitlUpdt
         
     else
     end
+end
+%% Variance STD update
+if VstdUpdt
+    AxesH =             get(H,              'Parent');
+    hTitle =            get(AxesH,          'Title');
+    hXLabel =           get(AxesH,          'XLabel');
+    dVarSTDs =          getappdata(hFig,    'dVarSTDs');
+    cVstdNum =          getappdata(hFig,    'cVstdNum');
+    cVstdNum =  cVstdNum + 1;
+    if cVstdNum > length(dVarSTDs)
+        cVstdNum = 1;
+    end
+    set(H,          'cData',    log10(dVarSTDs{cVstdNum}.PhPw_Data));
+    set(hTitle,     'String',   dVarSTDs{cVstdNum}.Title);
+    set(hXLabel,    'String',   dVarSTDs{cVstdNum}.XLabelStr);
+    setappdata(hFig,'cVstdNum', cVstdNum);
+    drawnow;
 end

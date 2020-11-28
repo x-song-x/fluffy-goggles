@@ -19,7 +19,7 @@ stm.TrialTime =             20;
 % stm.TrialPipNum =               10;
 % stm.TrialPipTime =              0.25;
 % stm.TrialPipDutyCycle =         0.5;
-
+% 
 % stm.TrialPreStimTime =      5;
 % stm.TrialStimTime =         10.0;
 % stm.TrialStimElectdNum =        1;
@@ -27,20 +27,91 @@ stm.TrialTime =             20;
 % stm.TrialPipTime =              0.25;
 % stm.TrialPipDutyCycle =         0.5;
 
+% stm.TrialPreStimTime =      4.75;
+% stm.TrialStimTime =         10.5;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               42;
+% stm.TrialPipTime =              0.25;
+% stm.TrialPipDutyCycle =         0.5;
 
+
+% stm.TrialPreStimTime =      1;
+% stm.TrialStimTime =         18.0;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               72;
+% stm.TrialPipTime =              0.25;
+% stm.TrialPipDutyCycle =         0.5;
+
+% stm.TrialPreStimTime =      2.5;
+% stm.TrialStimTime =         15;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               60;
+% stm.TrialPipTime =              0.25;
+% stm.TrialPipDutyCycle =         0.5;
+
+% stm.TrialPreStimTime =      3;
+% stm.TrialStimTime =         14;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               56;
+% stm.TrialPipTime =              0.25;
+% stm.TrialPipDutyCycle =         0.5;
+% 
 % stm.TrialPreStimTime =      2.5;
 % stm.TrialStimTime =         15.0;
 % stm.TrialStimElectdNum =        1;
 % stm.TrialPipNum =               30;
 % stm.TrialPipTime =              0.5;
 % stm.TrialPipDutyCycle =         0.5;
+% 
+% stm.TrialPreStimTime =      2.5;
+% stm.TrialStimTime =         15.0;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               20;
+% stm.TrialPipTime =              0.75;
+% stm.TrialPipDutyCycle =         0.5;
 
-stm.TrialPreStimTime =      2.5;
-stm.TrialStimTime =         15.0;
+% stm.TrialPreStimTime =      2;
+% stm.TrialStimTime =         16.0;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               40;
+% stm.TrialPipTime =              0.4;
+% stm.TrialPipDutyCycle =         0.5;
+
+stm.TrialPreStimTime =      2;
+stm.TrialStimTime =         8.0;
 stm.TrialStimElectdNum =        1;
-stm.TrialPipNum =               15;
-stm.TrialPipTime =              1;
+stm.TrialPipNum =               20;
+stm.TrialPipTime =              0.4;
 stm.TrialPipDutyCycle =         0.5;
+
+% stm.TrialPreStimTime =      0.1;
+% stm.TrialStimTime =         19.8;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               99;
+% stm.TrialPipTime =              0.2;
+% stm.TrialPipDutyCycle =         0.5;
+
+% stm.TrialPreStimTime =      0.2;
+% stm.TrialStimTime =         19.6;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               98;
+% stm.TrialPipTime =              0.2;
+% stm.TrialPipDutyCycle =         0.5;
+
+
+% stm.TrialPreStimTime =      2.5;
+% stm.TrialStimTime =         15.0;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               15;
+% stm.TrialPipTime =              1;
+% stm.TrialPipDutyCycle =         0.5;
+
+% stm.TrialPreStimTime =      2;
+% stm.TrialStimTime =         16.0;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               16;
+% stm.TrialPipTime =              1;
+% stm.TrialPipDutyCycle =         0.5;
 
 
 % stm.TrialPreStimTime =      2;

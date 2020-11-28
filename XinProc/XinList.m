@@ -6,11 +6,11 @@
 function XinList
 clear all
 global F
-% F.Opt = {'L'};                          % Listing
+F.Opt = {'L'};                          % Listing
 % F.Opt = {'P','75x120@5fps'};            % Listing & Preprocessing           w/ XinProc1
-% F.Opt = {'S','75x120@5fps', '3.7s'};	% Listing & Ploting                 w/ XinRanAnalysis2_Sweep
-% F.Opt = {'S','300x480@5fps','3.7s'};	% Listing & Ploting                 w/ XinRanAnalysis2_Sweep
-F.Opt = {'B','75x120@5fps', '3.7s'};	% Listing & Preprocessing & Ploting	w/ both above
+% F.Opt = {'S','75x120@5fps', ''};	% Listing & Ploting                 w/ XinRanAnalysis2_Sweep
+% F.Opt = {'S','300x480@5fps','3.7s_'};	% Listing & Ploting                 w/ XinRanAnalysis2_Sweep
+% F.Opt = {'B','75x120@5fps', '3.7s_'};	% Listing & Preprocessing & Ploting	w/ both above
 F.DirectoryFull = uigetdir(...
     'X:\',... 
     'Pick a parent directory');
@@ -88,7 +88,7 @@ function [DirList, DirH, DirText] = Listing(DirectoryFull)
                 
                 %%%% Here down is the host for customization code	%%%%%%
                 try
-                    switch F.Opt
+                    switch F.Opt{1}
                         case 'L'
                         case 'P'
                             if ~isfile([DirectoryFull, '\', RecFileName, '_', F.Opt{2}, '_P1.mat'])
@@ -98,7 +98,7 @@ function [DirList, DirH, DirText] = Listing(DirectoryFull)
                                 drawnow;
                             end
                         case 'S'
-                            if ~isfile([DirectoryFull, '\', RecFileName, '_', F.Opt{2}, '_', F.Opt{3}, '_Sweep.fig'])
+                            if ~isfile([DirectoryFull, '\', RecFileName, '_', F.Opt{2}, '_', F.Opt{3}, 'Sweep.fig'])
                                 XinRanAnalysis2_Sweep([DirectoryFull, '\', RecFileName '_', F.Opt{2}, '_P1.mat']);
                                 pause(2);
                                 close(gcf);

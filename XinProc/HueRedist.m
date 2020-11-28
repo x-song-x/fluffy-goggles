@@ -35,6 +35,7 @@ switch OutputType
         end
     case 'ZigZag';      HueStart = 0;   HueStop = 1/2;	HueZigZag = 1;
     case 'ZigZagR';     HueStart = 1/2; HueStop = 1;	HueZigZag = 1;
+    case 'Opposite';    HueStart = -0.1;HueStop = 1.1;	HueZigZag = 0;    
     otherwise
 end
 IndexHueStart =         find(HueData>HueStart, 1, 'first');
@@ -51,6 +52,18 @@ switch HueType
     case 'HSVadjusted2',OutSeq = HSVadjusted2;
     case 'HSLuv',       OutSeq = HSLuv;
     case 'CIELCh',      OutSeq = CIELCh;
+    case 'HSV0',        OutSeq = repelem([  0;  180;180; 0  ]/360, 100);
+    case 'HSV30',       OutSeq = repelem([  30; 210;210;30  ]/360, 100);
+    case 'HSV60',       OutSeq = repelem([  60; 240;240;60  ]/360, 100);
+    case 'HSV90',       OutSeq = repelem([  90; 270;270;90  ]/360, 100);
+    case 'HSV120',      OutSeq = repelem([  120;300;300;120 ]/360, 100);
+    case 'HSV150',      OutSeq = repelem([  150;330;330;150 ]/360, 100);
+    case 'HSV180',      OutSeq = repelem([  180;0;  0;  180 ]/360, 100);
+    case 'HSV210',      OutSeq = repelem([  210;30; 30; 210 ]/360, 100);
+    case 'HSV240',      OutSeq = repelem([  240;60; 60; 240 ]/360, 100);
+    case 'HSV270',      OutSeq = repelem([  270;90; 90; 270 ]/360, 100);
+    case 'HSV300',      OutSeq = repelem([  300;120;120;300 ]/360, 100);
+    case 'HSV330',      OutSeq = repelem([  330;150;150;330 ]/360, 100);
     otherwise
 end
 
