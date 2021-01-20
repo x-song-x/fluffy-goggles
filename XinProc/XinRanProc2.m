@@ -43,9 +43,9 @@ disp(['Xintrinsic Processing Stage 1 (spatiotemporal binning) is about to start 
 % R: Recorded
 % P: Processed
 % T: Temporal
-P.ProcFrameRate =       5;
-% P.ProcFrameRate =       20;
-% P.ProcPixelBinNum =     4;
+% P.ProcFrameRate =       5;
+P.ProcFrameRate =       20;
+% P.ProcPixelBinNum =     1;
 P.ProcPixelBinNum =     3;
 
 P.RecCanvasHeight =     300;
@@ -202,3 +202,68 @@ close(T.hWaitbar);
 disp('All files are processed');
 clear T P R
 return;
+
+function InterpFrame()
+[file, path] = uigetfile('D:\=XINTRINSIC=\', '*.mat');
+filename = fullfile(path, file);
+load(filename)
+R.SysCamPixelHeight =	270;
+R.SysCamPixelWidth =	480;
+R.SysCamFrameRate =     20;
+R.SysCamFramePerTrial =	S.TrlDurTotal * R.SysCamFrameRate;
+%% find missing frame, modify .mat
+missing_frame = find(S.SesFrameNum == 0);
+S.SesFrameNum(missing_frame - 3: missing_frame + 3)
+S.SesFrameNum(missing_frame) = missing_frame;
+S.SesTimestamps(missing_frame - 3: missing_frame + 3, :)
+S.SesTimestamps(missing_frame, :) = S.SesTimestamps(missing_frame - 1, :);
+save([filename(1:end-8), '.mat'], 'S')
+
+%% modify .rec
+T.filename = [filename(1:end-8), '_ori.rec'];
+T.filename_corrected = [filename(1:end-8), '.rec'];
+
+T.fid_ori = fopen(T.filename);
+T.fid_new = fopen(T.filename_corrected, 'w');
+
+% read and write frames before missing frame(s)
+for i = 1:missing_frame - 1
+frame = fread(T.fid_ori, [...
+    R.SysCamPixelHeight * R.SysCamPixelWidth, ...
+    1],...
+    'uint16');
+frame = uint16(frame);
+
+fwrite(T.fid_new, frame, 'uint16');
+
+end
+
+% read the frame after missing frames
+frame_pre = frame;
+frame_post = fread(T.fid_ori, [...
+    R.SysCamPixelHeight * R.SysCamPixelWidth, ...
+    1],...
+    'uint16');
+
+part_missing = mean([frame_pre, frame_post],2);
+part_missing = repmat(part_missing, length(missing_frame), 1);
+
+% write missing frames and frame_post
+fwrite(T.fid_new, part_missing, 'uint16');
+frame_post = uint16(frame_post);
+fwrite(T.fid_new, frame_post, 'uint16');
+
+% write the rest of the frames
+for i = missing_frame +1 : length(S.SesFrameNum)
+frame = fread(T.fid_ori, [...
+    R.SysCamPixelHeight * R.SysCamPixelWidth, ...
+    1],...
+    'uint16');
+frame = uint16(frame);
+
+fwrite(T.fid_new, frame, 'uint16');
+
+end
+
+fclose(T.fid_ori);
+fclose(T.fid_new);

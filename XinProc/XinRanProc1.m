@@ -129,11 +129,13 @@ for i = 1: length(A.FileName)
                                         T.ImageS5;                         
         end    
     end
-        %% Power Processing
-%         P.RawMeanPower =    mean(S.SesPowerMeter, 2)';
-%         P.ProcMeanPower =   mean(reshape(P.RawMeanPower,...
-%                                     P.ProcFrameBinNum,...
-%                                     P.ProcFrameNumTotal), 1 );
+    % Power Processing
+    if ~isempty(S.SesPowerMeter)
+        P.RawMeanPower =    mean(S.SesPowerMeter, 2)';
+        P.ProcMeanPower =   mean(reshape(P.RawMeanPower,...
+                                    P.ProcFrameBinNum,...
+                                    P.ProcFrameNumTotal), 1 );
+    end
     %% Show Figure
     T.timeraw =                 (1:S.SesFrameTotal)/R.SysCamFrameRate;
     T.timebinned =              (1:P.ProcFrameNumTotal)/P.ProcFrameRate;
