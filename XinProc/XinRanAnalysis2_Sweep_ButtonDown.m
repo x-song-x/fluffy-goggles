@@ -2,7 +2,7 @@ function XinRanAnalysis2_Sweep_ButtonDown(varargin)
 
 if nargin==0                % call from GUI
     H =         gcbo;
-else
+else 
     H =         varargin{1};
 end
 
@@ -11,37 +11,26 @@ hFig =          gcf;
     
 %% Update "Spec", "Tune", or "Temp", "Frme", "Pixl"
 switch ButtonTag(1:4)
-    % Update Label: [       Spec	Tune 	Frame	Pixel	Title 
-    % Update Label:             Delay 	TempAmp	Play 	AmpSpec	VarSTD 
-    case 'Spec';    Updt =[ 1   1   1   0   0   0   0   0   0   0];
-    case 'Dely';    Updt =[ 0   1   1   0   0   0   0   0   0   0];
-    case 'Tune';    Updt =[ 0   0   1   0   0   0   0   0   0   0];  
-    case 'Frme';    Updt =[ 0   0   0   1   0   0   0   0   0   0];
-    case 'Temp';    Updt =[ 0   0   0   0   1   0   0   0   0   0];
-    case 'Play';    Updt =[ 0   0   0   0   0   1   0   0   0   0];
-    case 'Pixl';    Updt =[ 0   0   0   0   0   0   1   0   0   0];
-    case 'AmpS';    Updt =[ 0   0   0   0   0   0   0   1   0   0];
-    case 'Titl';    Updt =[ 0   0   0   0   0   0   0   0   1   0];
-    case 'Vstd';    Updt =[ 0   0   0   0   0   0   0   0   0   1];
-        
-%     case 'Spec';    SpecUpdt=1; DelyUpdt = 1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-%     case 'Dely';    SpecUpdt=0; DelyUpdt = 1; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-%     case 'Tune';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=1; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-%         
-%     case 'Frme';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=1;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-%     case 'Temp';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=1; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-%     case 'Play';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=1; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=0;
-%     case 'Pixl';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=1; AmpSUpdt=0; TitlUpdt=0;
-%     case 'AmpS';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=1; TitlUpdt=0;
-%         
-%     case 'Titl';    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0; TitlUpdt=1;
-    otherwise
-                    SpecUpdt=0; DelyUpdt = 0; TuneUpdt=0; TempAmpUpdt=0;  FrmeUpdt=0; Play=0; PixlUpdt=0; AmpSUpdt=0;
+    % Update Label: [       Spec	Tune 	Frame	Pixel	Title Stat
+    % Update Label:             Delay 	TempAmp	Play 	AmpSpec	VarSTD StTk 
+    case 'Spec';    Updt =[ 1   1   1   0   0   0   0   0   0   0   0   0];
+    case 'Dely';    Updt =[ 0   1   1   0   0   0   0   0   0   0   0   0];
+    case 'Tune';    Updt =[ 0   0   1   0   0   0   0   0   0   0   0   0];  
+    case 'Frme';    Updt =[ 0   0   0   1   0   0   0   0   0   0   0   0];
+    case 'Temp';    Updt =[ 0   0   0   0   1   0   0   0   0   0   0   0];
+    case 'Play';    Updt =[ 0   0   0   0   0   1   0   0   0   0   0   0];
+    case 'Pixl';    Updt =[ 0   0   0   0   0   0   1   0   0   0   0   0];
+    case 'AmpS';    Updt =[ 0   0   0   0   0   0   0   1   0   0   0   0];
+    case 'Titl';    Updt =[ 0   0   0   0   0   0   0   0   1   0   0   0];
+    case 'Vstd';    Updt =[ 0   0   0   0   0   0   0   0   0   1   0   0];
+    case 'Stat';    Updt =[ 0   0   0   0   0   0   0   0   0   0   1   1];
+    case 'StTk';    Updt =[ 0   0   0   0   0   0   0   0   0   0   0   1];
+    otherwise;      Updt =[ 0   0   0   0   0   0   0   0   0   0   0   0];
 end
 	SpecUpdt=Updt(1);       DelyUpdt=Updt(2);       TuneUpdt=Updt(3);   
     TempAmpUpdt=Updt(4);    FrmeUpdt=Updt(5);       Play=Updt(6); 
     PixlUpdt=Updt(7);       AmpSUpdt=Updt(8);       TitlUpdt=Updt(9);
-    VstdUpdt=Updt(10);
+    VstdUpdt=Updt(10);      StatUpdt=Updt(11);      StTkUpdt=Updt(12);
 %% Amp(litude of the) S(pectrum)
 if AmpSUpdt
     hAxesSpec =     getappdata(hFig,	'hAxesSpec');
@@ -108,8 +97,9 @@ if DelyUpdt
         case 'Spec';    DelyUpDown =    0;
         case 'Dely';    DelyUpDown =	getappdata(H,	'UpDown');  % Delay up/down
                         dPseudoDelayCur = (round(dPseudoDelayCur/0.2)+DelyUpDown)*0.2;
-            if dPseudoDelayCur<0;   dPseudoDelayCur = 5.6;   end
-            if dPseudoDelayCur>5.6; dPseudoDelayCur = 0;     end
+            dDelayLimit = 9.6;
+            if dPseudoDelayCur<0;           dPseudoDelayCur = dDelayLimit;	end
+            if dPseudoDelayCur>dDelayLimit; dPseudoDelayCur = 0;            end
             hTextHistXLabel.String = sprintf('Phase, %3.1f s compensated', dPseudoDelayCur);
             hTextTuneXLabel.String = sprintf('Hue: %3.1f s compensated phase angle; Value: phase amplitude', dPseudoDelayCur);
             setappdata(hFig, 'dPseudoDelayCur', dPseudoDelayCur);
@@ -167,7 +157,8 @@ if TuneUpdt
     ValLimRange =   getappdata(hImageTune,	'ValLimRange');
     ValLimOrder =   getappdata(hImageTune,	'ValLimOrder');
     ValLim =        getappdata(hImageTune,	'ValLim');
-    
+        ValLimRange =   [ValLimRange(1)*[1/4 sqrt(2)/4 1/2 sqrt(2)/2]  ValLimRange]; % extend the ValRange for NIR
+		
     % What TUNE parameter has changed, if any
     switch ButtonTag(5:end)
         case 'ScalebarHue'  
@@ -234,14 +225,14 @@ if TuneUpdt
             	aa=findall(gcf,'Type','axes');  hAxesTuneSatHid = aa(4);
             end
             if SatValSync==2
-                
-                colormap(hAxesTuneSatHid,hsv2rgb([1/3*ones(65,1) [  1:-1/16:1/16 ...
+                colormap(hAxesTuneSatHid,   hsv2rgb([1/3*ones(65,1) [  1:-1/16:1/16 ...
                                                                                     0:1/16:15/16 ...
                                                                                     1:-1/16:1/16 ...
-                                                                                    0:1/16:1]'  1.0*ones(65,1)]) );	caxis( [0 1]);
+                                                                                    0:1/16:1]'  1.0*ones(65,1)]) );
             else               
-                colormap(hAxesTuneSatHid,hsv2rgb([1/3*ones(65,1) (0:1/64:1)'    0.5*ones(65,1)]) );	caxis( [0 1]);
-            end           
+                colormap(hAxesTuneSatHid,   hsv2rgb([1/3*ones(65,1) (0:1/64:1)'    0.5*ones(65,1)]) );
+            end          
+                caxis(   hAxesTuneSatHid,   [0 1]); 
             ylabel(H,	str,...
                         'FontSize',             8,...
                         'VerticalAlignment',    'Cap');
@@ -393,16 +384,24 @@ if PixlUpdt
     PwInd =             PixelPosi(1);
     hAxesPixl =         getappdata(hFig,	'hAxesPixl');
     hLinePixlAll =      getappdata(hFig,	'hLinePixlAll');
-    hLinePixlMean =     getappdata(hFig,	'hLinePixlMean');
+    hLinePixlErrorbar =	getappdata(hFig,	'hLinePixlErrorbar');
+    if ~isempty(hLinePixlErrorbar)
+       	hTextPixlStats =getappdata(hFig,	'hTextPixlStats');
+        dStat =         getappdata(hFig,	'dStat');
+    else
+        hLinePixlMean =	getappdata(hFig,	'hLinePixlMean');
+    end
     hLineSpecPixl =     getappdata(hFig,	'hLineSpecPixl');
     hTextPixl =         getappdata(hFig,	'hTextPixl');
     dFptCtPhPw_NormTrl= getappdata(hFig,	'dFptCtPhPw_NormTrl');
 	dPtQt_FFTAmp =      getappdata(hFig,	'dPtQt_FFTAmp');
     PtInd =             PhInd + (PwInd-1)*size(dFptCtPhPw_NormTrl,3);
+    dFptCt_NormTrlPixl =squeeze(dFptCtPhPw_NormTrl(:,:,PhInd,PwInd));
+    dSem =              std(dFptCt_NormTrlPixl, 1, 2)/sqrt(size(dFptCt_NormTrlPixl,2));
+%     [~,ANOVA_tbl,~] =   anova1(dFptCt_NormTrlPixl', 1:size(dFptCt_NormTrlPixl,1), 'off');
     for i = 1:length(hLinePixlAll)
-        hLinePixlAll(i).YData =	squeeze(dFptCtPhPw_NormTrl(:,i,PhInd,PwInd));
+        hLinePixlAll(i).YData =	dFptCt_NormTrlPixl(:,i);
     end
-    hLinePixlMean.YData =       mean(squeeze(dFptCtPhPw_NormTrl(:,:,PhInd,PwInd)),2);
     hAxesPixl.Title.String =    sprintf('Pixel(%dH,%dW): temporal traces across reps',...
         PhInd,PwInd);
     hTextPixl.String =	{...
@@ -411,6 +410,18 @@ if PixlUpdt
         sprintf('Across-frame:%5.2f%%',     100*std(mean(dFptCtPhPw_NormTrl(:,:,PhInd,PwInd), 1), 0, 2)),...
         'on STD'};
     hLineSpecPixl.YData =       dPtQt_FFTAmp(PtInd, :);
+    if ~isempty(hLinePixlErrorbar)
+        hLinePixlErrorbar.YData =           mean(dFptCt_NormTrlPixl,2);
+        hLinePixlErrorbar.YNegativeDelta =  dSem;
+        hLinePixlErrorbar.YPositiveDelta =  dSem;
+        hTextPixlStats.String =	{...
+            sprintf('one way ANOVA'),...
+            sprintf('F = %g',	dStat.F_ANOVA(PhInd,PwInd)),...
+            sprintf('p = %g',   dStat.p_ANOVA(PhInd,PwInd))   };
+    else
+        hLinePixlMean.YData =       mean(dFptCt_NormTrlPixl,2);
+    end
+       
     drawnow;
 end
 %% Title clipping
@@ -437,6 +448,7 @@ if TitlUpdt
         case 'TuIm';    AxesPlus = [    -3  -3  0   0   ];  figclip = 1;
         case 'Frme';    AxesPlus = [    -67 -25 0   17  ];  figclip = 1;
         case 'Hist';    AxesPlus = [    -55 -57 5   17  ];  figclip = 1;
+        case 'Stat';    AxesPlus = [    -5  -25 70  17  ];  figclip = 1;
         case 'Tex1';                                        figclip = 0;
         case 'Tex2';    AxesPlus = [    -1  -1  -1  -1  ];  figclip = 1;
                         AxesPosiMatlab = [ 0 0 FigPosiMatlab(3:4)];
@@ -486,4 +498,102 @@ if VstdUpdt
     set(hXLabel,    'String',   dVarSTDs{cVstdNum}.XLabelStr);
     setappdata(hFig,'cVstdNum', cVstdNum);
     drawnow;
+end
+%% Statistics Update
+    dStTkOpt =      'Tick';
+if StatUpdt
+    dStTkOpt =      'Map';    
+end
+%% Statistics Colorbar Update
+if StTkUpdt
+    dStatTickAll =      [	1e-50 1e-30 1e-20 1e-10	1e-7	1e-5   1e-4     0.001   0.01    0.05    1];
+    dPolarity =         getappdata(hFig,    'dPolarity');
+    dStat =             getappdata(hFig,    'dStat');
+    hImageStat =        getappdata(hFig,    'hImageStat');
+    dCLimL10End =       10^hImageStat.Parent.CLim(1);
+    dStatTickIdx =      find(dStatTickAll >= dCLimL10End, 1);
+    typeStr =           hImageStat.Parent.XLabel.String;
+    StrSeq =        {   'one-way ANOVA (each sample in the trial is a group)',...       1
+                        '2-sided t-test (1st vs 3rd trial Qts)',...                     2
+                        '1-sided t-test (1st vs 3rd trial Qts)',...                     3
+                        '2-sided Wilcoxon signed-rank test (1st vs 3rd trial Qts)',...	4
+                        '1-sided Wilcoxon signed-rank test (1st vs 3rd trial Qts)',...	5
+                        '2-sided Sign-test (1st vs 3rd trial Qts)',...              	6
+                        '1-sided Sign-test (1st vs 3rd trial Qts)',...              	7
+                        };
+%                     ,... 
+%                         'Welch''s t-test (1st Qt vs 3rd Qt of the trial)'
+    % locate the map type
+    for i = 1:length(StrSeq)
+        if strncmpi(typeStr, StrSeq{i}, 13)
+            typeNum = i;
+        end
+    end 
+    if strcmp(dStTkOpt, 'Map')  % whether switch the map type
+            typeNum = typeNum + 1;
+        if  typeNum > length(StrSeq)
+            typeNum = 1;
+        end
+    end
+    switch  typeNum
+        case 1;	cData = log10(dStat.p_ANOVA);       dColormapEnd = 1;
+        case 2; cData = log10(dStat.p_TTest);       dColormapEnd = 1;
+        case 4; cData = log10(dStat.p_WSignRank);   dColormapEnd = 1;
+        case 6; cData = log10(dStat.p_SignTest);    dColormapEnd = 1;
+        case 3; cData = log10(min(dStat.p_TTestR, dStat.p_TTestL)).*...
+                       	(-1+2*(   dStat.p_TTestR< dStat.p_TTestL))          *-dPolarity;
+                                                    dColormapEnd = 2;
+        case 5; cData = log10(min(dStat.p_WSignRankR, dStat.p_WSignRankL)).*...
+                      	(-1+2*(   dStat.p_WSignRankR< dStat.p_WSignRankL))  *-dPolarity;
+                                                    dColormapEnd = 2;
+        case 7; cData = log10(min(dStat.p_SignTestR, dStat.p_SignTestL)).*...
+                    	(-1+2*(   dStat.p_SignTestR< dStat.p_SignTestL))    *-dPolarity;
+                                                    dColormapEnd = 2;
+    end
+    % locate the p-value range
+    if strcmp(dStTkOpt, 'Tick')
+        dStatTickIdx =  dStatTickIdx -1;
+        if dStatTickIdx<1
+            dStatTickIdx = length(dStatTickAll)-3;
+        end
+    end
+        dCLimL10End =       log10(dStatTickAll(dStatTickIdx)/2);
+        dStatTick =         dStatTickAll(dStatTickIdx:end);
+        dStatTickL10 =      log10(dStatTick);
+    if      dColormapEnd == 1
+        dCLimL10 =          dCLimL10End*[1 0];
+        dStatTickL10Edge =  [dCLimL10End dStatTickL10];
+        if length(dStatTickL10Edge)>9;  dFontsize = max(round(80/length(dStatTickL10Edge)), 7);
+        else;                           dFontsize = 9;
+        end  
+    elseif  dColormapEnd == 2
+        dCLimL10 =          dCLimL10End*[1 -1];
+        dStatTickL10Edge =  [dCLimL10End dStatTickL10(1:end-1) -fliplr(dStatTickL10(1:end-1)) -dCLimL10End];
+        dStatTick =         [dStatTick(   1:end-1)	fliplr(dStatTick)];
+        dStatTickL10 =      [dStatTickL10(1:end-1) -fliplr(dStatTickL10)];
+        if length(dStatTickL10Edge)>14; dFontsize = max(round(120/length(dStatTickL10Edge)), 7);
+        else;                           dFontsize = 9;
+        end            
+    end
+        dStatTickLabel =	cellfun(@sprintf, ...
+            repmat({'%g'}, 1, length(dStatTick)), num2cell(dStatTick),...
+                    'UniformOutput', false);
+	% colormap
+    dStatCVecL10 =	linspace(dCLimL10(1), dCLimL10(end), 400);
+    dStatCVecIdx =  discretize(dStatCVecL10, dStatTickL10Edge);
+    if      dColormapEnd == 1;  dColormap = parula(length(dStatTickL10Edge)-1);
+    elseif  dColormapEnd == 2;  dColormap = [0 0 0.5000; jet(256)];
+                                dColormap = dColormap(...
+                                    round(linspace(1, 257, (length(dStatTickL10Edge)-1)))...
+                                                      ,:  );
+    end
+                                dColormap = dColormap(dStatCVecIdx,:);
+	% update GUI
+    set(hImageStat,                 'CData',    cData);
+    set(hImageStat.Parent.XLabel,   'String',   StrSeq(typeNum));  
+    set(hImageStat.Parent,          'CLim',     dCLimL10); 
+    set(hImageStat.Parent,          'Colormap', dColormap);
+    set(hImageStat.Parent.Colorbar, 'Ticks',        dStatTickL10); 
+    set(hImageStat.Parent.Colorbar, 'TickLabels',	dStatTickLabel); 
+    set(hImageStat.Parent.Colorbar, 'FontSize',     dFontsize); 
 end

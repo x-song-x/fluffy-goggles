@@ -1,14 +1,15 @@
  %% Xintrinsic File Listing
-%   The defination of "dir" function has been changed in Matlab R2018a 
+%   The defination of "dir" function has been changed in Matlab R2018a inte
 %   comparing to R2015a
 
 %% Locate The Parent Folder
 function XinList
 clear all
 global F
-F.Opt = {'L'};                          % Listing
-% F.Opt = {'P','75x120@5fps'};            % Listing & Preprocessing           w/ XinProc1
-% F.Opt = {'S','75x120@5fps', ''};	% Listing & Ploting                 w/ XinRanAnalysis2_Sweep
+% F.Opt = {'L'};                          % Listing
+% F.Opt = {'P','75x120@5fps'};            % Listing & Preprocessing           w/ XinPr
+F.Opt = {'S','75x120@5fps', ''}; 	% Listing & Ploting                 w/ XinRanAnalysis2_Sweep
+% F.Opt = {'S','300x480@5fps', ''};	% Listing & Ploting                 w/ XinRanAnalysis2_Sweep
 % F.Opt = {'S','300x480@5fps','3.7s_'};	% Listing & Ploting                 w/ XinRanAnalysis2_Sweep
 % F.Opt = {'B','75x120@5fps', '3.7s_'};	% Listing & Preprocessing & Ploting	w/ both above
 F.DirectoryFull = uigetdir(...
@@ -92,7 +93,7 @@ function [DirList, DirH, DirText] = Listing(DirectoryFull)
                         case 'L'
                         case 'P'
                             if ~isfile([DirectoryFull, '\', RecFileName, '_', F.Opt{2}, '_P1.mat'])
-                                XinRanProc1([DirectoryFull, '\', RecFileName '.rec']);
+                                XinRanProc2([DirectoryFull, '\', RecFileName '.rec']);
                                 pause(2);
                                 close(gcf);
                                 drawnow;
@@ -106,7 +107,7 @@ function [DirList, DirH, DirText] = Listing(DirectoryFull)
                             end
                         case 'B'
                             if ~isfile([DirectoryFull, '\', RecFileName, '_', F.Opt{2}, '_P1.mat'])
-                                XinRanProc1([DirectoryFull, '\', RecFileName '.rec']);
+                                XinRanProc2([DirectoryFull, '\', RecFileName '.rec']);
                                 pause(2);
                                 close(gcf);
                                 drawnow;

@@ -77,12 +77,20 @@ stm.TrialTime =             20;
 % stm.TrialPipTime =              0.4;
 % stm.TrialPipDutyCycle =         0.5;
 
-stm.TrialPreStimTime =      2;
-stm.TrialStimTime =         8.0;
+% stm.TrialPreStimTime =      2;
+% stm.TrialStimTime =         8.0;
+% stm.TrialStimElectdNum =        1;
+% stm.TrialPipNum =               20;
+% stm.TrialPipTime =              0.4;
+% stm.TrialPipDutyCycle =         0.5;
+
+stm.TrialPreStimTime =      0;
+stm.TrialStimTime =         20.0;
 stm.TrialStimElectdNum =        1;
-stm.TrialPipNum =               20;
+stm.TrialPipNum =               1;
 stm.TrialPipTime =              0.4;
 stm.TrialPipDutyCycle =         0.5;
+
 
 % stm.TrialPreStimTime =      0.1;
 % stm.TrialStimTime =         19.8;
