@@ -1,4 +1,4 @@
-function XinRanProc2(varargin)
+function XinRanProc21(varargin)
 % Xintrinsic preProcessingDATA BINNNING
 
 global S P Tm Sys
@@ -6,35 +6,8 @@ global S P Tm Sys
 % Tm: 	Temporary
 % Sys:  System parameters, if not in "S" yet
 P = [];     Tm =[];     Sys = []; 
-
-% P.RecCanvasHeight =     300;
-% P.RecCanvasWidth =      480;
-% System: Default (if not already specified in the "S")
-    Tm.SysDeft.SysCamFrameRate =	80;
-    Tm.SysDeft.SysCamBinNumber =	4;
-    Tm.SysDeft.SysCamPixelHeight =	300;
-    Tm.SysDeft.SysCamPixelWidth =	480;
-        Tm.SysDeft.ProcPixelBinNum =	4;
-        Tm.SysDeft.ProcFrameRate =      5;
-% System: FLIR/PointGrey GS3 
-    Tm.SysFlir.SysCamFrameRate =	80;
-    Tm.SysFlir.SysCamBinNumber =	4;
-    Tm.SysFlir.SysCamPixelHeight =	300;
-    Tm.SysFlir.SysCamPixelWidth =	480;
-        Tm.SysFlir.ProcPixelBinNum =	4;
-        Tm.SysFlir.ProcFrameRate =      5;
-%             Tm.SysFlir.ProcPixelBinNum =	1;
-            
-% System: Thorlabs sCMOS
-    Tm.SysThor.SysCamFrameRate =	20;
-%     Tm.SysThor.SysCamBinNumber =	4;
-    Tm.SysThor.SysCamBinNumber =	6;
-    Tm.SysThor.SysCamPixelHeight =	270;
-    Tm.SysThor.SysCamPixelWidth =	480;
-        Tm.SysThor.ProcPixelBinNum =	3;
-        Tm.SysThor.ProcFrameRate =      5;
-
-%% Get preprocessed ('*.rec') file
+  
+%% Get preprocessed ('*.rec') file(s)
 [~, Tm.pcname] = system('hostname');
 if strcmp(Tm.pcname(1:end-1), 'FANTASIA-425')	% recording computer 
         Tm.folder = 'D:\=XINTRINSIC=\';    
@@ -52,39 +25,81 @@ if nargin ==0           % Calling from direct running of the function
     if iscell(Tm.FileName) == 0          % single file selected
         Tm.FileName = {Tm.FileName};
     end
+    Sys.ProcFrameRate =     5;
+    Sys.ProcPixelBinNum =	4;
 else                    % Calling from another script
     Tm.RunningSource =   'S';
     [Tm.PathName, Tm.FileName, FileExt] = fileparts(varargin{1});
     Tm.PathName =        [Tm.PathName, '\'];
     Tm.FileName =        {[Tm.FileName, FileExt]};
+    Sys.ProcFrameRate =     varargin{2};
+    Sys.ProcPixelBinNum =	varargin{3};
 end
+    % 3 things specified here:
+    % (1) files to be pre-processed
+    % (2) ProcFrameRate,    usually downsampled from 80 or 20 fps to 5 fps
+    % (3) ProcPixelBinNum,  usually 4 for FLIR, 3 for Thorlabs
 disp(['Xintrinsic Processing Stage 1 (spatiotemporal binning) is about to start on ' ...
     num2str(length(Tm.FileName)) ' files']);
 
 %% DATA Preprocessing for each file (Binning)
 Tm.hWaitbar =	waitbar(0, 'processing');
+Tm.SFields = {...
+    'SysCamMain',       'SysCamDeviceName', 'SysCamFrameRate',...
+    'SysCamBinNumber',  'SysCamResolution', ...
+    'SesSoundFile',     'SesTrlOrderVec',   'SesCycleNumTotal',...
+    'SesFrameTotal',    'SesFrameNum', ...
+    'TrlNumTotal',      'TrlDurTotal',  'TrlDurPreStim', 'TrlDurStim'};
 for i = 1: length(Tm.FileName)
     % Load 'S'
-    Tm.filename = [Tm.PathName, Tm.FileName{i}];
-    S = load([Tm.filename(1:end-3) 'mat']);  
-    try S = S.S;    end
-    disp([  'Processing: "', Tm.FileName{i}, ...
-            '" with the sound: "', S.SesSoundFile, '"']);
+        Tm.filename = [Tm.PathName, Tm.FileName{i}];
+        if ~isfile([Tm.filename(1:end-3) 'mat'])
+            disp(['Skipping aborted file:' Tm.FileName{i}]);
+            continue;
+        end
+        Tm.SFieldList = whos('-file', [Tm.filename(1:end-3) 'mat']);
+        if strcmp(Tm.SFieldList(1).name, 'S')   % 'S' struct saved in .mat (pre 220727)
+            S =  load([Tm.filename(1:end-3) 'mat']);
+            S =  S.S;
+        else                                    % 'S' fields saved in .mat (post 220727)
+            S = [];
+            for j = 1:length(Tm.SFields)
+                Tm.ST = load([Tm.filename(1:end-3) 'mat'], Tm.SFields{j});
+                S.(Tm.SFields{j}) = Tm.ST.(Tm.SFields{j});
+            end
+        end
+        disp([  'Processing: "', Tm.FileName{i}, ...
+                '" with the sound: "', S.SesSoundFile, '"']);
 	% Default Paremeters (for files older than 2020/11/27)
-                                                    Sys = Tm.SysDeft;
-    if ~isfield(S, 'SysCamMain');                   S.SysCamMain = 'PointGrey';
-                                                    S.SysCamDeviceName = 'Grasshopper3 GS3-U3-23S6M'; end    
-	switch [S.SysCamMain '_' S.SysCamDeviceName]
-       case 'PointGrey_Grasshopper3 GS3-U3-23S6M';  Sys = Tm.SysFlir;
-       case 'Thorlabs_CS2100M-USB';                 Sys = Tm.SysThor;
-       otherwise;                                   disp('unrecognizable camera')
-	end
-    if isfield(S, 'SysCamFrameRate')    % overwrite if available (for files after 2020/11/27)
-        Sys.SysCamFrameRate =       S.SysCamFrameRate;
-        Sys.SysCamBinNumber =       S.SysCamBinNumber;
-        Sys.SysCamPixelHeight =     S.SysCamResolution(1)/S.SysCamBinNumber;
-        Sys.SysCamPixelWidth =      S.SysCamResolution(2)/S.SysCamBinNumber;
-    end
+                        Sys.SysIdentifier = 'PointGrey_Grasshopper3 GS3-U3-23S6M';
+                        Sys.SysCamFrameRate =	    80;
+                        Sys.SysCamBinNumber =	    4;
+                        Sys.SysCamPixelHeight =	    300;
+                        Sys.SysCamPixelWidth =	    480;
+                        Sys.SysCamFrameHeight1st =  1;
+    % Update further parameters if specified in 'S'
+        if isfield(S, 'SysCamFrameRate')    % overwrite if available (for files after 201127) 
+                        Sys.SysCamFrameRate =       S.SysCamFrameRate;
+                        Sys.SysCamBinNumber =       S.SysCamBinNumber;
+                        Sys.SysCamPixelHeight =     S.SysCamResolution(1)/S.SysCamBinNumber;
+                        Sys.SysCamPixelWidth =      S.SysCamResolution(2)/S.SysCamBinNumber;
+        end
+        if isfield(S, 'SysCamMain') 
+            Sys.SysIdentifier = [S.SysCamMain '_' S.SysCamDeviceName];
+            switch Sys.SysIdentifier
+                case 'PointGrey_Grasshopper3 GS3-U3-23S6M'
+                case 'Thorlabs_CS2100M-USB'
+                        Sys.SysCamFrameHeight1st =  0;  % width first
+                    if Tm.RunningSource == 'D'
+                        Sys.ProcPixelBinNum =	    3;
+                    end
+                otherwise                                  
+                    disp('unrecognizable camera')
+            end
+        end
+%     S.SysCamFrameRate;
+%     S.SysCamBinNumber
+%     S.SysCamResolution
         Sys.SysCamFramePerTrial =	S.TrlDurTotal * Sys.SysCamFrameRate;
         Tm.SesTrlNumTotal =         length(S.SesTrlOrderVec);
     % Proc Parameters initialization for Spatial & Temporal Binning  
@@ -105,8 +120,6 @@ for i = 1: length(Tm.FileName)
         P.ProcPixelHeight =     round(P.ProcCamPixelWidth*10/16);
         P.ProcPixelWidth =      P.ProcCamPixelWidth;
     end
-%     P.ProcPixelHeight =     P.RecCanvasHeight/P.ProcPixelBinNum;
-%     P.ProcPixelWidth =      P.RecCanvasWidth /P.ProcPixelBinNum;
     
 	P.RawMeanPixel =	zeros(1, S.SesFrameTotal);
     P.RawMeanPower =	zeros(1, S.SesFrameTotal);                                
@@ -127,7 +140,8 @@ for i = 1: length(Tm.FileName)
 % 	P.ProcDataMatWidthIndex =   (1:P.ProcCamPixelWidth) + ...
 %                                 round((P.ProcPixelWidth -P.ProcCamPixelWidth )/2);
 	% Patch the dropped frames (for Thorlabs sCMOS)
-        Tm.esc = PatchFrame;    
+        Tm.esc = PatchFrame;  
+
     % Read data
     if ~Tm.esc
     Tm.fid =            fopen(Tm.filename);
@@ -157,21 +171,19 @@ for i = 1: length(Tm.FileName)
                                                 P.ProcFrameBinNum,...
                                                 P.ProcFramePerTrial), 1 );
             P.RawMeanPixel(Tm.RecFramesCurrent) =    Tm.PixelMeanRaw;
-            P.ProcMeanPixel(Tm.ProcFramesCurrent) =  Tm.PixelMeanBinned;  
-            
-            switch [S.SysCamMain '_' S.SysCamDeviceName]
-               case 'PointGrey_Grasshopper3 GS3-U3-23S6M'
-                    Tm.ImageS0 =         reshape(Tm.DataRaw,...  
-                        P.ProcPixelBinNum,     P.ProcCamPixelHeight, ...
-                        P.ProcPixelBinNum,     P.ProcCamPixelWidth, ...
-                        P.ProcFrameBinNum,     P.ProcFramePerTrial);
-                    Tm.ImageS1 =         Tm.ImageS0;
-                case 'Thorlabs_CS2100M-USB'
-                    Tm.ImageS0 =         reshape(Tm.DataRaw,...  
-                        P.ProcPixelBinNum,     P.ProcCamPixelWidth, ...
-                        P.ProcPixelBinNum,     P.ProcCamPixelHeight, ...
-                        P.ProcFrameBinNum,     P.ProcFramePerTrial);
-                    Tm.ImageS1 =         permute(Tm.ImageS0, [3 4 1 2 5 6]); 
+            P.ProcMeanPixel(Tm.ProcFramesCurrent) =  Tm.PixelMeanBinned;              
+            if Sys.SysCamFrameHeight1st
+                Tm.ImageS0 =         reshape(Tm.DataRaw,...  
+                    P.ProcPixelBinNum,     P.ProcCamPixelHeight, ...
+                    P.ProcPixelBinNum,     P.ProcCamPixelWidth, ...
+                    P.ProcFrameBinNum,     P.ProcFramePerTrial);
+                Tm.ImageS1 =         Tm.ImageS0;
+            else
+                Tm.ImageS0 =         reshape(Tm.DataRaw,...  
+                    P.ProcPixelBinNum,     P.ProcCamPixelWidth, ...
+                    P.ProcPixelBinNum,     P.ProcCamPixelHeight, ...
+                    P.ProcFrameBinNum,     P.ProcFramePerTrial);
+                Tm.ImageS1 =         permute(Tm.ImageS0, [3 4 1 2 5 6]); 
             end 
             Tm.ImageS2 =         sum(Tm.ImageS1, 1);  
             Tm.ImageS3 =         sum(Tm.ImageS2, 3); 
@@ -194,7 +206,8 @@ for i = 1: length(Tm.FileName)
         Tm.timeraw =	(1:S.SesFrameTotal)/Sys.SysCamFrameRate;
         Tm.timebin =	(1:P.ProcFrameNumTotal)/P.ProcFrameRate;
         figure(     'Name',                 Tm.FileName{i},...
-                    'Color',                0.8*[1 1 1]);
+                    'Color',                0.95*[1 1 1]);
+    % Ax1, Temporal trace of the entire session, averaged across all pixels
         Tm.hAx(1) = subplot(2,1,1);
             Tm.ColorOrder = get(gca, 'ColorOrder');
             Tm.ColorOrder = Tm.ColorOrder(2,:);
@@ -224,19 +237,7 @@ for i = 1: length(Tm.FileName)
                                             'if ylim(2)>20; ylim=0.125*[-1 1]; end; '...
                                             'hax.YLim=ylim; '
                                                 ]);
-%         [Tm.hAx,~,~] =	plotyy(	Tm.timeraw,      P.RawMeanPower, ...
-%                                 Tm.timeraw,      P.RawMeanPixel);
-%         xlabel(Tm.hAx(1),        'Time (sec)');
-%         ylabel(Tm.hAx(1),        'Power Mean (volt)');
-%         ylabel(Tm.hAx(2),        'Pixel Mean (ADU)');
-%         subplot(2,1,2);
-%         [Tm.hAx, Tm.hP1, Tm.hP2] = ...
-%                         plotyy(	Tm.timebinned,   P.ProcMeanPower, ...
-%                                 Tm.timebinned,   P.ProcMeanPixel);    
-        % Tm.hP2.LineWidth =       2;                     
-%         xlabel(Tm.hAx(1),        'Time (sec)');
-%         ylabel(Tm.hAx(1),        'Power Mean (volt)');
-%         ylabel(Tm.hAx(2),        'Pixel Mean (ADU)');
+    % Ax2, Trial-averaged temporal trace of all pixels
         Tm.ProcDataHWF =     squeeze(mean(mean(P.ProcDataMat, 1), 2));
         Tm.ProcDataHWpre =   squeeze(mean(Tm.ProcDataHWF(...
             :,:,1:round(S.TrlDurPreStim*P.ProcFrameRate)),3));
@@ -250,8 +251,9 @@ for i = 1: length(Tm.FileName)
         set(gca,    'XTick',                S.TrlDurPreStim+[0 S.TrlDurStim]);
         set(gca,    'XGrid',                'on');
         xlabel(Tm.hAx(2),                   'Trial time (sec)');
-        ylabel(Tm.hAx(2),                   '\DeltaF/F (%)',...
-                    'VerticalAlignment',    'cap');
+        ylabel(Tm.hAx(2),                   '\DeltaF/F (%)');
+%         ,...
+%                     'VerticalAlignment',    'middle');
     % Save "P"
     save([Tm.filename(1:end-4),...
         sprintf('_%dx%d@%dfps', P.ProcPixelHeight, P.ProcPixelWidth, P.ProcFrameRate),...
@@ -273,7 +275,7 @@ global S Tm Sys
 %% find missing frame, modify .mat
 % PatchRule = 'FrameTimeStamp';
 PatchRule = 'FrameNum';
-switch PatchRule(6)
+switch PatchRule(6) % according to the frame num (N) or timestamp (T)
     case 'N';   indexFmiss = find(S.SesFrameNum == 0);
     case 'T';   indexFmiss = find(double(S.SesTimestamps(:,1))==0);
                 S.SesFrameNum(indexFmiss) = 0;
@@ -301,6 +303,11 @@ disp(['missing frames#: ' sprintf('%d ', indexFmiss)]);
 namestr = [ sprintf('_%d_missingframes_', length(indexFmiss))...
             sprintf('#%d',indexFmiss)    ];
 %% Save Original files & ...
+    S = load([Tm.filename(1:end-4) '.mat']);	% load S (Saved from recording)
+    try 
+        S = S.S;
+    catch
+    end
 movefile(    Tm.filename, ...
             [Tm.filename(1:end-4) namestr '.rec']);
 movefile(   [Tm.filename(1:end-4) '.mat'], ...
@@ -350,5 +357,5 @@ end
 %% Finish writing and saving
 fclose(fid_ori);
 fclose(fid_ptd);
-save([Tm.filename(1:end-4), '.mat'], 'S', '-v7.3');
+save([Tm.filename(1:end-4), '.mat'], '-STRUCT', 'S', '-v7.3');
 fprintf('\n');

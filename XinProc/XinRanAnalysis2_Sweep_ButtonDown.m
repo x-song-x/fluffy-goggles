@@ -177,8 +177,8 @@ if TuneUpdt
             end
             HueMap =        [   HueMapOptions{1, HueMapOrder}, '_',...
                                 HueMapOptions{2, HueMapOrder}   ];
-            HueTempolate =	HueRedist(  HueMapOptions{1, HueMapOrder},...
-                                        HueMapOptions{2, HueMapOrder});
+            HueTempolate =	HueRedist(HueMapOptions{1, HueMapOrder},...
+                                      HueMapOptions{2, HueMapOrder});
             HueColorMap =   hsv2rgb([HueTempolate ones(length(HueTempolate),2)]);            
             setappdata(hImageTune,	'HueMapOptions',    HueMapOptions);
             setappdata(hImageTune,	'HueMapOrder',      HueMapOrder);

@@ -2159,7 +2159,7 @@ i = 2;
 H{i}.Name =             'HSLuv @S=70, L=71.9';
 H{i}.Colormap1 =        zeros(Hnum,3);
 for j = 1:Hnum
-    H{i}.Colormap1(j,:) =   cell2mat(cell(py.hsluv.hsluv_to_rgb([H0(j) 70 71.9])));
+%     H{i}.Colormap1(j,:) =   cell2mat(cell(py.hsluv.hsluv_to_rgb([H0(j) 70 71.9])));
 end
 H{i}.Colormap2 =        rgb2hsv(H{i}.Colormap1);
 H{i}.Colormap2I =       find(H{i}.Colormap2(:,1)<0.5, 1);
