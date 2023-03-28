@@ -31,7 +31,7 @@ for i = 1: max(Screen('Screens'))
         break
     end
 end
-
+    
 % Session Timer 
 % stm.TimerOption =       'simulated';
 stm.TimerOption =       'NI-DAQ';
@@ -46,7 +46,10 @@ stm.SesOption =         'DLCL';  % Dot Localizer
 stm.DotAngleDivide =        10;
 
     stm.SesCycleTime =              10;     % in second
-    sys.SesCycleNumTotal =          40;     % rep # total
+    sys.SesCycleNumTotal =          20;     % rep # total
+    
+%     stm.SesCycleTime =              20;     % in second
+%     sys.SesCycleNumTotal =          20;     % rep # total
     
 % Session Parameters
 % stm.SesCycleTime =              1.25;     % in second
@@ -62,10 +65,16 @@ stm.SesCycleTimeInitial =       tic;
 % stm.MonitorDistance =   75;         % in cm
 % stm.MonitorHeight =     29.5;       % in cm
 % stm.MonitorWidth =      52.7;       % in cm
-stm.MonitorName =       'LG 32GK850F-B';
-stm.MonitorDistance =   75;             % in cm
-stm.MonitorHeight =     0.02724*1440;	% in cm
-stm.MonitorWidth =      0.02724*2560;	% in cm
+% stm.MonitorName =       'LG 32GK850F-B';
+% stm.MonitorDistance =   75;             % in cm
+% stm.MonitorHeight =     0.02724*1440;	% in cm
+% stm.MonitorWidth =      0.02724*2560;	% in cm
+stm.MonitorName =       'LG 24UD58-B';
+% stm.MonitorDistance =   75;             % in cm
+stm.MonitorDistance =   60;             % in cm
+stm.MonitorHeight =     0.01369*2160;	% in cm
+stm.MonitorWidth =      0.01369*3840;	% in cm
+    sys.screenNumber =  2;
 
 %% Prepare the Psychtoolbox window
 % Here we call some default settings for setting up Psychtoolbox
